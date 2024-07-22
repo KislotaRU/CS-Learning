@@ -2,7 +2,7 @@
 
 namespace CS_JUNIOR
 {
-    internal class Task_variables
+    internal class Variables
     {
         string name = "Kislota_RU";
         char coinSymbol = '$';
