@@ -6,7 +6,7 @@ namespace CS_JUNIOR
     {
         static void Main(string[] args)
         {
-
+            
         }
     }
 }
