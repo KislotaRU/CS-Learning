@@ -58,8 +58,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BossFight.cs" />
+    <Compile Include="ConsoleMenu.cs" />
+    <Compile Include="CurrencyConverter.cs" />
+    <Compile Include="DegreeTwo.cs" />
+    <Compile Include="MasteringCycles.cs" />
+    <Compile Include="MultiplesNumbers.cs" />
+    <Compile Include="NameOutput.cs" />
+    <Compile Include="OutputControl.cs" />
+    <Compile Include="ParenthesisExpression.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ProgramUnderPassword.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sequence.cs" />
+    <Compile Include="SumNumbers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
