@@ -2,7 +2,7 @@
 
 namespace CS_JUNIOR
 {
-    class Program
+    class Polyclinic
     {
         static void Main(string[] args)
         {

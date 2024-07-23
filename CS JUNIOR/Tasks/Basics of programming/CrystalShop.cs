@@ -2,7 +2,7 @@
 
 namespace CS_JUNIOR
 {
-    class Program
+    class CrystalShop
     {
         static void Main(string[] args)
         {

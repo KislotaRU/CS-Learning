@@ -2,7 +2,7 @@
 
 namespace CS_JUNIOR
 {
-    class Program
+    class SwappingValues
     {
         static void Main(string[] args)
         {
