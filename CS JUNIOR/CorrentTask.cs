@@ -17,40 +17,42 @@ namespace CS_JUNIOR
             Console.ForegroundColor = ConsoleColor.White;
 
             War war = new War();
+
+            war.Begin();
         }
     }
 }
 
 class Barrack
 {
-    private const string professionRifleman = "Rifleman";
-    private const string professionTankman = "Tankman";
-    private const string professionBorderman = "Borderman";
-    private const string professionDoctor = "Doctor";
-    private const string professionArtilleryman = "Artilleryman";
+    private const string ProfessionRifleman = "Rifleman";
+    private const string ProfessionTankman = "Tankman";
+    private const string ProfessionBorderman = "Borderman";
+    private const string ProfessionDoctor = "Doctor";
+    private const string ProfessionArtilleryman = "Artilleryman";
 
-    private const int CountSoldiers = 5;
+    private const int CountSoldiers = 3;
 
-    private Random random;
-    private List<Soldier> _soldiers;
+    private readonly Random _random;
+
+    private readonly List<Soldier> _soldiers;
 
     private readonly string[] _professionsSoldiers;
 
     public Barrack()
     {
-        random = new Random();
+        _random = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
+
         _soldiers = new List<Soldier>();
 
         _professionsSoldiers = new string[]
         {
-            professionRifleman,
-            professionTankman,
-            professionBorderman,
-            professionDoctor,
-            professionArtilleryman
+            ProfessionRifleman,
+            ProfessionTankman,
+            ProfessionBorderman,
+            ProfessionDoctor,
+            ProfessionArtilleryman
         };
-
-        CreateSoldier(CountSoldiers);
     }
 
     public List<Soldier> GetSoldiers()
@@ -65,36 +67,36 @@ class Barrack
         return temporarySoldiers;
     }
 
-    private void CreateSoldier(int countSoldiers = 1)
+    public void CreateSoldier()
     {
         int minRandom = 0;
         int maxRandom = _professionsSoldiers.Length;
 
-        while (_soldiers.Count < countSoldiers)
+        while (_soldiers.Count < CountSoldiers)
         {
-            int indexProfession = random.Next(minRandom, maxRandom);
+            int indexProfession = _random.Next(minRandom, maxRandom);
 
             string temporaryProfession = _professionsSoldiers[indexProfession];
 
             switch (temporaryProfession)
             {
-                case professionRifleman:
+                case ProfessionRifleman:
                     _soldiers.Add(new Rifleman());
                     break;
 
-                case professionTankman:
+                case ProfessionTankman:
                     _soldiers.Add(new Tankman());
                     break;
 
-                case professionBorderman:
+                case ProfessionBorderman:
                     _soldiers.Add(new Borderman());
                     break;
 
-                case professionDoctor:
+                case ProfessionDoctor:
                     _soldiers.Add(new Doctor());
                     break;
 
-                case professionArtilleryman:
+                case ProfessionArtilleryman:
                     _soldiers.Add(new Artilleryman());
                     break;
             }
@@ -106,17 +108,17 @@ class Squad
 {
     private const int FullAmount = 100;
 
-    private const int MaxCountSoldiers = 5;
+    private const int MaxCountSoldiers = 3;
 
-    private readonly List<Soldier> _soldiers;
+    private readonly Dictionary<string, int> _characteristic;
 
-    private readonly Dictionary<string, int> Characteristic;
+    private List<Soldier> _soldiers;
 
-    public Squad(List<Soldier> soldiers)
+    public Squad()
     {
         _soldiers = new List<Soldier>();
 
-        Characteristic = new Dictionary<string, int>()
+        _characteristic = new Dictionary<string, int>()
         {
             { Soldier.KeyShootingAttack, 0},
             { Soldier.KeyMeleeAttack, 0},
@@ -125,16 +127,14 @@ class Squad
             { Soldier.KeyFightingSpirit, 0},
             { Soldier.KeyMedication, 0},
         };
-
-        CollectSquad(soldiers);
     }
 
-    public int ShootingAttack { get => Characteristic[Soldier.KeyShootingAttack]; }
-    public int MeleeAttack { get => Characteristic[Soldier.KeyMeleeAttack]; }
-    public int HealthPoints { get => Characteristic[Soldier.KeyHealthPoints]; private set => Characteristic[Soldier.KeyHealthPoints] = value; }
-    public int Armor { get => Characteristic[Soldier.KeyArmor]; }
-    public int FightingSpirit { get => Characteristic[Soldier.KeyFightingSpirit]; }
-    public int Medication { get => Characteristic[Soldier.KeyMedication]; private set => Characteristic[Soldier.KeyMedication] = value; }
+    public int ShootingAttack { get => _characteristic[Soldier.KeyShootingAttack]; }
+    public int MeleeAttack { get => _characteristic[Soldier.KeyMeleeAttack]; }
+    public int HealthPoints { get => _characteristic[Soldier.KeyHealthPoints]; private set => _characteristic[Soldier.KeyHealthPoints] = value; }
+    public int Armor { get => _characteristic[Soldier.KeyArmor]; }
+    public int FightingSpirit { get => _characteristic[Soldier.KeyFightingSpirit]; }
+    public int Medication { get => _characteristic[Soldier.KeyMedication]; private set => _characteristic[Soldier.KeyMedication] = value; }
 
     public void ShowStatus(ConsoleColor colorSquad, ConsoleColor colorDefault)
     {
@@ -212,7 +212,7 @@ class Squad
         }
     }
 
-    private void CollectSquad(List<Soldier> soldiers)
+    public void CollectSquad(List<Soldier> soldiers)
     {
         foreach (Soldier soldier in soldiers)
         {
@@ -233,7 +233,7 @@ class Squad
             if (characteristic == Soldier.KeyArmor || characteristic == Soldier.KeyShootingAttack)
                 value /= MaxCountSoldiers;
 
-            Characteristic[characteristic] += value;
+            _characteristic[characteristic] += value;
         }
     }
 }
@@ -241,19 +241,23 @@ class Squad
 class Team
 {
     private readonly Barrack _barrack;
+    private readonly Squad _squad;
 
     public Team()
     {
         _barrack = new Barrack();
-        Squad = new Squad(_barrack.GetSoldiers());
-        CreateNewSquad();
+        _squad = new Squad();
     }
 
-    public Squad Squad { get; private set; }
-
-    private void CreateNewSquad()
+    public void CreateSquad()
     {
+        _barrack.CreateSoldier();
+        _squad.CollectSquad(_barrack.GetSoldiers());
+    }
 
+    public Squad GetSquad()
+    {
+        return _squad;
     }
 }
 
@@ -262,18 +266,25 @@ class War
     private readonly Team _teamRed;
     private readonly Team _teamBlue;
 
-    private readonly Battle _battle;
+    private Battle _battle;
 
     public War()
     {
         _teamRed = new Team();
         _teamBlue = new Team();
+    }
 
-        //Console.Write("\t\tНачалась Война между двумя странами!\n");
-        //Console.ReadKey();
-        //Console.Clear();
+    public void Begin()
+    {
+        _teamRed.CreateSquad();
+        _teamBlue.CreateSquad();
 
-        _battle = new Battle(_teamRed.Squad, _teamBlue.Squad);
+        Console.Write("Началась Война между двумя странами!\n" +
+                      "*Нажмите любую кнопку*\n");
+        Console.ReadKey();
+        Console.Clear();
+
+        _battle = new Battle(_teamRed.GetSquad(), _teamBlue.GetSquad());
     }
 }
 
@@ -458,12 +469,14 @@ abstract class Soldier
 
 class Rifleman : Soldier
 {
+    private int _healthPoints = 110;
     private int _shootingAttack = 30;
     private int _meleeAttack = 20;
     private int _armor = 25;
 
     public Rifleman()
     {
+        HealthPoints = _healthPoints;
         ShootingAttack = _shootingAttack;
         MeleeAttack = _meleeAttack;
         Armor = _armor;
@@ -474,12 +487,14 @@ class Rifleman : Soldier
 
 class Tankman : Soldier
 {
+    private int _healthPoints = 130;
     private int _shootingAttack = 40;
     private int _armor = 60;
     private int _fightingSpirit = 5;
 
     public Tankman()
     {
+        HealthPoints = _healthPoints;
         ShootingAttack = _shootingAttack;
         Armor = _armor;
         FightingSpirit = _fightingSpirit;
@@ -524,11 +539,13 @@ class Doctor : Soldier
 
 class Artilleryman : Soldier
 {
+    private int _healthPoints = 90;
     private int _shootingAttack = 60;
     private int _fightingSpirit = 10;
 
     public Artilleryman()
     {
+        HealthPoints = _healthPoints;
         ShootingAttack = _shootingAttack;
         FightingSpirit = _fightingSpirit;
 
