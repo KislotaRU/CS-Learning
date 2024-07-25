@@ -110,6 +110,8 @@ class Squad
 
     private const int MaxCountSoldiers = 3;
 
+    private const int DistanceMeleeAttack = 1;
+
     private readonly Dictionary<string, int> _characteristic;
 
     private List<Soldier> _soldiers;
@@ -173,25 +175,34 @@ class Squad
         Console.Write("\n└" + new string('─', messageLength) + "┘\n");
     }
 
-    public void ShowAttack(float takeDamage, float takeHealth)
+    public void ShowAttack(float takeDamage, int takeHealth, string typeAttack)
     {
-        Console.Write($"Атаковал противника на {(int)takeDamage} единиц урона.\n");
-        Console.Write($"Противник восстановил себе здоровье на {(int)takeHealth} единиц.");
+        Console.Write($"Атаковал противника {typeAttack} на {(int)takeDamage} единиц урона.\n");
+
+        if (takeHealth > 0)
+           Console.Write($"Противник восстановил себе здоровье на {takeHealth} единиц.");
     }
 
-    public int Attack(int distanceEnemy)
+    public int Attack(int distanceEnemy, out string typeAttack)
     {
         float damage;
+        typeAttack = null;
 
-        if (distanceEnemy > 0)
+        if (distanceEnemy > DistanceMeleeAttack)
+        {
             damage = ShootingAttack + (float)ShootingAttack / FullAmount * FightingSpirit;
+            typeAttack = "ДАЛЬНИМ оружием";
+        }
         else
+        {
             damage = MeleeAttack + (float)MeleeAttack / FullAmount * FightingSpirit;
+            typeAttack = "БЛИЖНИМ оружием";
+        }
 
         return (int)damage;
     }
 
-    public void TakeDamage(int damage, out float takeDamage, out float takeHealth)
+    public void TakeDamage(int damage, out float takeDamage, out int takeHealth)
     {
         takeHealth = 0;
         takeDamage = damage - (float)damage / FullAmount * Armor;
@@ -200,8 +211,9 @@ class Squad
         {
             HealthPoints -= (int)takeDamage;
 
-            takeHealth = takeDamage / FullAmount * Medication;
-            HealthPoints += (int)takeHealth;
+            takeHealth = (int)(takeDamage / FullAmount * Medication) < 0 ? 1 : (int)(takeDamage / FullAmount * Medication);
+
+            HealthPoints += takeHealth;
 
             if (Medication > 0)
                 Medication--;
@@ -268,6 +280,8 @@ class War
 
     private Battle _battle;
 
+    private string _squadWinner;
+
     public War()
     {
         _teamRed = new Team();
@@ -281,10 +295,21 @@ class War
 
         Console.Write("Началась Война между двумя странами!\n" +
                       "*Нажмите любую кнопку*\n");
+
         Console.ReadKey();
         Console.Clear();
 
         _battle = new Battle(_teamRed.GetSquad(), _teamBlue.GetSquad());
+
+        _battle.Fight(out _squadWinner);
+
+        SendMessageResults(_squadWinner);
+    }
+
+    private void SendMessageResults(string squadWinner)
+    {
+        Console.Write($"\n\nВ этой кровопролитной войне вверх одержал {squadWinner}.\n" +
+                      $"Но какой ценной...\n\n");
     }
 }
 
@@ -310,12 +335,10 @@ class Battle
     {
         _squadRed = squadRed;
         _squadBlue = squadBlue;
-
-        Fight();
     }
 
-    public void Show(int distanceSquad1, int distanceSquad2)
-    {
+    public void Show(int distanceSquadRed, int distanceSquadBlue)
+    { 
         int freeDistance;
 
         Console.Write("Дистанция между взводами:\n");
@@ -323,10 +346,10 @@ class Battle
         Console.Write("┌" + new string('─', _distanceBattle) + "┐\n");
         Console.Write("│");
 
-        freeDistance = _distanceBattle - (distanceSquad1 + distanceSquad2);
+        freeDistance = _distanceBattle - (distanceSquadRed + distanceSquadBlue);
 
         Console.ForegroundColor = ColorRed;
-        Console.Write(new string('#', distanceSquad1));
+        Console.Write(new string('#', distanceSquadRed));
 
         if (freeDistance > 0)
         {
@@ -335,7 +358,7 @@ class Battle
         }
 
         Console.ForegroundColor = ColorBlue;
-        Console.Write(new string('#', distanceSquad2));
+        Console.Write(new string('#', distanceSquadBlue));
 
         Console.ForegroundColor = ColorDefault;
 
@@ -343,13 +366,17 @@ class Battle
         Console.Write("\n└" + new string('─', _distanceBattle) + "┘\n");
     }
 
-    private void Fight()
+    public void Fight(out string squadWinner)
     {
         Random random;
 
+        squadWinner = null;
+
         while (_squadRed.HealthPoints > 0 & _squadBlue.HealthPoints > 0)
         {
-            random = new Random();
+            Console.Clear();
+
+            random = new Random((int)DateTime.Now.Ticks);
 
             _countMoves++;
 
@@ -373,12 +400,18 @@ class Battle
 
             Console.ForegroundColor = ColorDefault;
             Console.ReadKey();
-            Console.Clear();
         }
+
+        if (_squadRed.HealthPoints <= 0)
+            squadWinner = NameSquadBlue;
+        else
+            squadWinner = NameSquadRed;
     }
 
     private void MakeMove(string nameSquad, Squad squadAttacking, Squad squadDefending, ref int distanceSquadAttacking, ref int distanceSquadDefending, Random random)
     {
+        string typeAttack;
+
         int distanceEnemys = _distanceBattle - (distanceSquadAttacking + distanceSquadDefending);
 
         int minStepDistance = -2;
@@ -386,7 +419,10 @@ class Battle
 
         int step = random.Next(minStepDistance, maxStepDistance);
 
-        Console.Write($"Ходит {nameSquad}:\n");
+        Console.Write($"Ходит {nameSquad}:\n\n");
+
+        squadDefending.TakeDamage(squadAttacking.Attack(distanceEnemys, out typeAttack), out float takeDamage, out int takeHealth);
+        squadAttacking.ShowAttack(takeDamage, takeHealth, typeAttack);
 
         if (distanceEnemys > 0 && step > 0)
         {
@@ -408,13 +444,8 @@ class Battle
             Console.Write($"\n{nameSquad} отступил от противника на кол-во клеток ({step}).\n");
         }
 
-        if (distanceEnemys <= 0)
-        {
+        if (distanceEnemys < 0)
             distanceEnemys = _distanceBattle - (distanceSquadAttacking + distanceSquadDefending);
-        }
-
-        squadDefending.TakeDamage(squadAttacking.Attack(distanceEnemys), out float takeDamage, out float takeHealth);
-        squadAttacking.ShowAttack(takeDamage, takeHealth);
     }
 }
 
@@ -525,7 +556,7 @@ class Doctor : Soldier
 {
     private int _shootingAttack = 10;
     private int _meleeAttack = 5;
-    private int _medication = 4;
+    private int _medication = 12;
 
     public Doctor()
     {
