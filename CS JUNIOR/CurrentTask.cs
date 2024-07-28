@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-//Есть 2 взвода. 1 взвод страны один, 2 взвод страны два.
-//Каждый взвод внутри имеет солдат.
-//Нужно написать программу, которая будет моделировать бой этих взводов.
-//Каждый боец - это уникальная единица, он может иметь уникальные способности или же уникальные характеристики, такие как повышенная сила.
-//Побеждает та страна, во взводе которой остались выжившие бойцы.
-//Не важно, какой будет бой, рукопашный, стрелковый.
+//Есть аквариум, в котором плавают рыбы. В этом аквариуме может быть максимум определенное кол-во рыб. 
+//Рыб можно добавить в аквариум или рыб можно достать из аквариума. 
+//(программу делать в цикле для того, чтобы рыбы могли “жить”)
+//Все рыбы отображаются списком, у рыб также есть возраст. 
+//За 1 итерацию рыбы стареют на определенное кол-во жизней и могут умереть. 
+//Рыб также вывести в консоль, чтобы можно было мониторить показатели.
 
 namespace CS_JUNIOR
 {
@@ -14,509 +14,163 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.White; 
 
-            War war = new War();
+            Aquarium aquarium = new Aquarium();
 
-            war.Begin();
+            aquarium.Work();
         }
     }
 }
 
-class Barrack
+class Inventory
 {
-    private const string ProfessionRifleman = "Rifleman";
-    private const string ProfessionTankman = "Tankman";
-    private const string ProfessionBorderman = "Borderman";
-    private const string ProfessionDoctor = "Doctor";
-    private const string ProfessionArtilleryman = "Artilleryman";
-
-    private const int CountSoldiers = 3;
-
-    private readonly Random _random;
-
-    private readonly List<Soldier> _soldiers;
-
-    private readonly string[] _professionsSoldiers;
-
-    public Barrack()
-    {
-        _random = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
-
-        _soldiers = new List<Soldier>();
-
-        _professionsSoldiers = new string[]
-        {
-            ProfessionRifleman,
-            ProfessionTankman,
-            ProfessionBorderman,
-            ProfessionDoctor,
-            ProfessionArtilleryman
-        };
-    }
-
-    public List<Soldier> GetSoldiers()
-    {
-        List<Soldier> temporarySoldiers = new List<Soldier>();
-
-        foreach (Soldier soldier in _soldiers)
-        {
-            temporarySoldiers.Add(soldier);
-        }
-
-        return temporarySoldiers;
-    }
-
-    public void CreateSoldier()
-    {
-        int minRandom = 0;
-        int maxRandom = _professionsSoldiers.Length;
-
-        while (_soldiers.Count < CountSoldiers)
-        {
-            int indexProfession = _random.Next(minRandom, maxRandom);
-
-            string temporaryProfession = _professionsSoldiers[indexProfession];
-
-            switch (temporaryProfession)
-            {
-                case ProfessionRifleman:
-                    _soldiers.Add(new Rifleman());
-                    break;
-
-                case ProfessionTankman:
-                    _soldiers.Add(new Tankman());
-                    break;
-
-                case ProfessionBorderman:
-                    _soldiers.Add(new Borderman());
-                    break;
-
-                case ProfessionDoctor:
-                    _soldiers.Add(new Doctor());
-                    break;
-
-                case ProfessionArtilleryman:
-                    _soldiers.Add(new Artilleryman());
-                    break;
-            }
-        }
-    }
+    private readonly List<Fish> _inventory;
 }
 
-class Squad
+class Aquarium
 {
-    private const int FullAmount = 100;
+    private const int MaxCountFish = 20;
 
-    private const int MaxCountSoldiers = 3;
-    
-    private const int DistanceMeleeAttack = 1;
+    private readonly List<Fish> _fishGroup;
 
-    private readonly Barrack _barrack;
-    private List<Soldier> _soldiers;
+    private int _workTime = 0;
 
-    public Squad()
+    public Aquarium()
     {
-        _barrack = new Barrack();
-        _soldiers = new List<Soldier>();
+
     }
 
-    public int ShootingAttack { get; private set; }
-    public int MeleeAttack { get; private set; }
-    public int HealthPoints { get; private set; }
-    public int Armor { get; private set; }
-    public int FightingSpirit { get; private set; }
-    public int Medication { get; private set; }
-    public int DistanceInFight { get; private set; }
-
-    public void ShowStatus(ConsoleColor colorSquad, ConsoleColor colorDefault)
+    public void Work()
     {
-        string[] status = new string[]
+        while (Console.ReadKey(true).Key != ConsoleKey.Escape)
         {
-            $"Здоровье: {HealthPoints}",
-            $"Дальняя атака: {ShootingAttack}",
-            $"Ближняя атака: {MeleeAttack}",
-            $"Броня: {Armor}",
-            $"Боевой дух: {FightingSpirit}",
-            $"Аптеки: {Medication}"
-        };
 
-        int separatorLength = 3;
-        int messageLength = 0;
-
-        for (int i = 0; i < status.Length; i++)
-        {
-            messageLength += status[i].Length + separatorLength;
-
-            if (i == status.Length - 1)
-                messageLength--;
+            _workTime++;
         }
 
-        Console.Write("┌" + new string('─', messageLength) + "┐\n");
-        Console.Write("│ ");
-
-        for (int i = 0; i < status.Length; i++)
-        {
-            Console.ForegroundColor = colorSquad;
-            Console.Write(status[i].PadRight(status[i].Length));
-            Console.ForegroundColor = colorDefault;
-            Console.Write(" │ ");
-        }
-
-        Console.Write("\n└" + new string('─', messageLength) + "┘\n");
-    }
-
-    public void ShowAttack(float damageTaken, int healthTaken, string typeAttack)
-    {
-        Console.Write($"Атаковал противника {typeAttack} на {(int)damageTaken} единиц урона.\n");
-
-        if (healthTaken > 0)
-           Console.Write($"Противник восстановил себе здоровье на {healthTaken} единиц.");
-    }
-
-    public int Attack(int distanceEnemy, out string typeAttack)
-    {
-        float damage;
-        typeAttack = null;
-
-        if (distanceEnemy > DistanceMeleeAttack)
-        {
-            damage = ShootingAttack + (float)ShootingAttack / FullAmount * FightingSpirit;
-            typeAttack = "ДАЛЬНИМ оружием";
-        }
-        else
-        {
-            damage = MeleeAttack + (float)MeleeAttack / FullAmount * FightingSpirit;
-            typeAttack = "БЛИЖНИМ оружием";
-        }
-
-        return (int)damage;
-    }
-
-    public void TakeDamage(int damage, out float takeDamage, out int takeHealth)
-    {
-        takeHealth = 0;
-        takeDamage = damage - (float)damage / FullAmount * Armor;
-
-        if (HealthPoints - (int)takeDamage > 0)
-        {
-            HealthPoints -= (int)takeDamage;
-
-            takeHealth = (int)(takeDamage / FullAmount * Medication) < 0 ? 1 : (int)(takeDamage / FullAmount * Medication);
-
-            HealthPoints += takeHealth;
-
-            if (Medication > 0)
-                Medication--;
-        }
-        else
-        {
-            HealthPoints = 0;
-        }
-    }
-
-    public void Walk(int step)
-    {
-        DistanceInFight += step;
-
-        if (DistanceInFight < 0)
-            DistanceInFight = 0;
-    }
-
-    public void CreateSquad()
-    {
-        _barrack.CreateSoldier();
-
-        List<Soldier> temporarySoldiers = _barrack.GetSoldiers();
-
-        foreach (Soldier soldier in temporarySoldiers)
-        {
-            if (_soldiers.Count < MaxCountSoldiers)
-            {
-                _soldiers.Add(soldier);
-
-                ShootingAttack += soldier.ShootingAttack / MaxCountSoldiers;
-                MeleeAttack += soldier.MeleeAttack;
-                HealthPoints += soldier.HealthPoints;
-                Armor += soldier.Armor / MaxCountSoldiers;
-                FightingSpirit += soldier.FightingSpirit;
-                Medication += soldier.Medication;
-            }
-        }
-    }
-}
-
-class War
-{
-    private readonly Squad _squadRed;
-    private readonly Squad _squadBlue;
-
-    private Battle _battle;
-
-    private string _squadWinner;
-
-    public War()
-    {
-        _squadRed = new Squad();
-        _squadBlue = new Squad();
-    }
-
-    public void Begin()
-    {
-        _squadRed.CreateSquad();
-        _squadBlue.CreateSquad();
-
-        Console.Write("Началась Война между двумя странами!\n" +
-                      "*Нажмите любую кнопку*\n");
-
-        Console.ReadKey();
-        Console.Clear();
-
-        _battle = new Battle(_squadRed, _squadBlue);
-
-        _battle.Fight(out _squadWinner);
-
-        SendMessageResults(_squadWinner);
-    }
-
-    private void SendMessageResults(string squadWinner)
-    {
-        Console.Write($"\n\nВ этой кровопролитной войне вверх одержал {squadWinner}.\n" +
-                      $"Но какой ценной...\n\n");
-    }
-}
-
-class Battle
-{
-    private const ConsoleColor ColorDefault = ConsoleColor.White;
-    private const ConsoleColor ColorRed = ConsoleColor.Red;
-    private const ConsoleColor ColorBlue = ConsoleColor.Blue;
-
-    private const string NameSquadRed = "Красный взвод";
-    private const string NameSquadBlue = "Синий взвод";
-
-    private readonly Squad _squadRed;
-    private readonly Squad _squadBlue;
-
-    private int _distanceBattle = 10;
-    private int _distanceSquadRed = 0;
-    private int _distanceSquadBlue = 0;
-    private int _distanceEnemys = 0;
-
-
-    private int _countMoves = 0;
-
-    public Battle(Squad squadRed, Squad squadBlue)
-    {
-        _squadRed = squadRed;
-        _squadBlue = squadBlue;
-
-        _distanceEnemys = _distanceBattle - (squadRed.DistanceInFight + squadBlue.DistanceInFight);
+        Console.Write("\nВы решили уйти на пенсию и оставили рыбные дела своим приемникам,\n" +
+                      "чтобы посвятить оставшееся время путешествиям по миру.\n\n");
     }
 
     public void Show()
-    { 
-        int freeDistance;
+    {
 
-        Console.Write("Дистанция между взводами:\n");
+    }
+}
 
-        Console.Write("┌" + new string('─', _distanceBattle) + "┐\n");
-        Console.Write("│");
+abstract class Fish
+{
+    private int _age;
 
-        freeDistance = _distanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
+    public Fish()
+    {
 
-        Console.ForegroundColor = ColorRed;
-        Console.Write(new string('#', _squadRed.DistanceInFight));
-
-        if (freeDistance > 0)
-        {
-            Console.ForegroundColor = ColorDefault;
-            Console.Write(new string('#', freeDistance));
-        }
-
-        Console.ForegroundColor = ColorBlue;
-        Console.Write(new string('#', _squadBlue.DistanceInFight));
-
-        Console.ForegroundColor = ColorDefault;
-
-        Console.Write("│");
-        Console.Write("\n└" + new string('─', _distanceBattle) + "┘\n");
     }
 
-    public void Fight(out string squadWinner)
+    public string Type { get; protected set; }
+    public int Age { get { return _age; } private set { if (_age > Lifespan) Die(); } }
+    public string State { get; protected set; }
+    public int Lifespan { get; private set; }
+
+    public void Show()
     {
-        Random random;
+        Console.Write($"Вид рыбы: {Type} | Восраст: {Age} | Статус: {State}");
+    }
 
-        squadWinner = null;
+    public void Grow()
+    {
+        Age = ++_age;
 
-        while (_squadRed.HealthPoints > 0 & _squadBlue.HealthPoints > 0)
-        {
-            Console.Clear();
+        UpdateState();
+    }
 
-            random = new Random((int)DateTime.Now.Ticks);
+    protected void SetLifespan(int minLifespan, int maxLifespan)
+    {
+        Random random = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
 
-            _countMoves++;
+        Lifespan = random.Next(minLifespan, maxLifespan);
+    }
 
-            _squadRed.ShowStatus(ColorRed, ColorDefault);
-            _squadBlue.ShowStatus(ColorBlue, ColorDefault);
+    private void Die()
+    {
+        Age = -1;
+    }
 
-            Show();
+    private void UpdateState()
+    {
+        int halfLife = Lifespan / 2;
+        int oldAge = halfLife + halfLife / 2;
 
-            Console.Write($"Ход #{_countMoves}\n");
-
-            if (_countMoves % 2 == 0)
-            {
-                Console.ForegroundColor = ColorBlue;
-                MakeMove(NameSquadBlue, _squadBlue, _squadRed, random);
-            }
-            else
-            {
-                Console.ForegroundColor = ColorRed;
-                MakeMove(NameSquadRed, _squadRed, _squadBlue, random);
-            }
-
-            Console.ForegroundColor = ColorDefault;
-            Console.ReadKey();
-        }
-
-        if (_squadRed.HealthPoints <= 0)
-            squadWinner = NameSquadBlue;
+        if (Age >= oldAge)
+            State = "Старенькая особь";
+        else if (Age >= halfLife)
+            State = "Взрослая особь";
+        else if (Age > 0)
+            State = "Молодняк";
+        else if (Age == 0)
+            State = "Головастик";
         else
-            squadWinner = NameSquadRed;
-    }
-
-    private void MakeMove(string nameSquad, Squad squadAttacking, Squad squadDefending, Random random)
-    {
-        int minStepDistance = -2;
-        int maxStepDistance = _distanceEnemys + 1;
-
-        int step = random.Next(minStepDistance, maxStepDistance);
-
-        Console.Write($"Ходит {nameSquad}:\n\n");
-
-        squadDefending.TakeDamage(squadAttacking.Attack(_distanceEnemys, out string typeAttack), out float damageTaken, out int HealthTaken);
-        
-        squadAttacking.ShowAttack(damageTaken, HealthTaken, typeAttack);
-
-        if (step > 0)
-            Console.Write($"\n{nameSquad} продвинулся к противнику на кол-во клеток ({step}).\n");
-        else if (step == 0)
-            Console.Write($"\n{nameSquad} удерживает позицию.\n");
-        else
-            Console.Write($"\n{nameSquad} отступил от противника на кол-во клеток ({step}).\n");
-
-        squadAttacking.Walk(step);
-
-        _distanceEnemys = _distanceBattle - (squadAttacking.DistanceInFight + squadDefending.DistanceInFight);
+            State = "Умерла";
     }
 }
 
-abstract class Soldier
+class Salmon : Fish
 {
-    public const string KeyShootingAttack = "ShootingAttack";
-    public const string KeyMeleeAttack = "MeleeAttack";
-    public const string KeyHealthPoints = "HealthPoints";
-    public const string KeyArmor = "Armor";
-    public const string KeyFightingSpirit = "FightingSpirit";
-    public const string KeyMedication = "Medication";
+    private const int MinLifespan = 7;
+    private const int MaxLifespan = 16;
 
-    private int _shootingAttack = 0;
-    private int _meleeAttack = 15;
-    private int _healthPoints = 100;
-    private int _armor = 10;
-    private int _fightingSpirit = 0;
-    private int _medication = 0;
+    private readonly string _type = "Salmon";
 
-    public Soldier()
+    public Salmon()
     {
-        ShootingAttack = _shootingAttack;
-        MeleeAttack = _meleeAttack;
-        HealthPoints = _healthPoints;
-        Armor = _armor;
-        FightingSpirit = _fightingSpirit;
-        Medication = _medication;
-    }
+        Type = _type;
 
-    public int ShootingAttack { get; protected set; }
-    public int MeleeAttack { get; protected set; }
-    public int HealthPoints { get; protected set; }
-    public int Armor { get; protected set; }
-    public int FightingSpirit { get; protected set; }
-    public int Medication { get; protected set; }
+        SetLifespan(MinLifespan, MaxLifespan);
+    }
 }
 
-class Rifleman : Soldier
+class Perch : Fish
 {
-    private int _healthPoints = 110;
-    private int _shootingAttack = 30;
-    private int _meleeAttack = 20;
-    private int _armor = 25;
+    private const int MinLifespan = 5;
+    private const int MaxLifespan = 11;
 
-    public Rifleman()
+    private readonly string _type = "Perch";
+
+    public Perch()
     {
-        HealthPoints = _healthPoints;
-        ShootingAttack = _shootingAttack;
-        MeleeAttack = _meleeAttack;
-        Armor = _armor;
+        Type = _type;
+
+        SetLifespan(MinLifespan, MaxLifespan);
     }
 }
 
-class Tankman : Soldier
+class Crucian : Fish
 {
-    private int _healthPoints = 130;
-    private int _shootingAttack = 40;
-    private int _armor = 60;
-    private int _fightingSpirit = 5;
+    private const int MinLifespan = 15;
+    private const int MaxLifespan = 21;
 
-    public Tankman()
+    private readonly string _type = "Crucian";
+
+    public Crucian()
     {
-        HealthPoints = _healthPoints;
-        ShootingAttack = _shootingAttack;
-        Armor = _armor;
-        FightingSpirit = _fightingSpirit;
+        Type = _type;
+
+        SetLifespan(MinLifespan, MaxLifespan);
     }
 }
 
-class Borderman : Soldier
+class Goldfish : Fish
 {
-    private int _shootingAttack = 25;
-    private int _meleeAttack = 20;
-    private int _armor = 20;
-    private int _fightingSpirit = -2;
+    private const int MinLifespan = 10;
+    private const int MaxLifespan = 21;
 
-    public Borderman()
+    private readonly string _type = "Goldfish";
+
+    public Goldfish()
     {
-        ShootingAttack = _shootingAttack;
-        MeleeAttack = _meleeAttack;
-        Armor = _armor;
-        FightingSpirit = _fightingSpirit;
+        Type = _type;
+
+        SetLifespan(MinLifespan, MaxLifespan);
     }
-}
-
-class Doctor : Soldier
-{
-    private int _shootingAttack = 10;
-    private int _meleeAttack = 5;
-    private int _medication = 12;
-
-    public Doctor()
-    {
-        ShootingAttack = _shootingAttack;
-        MeleeAttack = _meleeAttack;
-        Medication = _medication;
-    }
-}
-
-class Artilleryman : Soldier
-{
-    private int _healthPoints = 90;
-    private int _shootingAttack = 60;
-    private int _fightingSpirit = 10;
-
-    public Artilleryman()
-    {
-        HealthPoints = _healthPoints;
-        ShootingAttack = _shootingAttack;
-        FightingSpirit = _fightingSpirit;
-    }
-}
+} 
