@@ -23,28 +23,94 @@ namespace CS_JUNIOR
     }
 }
 
-class Inventory
+class Spawn
 {
-    private readonly List<Fish> _inventory;
+    private const string FishSalmon = "Salmon";
+    private const string FishPerch = "Perch";
+    private const string FishCrucian = "Crucian";
+    private const string FishGoldfish = "Goldfish";
+
+    private readonly List<string> _typesFish;
+
+    private readonly Random _random;
+
+    public Spawn()
+    {
+        _random = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
+
+        _typesFish = new List<string>()
+        {
+            FishSalmon,
+            FishPerch,
+            FishCrucian,
+            FishGoldfish
+        };
+    }
+
+    public Fish GetFish()
+    {
+        int numberTypesFish = _random.Next(0, _typesFish.Count);
+
+        switch (_typesFish[numberTypesFish])
+        {
+            case FishSalmon:
+                return new Salmon();
+
+            case FishPerch:
+                return new Perch();
+
+            case FishCrucian:
+                return new Crucian();
+
+            case FishGoldfish:
+                return new Goldfish();
+
+            default:
+                return null;
+        }
+    }
 }
 
 class Aquarium
 {
+    private const string CommandCelebrateNewYear = "CelebrateNewYear";
+    private const string CommandAddFish = "AddFish";
+    private const string CommandRemoveFish = "RemoveFish";
+    private const string CommandExit = "Exit";
+
     private const int MaxCountFish = 20;
 
     private readonly List<Fish> _fishGroup;
 
+    private readonly Spawn _spawn;
+
+    private readonly string[] _mainMenu; 
+        
     private int _workTime = 0;
+
+    private string _userInput = null;
 
     public Aquarium()
     {
+        _fishGroup = new List<Fish>();
+        _spawn = new Spawn();
 
+        _mainMenu = new string[]
+        {
+            CommandCelebrateNewYear,
+            CommandAddFish,
+            CommandRemoveFish,
+            CommandExit
+        };
     }
 
     public void Work()
     {
-        while (Console.ReadKey(true).Key != ConsoleKey.Escape)
+        while (_userInput != CommandExit)
         {
+            PrintMenu(_mainMenu);
+
+            ReadInput(_mainMenu);
 
             _workTime++;
         }
@@ -56,6 +122,37 @@ class Aquarium
     public void Show()
     {
 
+    }
+
+    public void AddFish()
+    {
+        if (_fishGroup.Count < MaxCountFish)
+            _fishGroup.Add(_spawn.GetFish());
+    }
+
+    public void RemoveFish()
+    {
+
+    }
+
+    private void ReadInput(string[] arrayMenu)
+    {
+        _userInput = Console.ReadLine();
+
+        if (int.TryParse(_userInput, out int result))
+            if ((result > 0) && (result <= arrayMenu.Length))
+                _userInput = arrayMenu[result - 1];
+    }
+
+    private void PrintMenu(string[] arrayMenu)
+    {
+        Console.Write("\tДоступные команды:\n\n");
+
+        for (int i = 0; i < arrayMenu.Length; i++)
+            Console.Write($"\t{i + 1}. {arrayMenu[i]}\n");
+
+        Console.WriteLine();
+        Console.Write("Ожидается ввод: ");
     }
 }
 
@@ -75,7 +172,7 @@ abstract class Fish
 
     public void Show()
     {
-        Console.Write($"Вид рыбы: {Type} | Восраст: {Age} | Статус: {State}");
+        Console.Write($"Вид рыбы: {Type} | Возраст: {Age} | Статус: {State}");
     }
 
     public void Grow()

@@ -16,14 +16,29 @@ namespace CS_JUNIOR
         {
             Console.ForegroundColor = ConsoleColor.White;
 
-            War war = new War();
-
-            war.Begin();
+            Battle battle = new Battle();
+            
+            battle.Begin();
         }
     }
 }
 
-class Barrack
+static class UserUtils
+{
+    private static readonly Random s_random;
+
+    static UserUtils()
+    {
+        s_random = new Random();
+    }
+
+    public static int GenerateRandomNumber(int minNumber, int maxNumber)
+    {
+        return s_random.Next(minNumber, maxNumber);
+    }
+}
+
+class Squad
 {
     private const string ProfessionRifleman = "Rifleman";
     private const string ProfessionTankman = "Tankman";
@@ -31,18 +46,14 @@ class Barrack
     private const string ProfessionDoctor = "Doctor";
     private const string ProfessionArtilleryman = "Artilleryman";
 
-    private const int CountSoldiers = 3;
-
-    private readonly Random _random;
-
-    private readonly List<Soldier> _soldiers;
+    private const int MaxCountSoldiers = 4;
 
     private readonly string[] _professionsSoldiers;
 
-    public Barrack()
-    {
-        _random = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
+    private List<Soldier> _soldiers;
 
+    public Squad()
+    {
         _soldiers = new List<Soldier>();
 
         _professionsSoldiers = new string[]
@@ -53,72 +64,6 @@ class Barrack
             ProfessionDoctor,
             ProfessionArtilleryman
         };
-    }
-
-    public List<Soldier> GetSoldiers()
-    {
-        List<Soldier> temporarySoldiers = new List<Soldier>();
-
-        foreach (Soldier soldier in _soldiers)
-        {
-            temporarySoldiers.Add(soldier);
-        }
-
-        return temporarySoldiers;
-    }
-
-    public void CreateSoldier()
-    {
-        int minRandom = 0;
-        int maxRandom = _professionsSoldiers.Length;
-
-        while (_soldiers.Count < CountSoldiers)
-        {
-            int indexProfession = _random.Next(minRandom, maxRandom);
-
-            string temporaryProfession = _professionsSoldiers[indexProfession];
-
-            switch (temporaryProfession)
-            {
-                case ProfessionRifleman:
-                    _soldiers.Add(new Rifleman());
-                    break;
-
-                case ProfessionTankman:
-                    _soldiers.Add(new Tankman());
-                    break;
-
-                case ProfessionBorderman:
-                    _soldiers.Add(new Borderman());
-                    break;
-
-                case ProfessionDoctor:
-                    _soldiers.Add(new Doctor());
-                    break;
-
-                case ProfessionArtilleryman:
-                    _soldiers.Add(new Artilleryman());
-                    break;
-            }
-        }
-    }
-}
-
-class Squad
-{
-    private const int FullAmount = 100;
-
-    private const int MaxCountSoldiers = 3;
-
-    private const int DistanceMeleeAttack = 1;
-
-    private readonly Barrack _barrack;
-    private List<Soldier> _soldiers;
-
-    public Squad()
-    {
-        _barrack = new Barrack();
-        _soldiers = new List<Soldier>();
     }
 
     public int ShootingAttack { get; private set; }
@@ -176,17 +121,18 @@ class Squad
 
     public int Attack(int distanceEnemy, out string typeAttack)
     {
+        int fullAmount = 100;
+        int distanceMeleeAttack = 1;
         float damage;
-        typeAttack = null;
 
-        if (distanceEnemy > DistanceMeleeAttack)
+        if (distanceEnemy > distanceMeleeAttack)
         {
-            damage = ShootingAttack + (float)ShootingAttack / FullAmount * FightingSpirit;
+            damage = ShootingAttack + (float)ShootingAttack / fullAmount * FightingSpirit;
             typeAttack = "ДАЛЬНИМ оружием";
         }
         else
         {
-            damage = MeleeAttack + (float)MeleeAttack / FullAmount * FightingSpirit;
+            damage = MeleeAttack + (float)MeleeAttack / fullAmount * FightingSpirit;
             typeAttack = "БЛИЖНИМ оружием";
         }
 
@@ -195,14 +141,15 @@ class Squad
 
     public void TakeDamage(int damage, out float takeDamage, out int takeHealth)
     {
+        int fullAmount = 100;
         takeHealth = 0;
-        takeDamage = damage - (float)damage / FullAmount * Armor;
+        takeDamage = damage - (float)damage / fullAmount * Armor;
 
         if (HealthPoints - (int)takeDamage > 0)
         {
             HealthPoints -= (int)takeDamage;
 
-            takeHealth = (int)(takeDamage / FullAmount * Medication) < 0 ? 1 : (int)(takeDamage / FullAmount * Medication);
+            takeHealth = (int)(takeDamage / fullAmount * Medication) < 0 ? 1 : (int)(takeDamage / fullAmount * Medication);
 
             HealthPoints += takeHealth;
 
@@ -223,48 +170,78 @@ class Squad
             DistanceInFight = 0;
     }
 
-    public void CreateSquad()
+    public void Create()
     {
-        _barrack.CreateSoldier();
+        Soldier temporarySoldier;
 
-        List<Soldier> temporarySoldiers = _barrack.GetSoldiers();
+        int minNumber = 0;
+        int maxNumber = _professionsSoldiers.Length;
 
-        foreach (Soldier soldier in temporarySoldiers)
+        while (_soldiers.Count < MaxCountSoldiers)
         {
-            if (_soldiers.Count < MaxCountSoldiers)
-            {
-                _soldiers.Add(soldier);
+            int indexProfession = UserUtils.GenerateRandomNumber(minNumber, maxNumber);
 
-                ShootingAttack += soldier.ShootingAttack / MaxCountSoldiers;
-                MeleeAttack += soldier.MeleeAttack;
-                HealthPoints += soldier.HealthPoints;
-                Armor += soldier.Armor / MaxCountSoldiers;
-                FightingSpirit += soldier.FightingSpirit;
-                Medication += soldier.Medication;
+            string professionsSoldier = _professionsSoldiers[indexProfession];
+
+            switch (professionsSoldier)
+            {
+                case ProfessionRifleman:
+                    temporarySoldier = new Rifleman();
+                    break;
+
+                case ProfessionTankman:
+                    temporarySoldier = new Tankman();
+                    break;
+
+                case ProfessionBorderman:
+                    temporarySoldier = new Borderman();
+                    break;
+
+                case ProfessionDoctor:
+                    temporarySoldier = new Doctor();
+                    break;
+
+                case ProfessionArtilleryman:
+                    temporarySoldier = new Artilleryman();
+                    break;
+
+                default:
+                    temporarySoldier = null;
+                    break;
             }
+
+            _soldiers.Add(temporarySoldier);
+
+            ShootingAttack += temporarySoldier.ShootingAttack / MaxCountSoldiers;
+            MeleeAttack += temporarySoldier.MeleeAttack;
+            HealthPoints += temporarySoldier.HealthPoints;
+            Armor += temporarySoldier.Armor / MaxCountSoldiers;
+            FightingSpirit += temporarySoldier.FightingSpirit;
+            Medication += temporarySoldier.Medication;
         }
     }
 }
 
-class War
+class Battle
 {
     private readonly Squad _squadRed;
     private readonly Squad _squadBlue;
 
-    private Battle _battle;
+    private int _distanceBattle = 10;
+    private int _distanceEnemys = 0;
 
-    private string _squadWinner;
-
-    public War()
+    public Battle()
     {
         _squadRed = new Squad();
         _squadBlue = new Squad();
+
+        _distanceEnemys = _distanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
     }
 
     public void Begin()
     {
-        _squadRed.CreateSquad();
-        _squadBlue.CreateSquad();
+        _squadRed.Create();
+        _squadBlue.Create();
 
         Console.Write("Началась Война между двумя странами!\n" +
                       "*Нажмите любую кнопку*\n");
@@ -272,50 +249,15 @@ class War
         Console.ReadKey();
         Console.Clear();
 
-        _battle = new Battle(_squadRed, _squadBlue);
-
-        _battle.Fight(out _squadWinner);
-
-        SendMessageResults(_squadWinner);
-    }
-
-    private void SendMessageResults(string squadWinner)
-    {
-        Console.Write($"\n\nВ этой кровопролитной войне вверх одержал {squadWinner}.\n" +
-                      $"Но какой ценной...\n\n");
-    }
-}
-
-class Battle
-{
-    private const ConsoleColor ColorDefault = ConsoleColor.White;
-    private const ConsoleColor ColorRed = ConsoleColor.Red;
-    private const ConsoleColor ColorBlue = ConsoleColor.Blue;
-
-    private const string NameSquadRed = "Красный взвод";
-    private const string NameSquadBlue = "Синий взвод";
-
-    private readonly Squad _squadRed;
-    private readonly Squad _squadBlue;
-
-    private int _distanceBattle = 10;
-    private int _distanceSquadRed = 0;
-    private int _distanceSquadBlue = 0;
-    private int _distanceEnemys = 0;
-
-
-    private int _countMoves = 0;
-
-    public Battle(Squad squadRed, Squad squadBlue)
-    {
-        _squadRed = squadRed;
-        _squadBlue = squadBlue;
-
-        _distanceEnemys = _distanceBattle - (squadRed.DistanceInFight + squadBlue.DistanceInFight);
+        Fight();
     }
 
     public void Show()
     {
+        ConsoleColor ColorDefault = ConsoleColor.White;
+        ConsoleColor ColorRed = ConsoleColor.Red;
+        ConsoleColor ColorBlue = ConsoleColor.Blue;
+
         int freeDistance;
 
         Console.Write("Дистанция между взводами:\n");
@@ -343,54 +285,60 @@ class Battle
         Console.Write("\n└" + new string('─', _distanceBattle) + "┘\n");
     }
 
-    public void Fight(out string squadWinner)
+    public void Fight()
     {
-        Random random;
+        ConsoleColor colorDefault = ConsoleColor.White;
+        ConsoleColor colorRed = ConsoleColor.Red;
+        ConsoleColor colorBlue = ConsoleColor.Blue;
 
-        squadWinner = null;
+        string nameSquadRed = "Красный взвод";
+        string nameSquadBlue = "Синий взвод";
+
+        string squadWinner;
+
+        int countMoves = 0;
 
         while (_squadRed.HealthPoints > 0 & _squadBlue.HealthPoints > 0)
         {
             Console.Clear();
 
-            random = new Random((int)DateTime.Now.Ticks);
-
-            _countMoves++;
-
-            _squadRed.ShowStatus(ColorRed, ColorDefault);
-            _squadBlue.ShowStatus(ColorBlue, ColorDefault);
+            _squadRed.ShowStatus(colorRed, colorDefault);
+            _squadBlue.ShowStatus(colorBlue, colorDefault);
 
             Show();
 
-            Console.Write($"Ход #{_countMoves}\n");
+            Console.Write($"Ход #{++countMoves}\n");
 
-            if (_countMoves % 2 == 0)
+            if (countMoves % 2 == 0)
             {
-                Console.ForegroundColor = ColorBlue;
-                MakeMove(NameSquadBlue, _squadBlue, _squadRed, random);
+                Console.ForegroundColor = colorBlue;
+                MakeMove(nameSquadBlue, _squadBlue, _squadRed);
             }
             else
             {
-                Console.ForegroundColor = ColorRed;
-                MakeMove(NameSquadRed, _squadRed, _squadBlue, random);
+                Console.ForegroundColor = colorRed;
+                MakeMove(nameSquadRed, _squadRed, _squadBlue);
             }
 
-            Console.ForegroundColor = ColorDefault;
+            Console.ForegroundColor = colorDefault;
             Console.ReadKey();
         }
 
         if (_squadRed.HealthPoints <= 0)
-            squadWinner = NameSquadBlue;
+            squadWinner = nameSquadBlue;
         else
-            squadWinner = NameSquadRed;
+            squadWinner = nameSquadRed;
+
+        Console.Write($"\n\nВ этой кровопролитной войне вверх одержал {squadWinner}.\n" +
+                      $"Но какой ценной...\n\n");
     }
 
-    private void MakeMove(string nameSquad, Squad squadAttacking, Squad squadDefending, Random random)
+    private void MakeMove(string nameSquad, Squad squadAttacking, Squad squadDefending)
     {
         int minStepDistance = -2;
         int maxStepDistance = _distanceEnemys + 1;
 
-        int step = random.Next(minStepDistance, maxStepDistance);
+        int step = UserUtils.GenerateRandomNumber(minStepDistance, maxStepDistance);
 
         Console.Write($"Ходит {nameSquad}:\n\n");
 
@@ -413,13 +361,6 @@ class Battle
 
 abstract class Soldier
 {
-    public const string KeyShootingAttack = "ShootingAttack";
-    public const string KeyMeleeAttack = "MeleeAttack";
-    public const string KeyHealthPoints = "HealthPoints";
-    public const string KeyArmor = "Armor";
-    public const string KeyFightingSpirit = "FightingSpirit";
-    public const string KeyMedication = "Medication";
-
     private int _shootingAttack = 0;
     private int _meleeAttack = 15;
     private int _healthPoints = 100;
@@ -443,6 +384,11 @@ abstract class Soldier
     public int Armor { get; protected set; }
     public int FightingSpirit { get; protected set; }
     public int Medication { get; protected set; }
+
+    //public int Attack()
+    //{
+    //    return
+    //}
 }
 
 class Rifleman : Soldier
