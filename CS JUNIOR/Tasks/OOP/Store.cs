@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
+//Существует продавец, он имеет у себя список товаров, и при нужде, может вам его показать, 
+//также продавец может продать вам товар. 
+//После продажи товар переходит к вам, и вы можете также посмотреть свои вещи.
+//Возможные классы – игрок, продавец, товар.
+//Вы можете сделать так, как вы видите это.
+
 namespace CS_JUNIOR
 {
-    class Store
+    class Program
     {
         static void Main()
         {
@@ -18,11 +24,11 @@ namespace CS_JUNIOR
         private const int DefaultCoins = 0;
         private const int DefaultLevel = 1;
 
-        protected Inventory _inventory;
+        protected Inventory Inventory;
 
         public Human()
         {
-            _inventory = new Inventory();
+            Inventory = new Inventory();
 
             Coins = DefaultCoins;
             Level = DefaultLevel;
@@ -33,7 +39,7 @@ namespace CS_JUNIOR
 
         public virtual void ShowInventory()
         {
-            _inventory.Show();
+            Inventory.Show();
         }
 
         public virtual void ShowCoins()
@@ -45,44 +51,14 @@ namespace CS_JUNIOR
         {
             Console.WriteLine(Level);
         }
-
-        public virtual void AddItem(Item item)
-        {
-            _inventory.AddItem(item);
-        }
-
-        public virtual void RemoveItem(Item item)
-        {
-            _inventory.RemoveItem(item);
-        }
-
-        public virtual void TakeCoins(int coins)
-        {
-            Coins += coins;
-        }
-
-        public virtual void TakeAwayCoins(int coins)
-        {
-            Coins -= coins;
-        }
-
-        public int ToPay(Trader trader)
-        {
-            Coins -= trader.CoinsToPay;
-
-            return trader.CoinsToPay;
-        }
     }
 
     class Player : Human
     {
-        private const int CoinsPlayer = 500;
-        private const int LevelPlayer = 10;
-
-        public Player()
+        public Player(int coins, int level)
         {
-            Coins = CoinsPlayer;
-            Level = LevelPlayer;
+            Coins = coins;
+            Level = level;
         }
 
         public override void ShowInventory()
@@ -103,10 +79,26 @@ namespace CS_JUNIOR
             base.ShowLevel();
         }
 
-        public override void AddItem(Item item)
+        public bool CanPay(int price)
         {
-            base.AddItem(item);
+            return Coins >= price;
+        }
+
+        public void Buy(Item item)
+        {
+            AddItem(item);
+            Pay(item.Price);
+        }
+
+        private void AddItem(Item item)
+        {
+            Inventory.AddItem(item);
             Console.Write("Предмет добавлен в инвентарь игрока.");
+        }
+
+        private void Pay(int price)
+        {
+            Coins -= price;
         }
     }
 
@@ -125,9 +117,6 @@ namespace CS_JUNIOR
             SetInventory();
         }
 
-        public int CoinsToPay { get; private set; }
-        public int LevelToPay { get; private set; }
-
         public override void ShowInventory()
         {
             Console.Write("Инвентарь торговца.\n");
@@ -142,44 +131,36 @@ namespace CS_JUNIOR
 
         public bool TryGetItem(out Item item)
         {
-            return _inventory.TryGetItem(out item);
+            return Inventory.TryGetItem(out item);
         }
 
-        public bool CheckSolvency(Player player, Item item)
+        public bool IsLevelConformity(int playerLevel, int itemLevel)
         {
-            CoinsToPay = item.Price;
-
-            if (player.Coins >= CoinsToPay)
-            {
-                return true;
-            }
-            else
-            {
-                CoinsToPay = 0;
-                return false;
-            }
+            return playerLevel >= itemLevel;
         }
 
-        public bool CheckLevel(Player player, Item item)
+        public void Sell(Item item)
         {
-            LevelToPay = item.Level;
+            RemoveItem(item);
+            TakeCoins(item.Price);
+        }
 
-            if (player.Level >= LevelToPay)
-            {
-                return true;
-            }
-            else
-            {
-                LevelToPay = 0;
-                return false;
-            }
+        private void TakeCoins(int coins)
+        {
+            if (coins >= 0)
+                Coins += coins;
+        }
+
+        private void RemoveItem(Item item)
+        {
+            Inventory.RemoveItem(item);
         }
 
         private void SetInventory()
         {
             for (int i = 0; i < _items.Count; i++)
             {
-                _inventory.AddItem(_items[i]);
+                Inventory.AddItem(_items[i]);
             }
         }
     }
@@ -274,22 +255,32 @@ namespace CS_JUNIOR
 
     class Shop
     {
-        private const string CommandShowInventoryPlayer = "Player";
-        private const string CommandShowInventoryTrader = "Trader";
-        private const string CommandBuyItem = "Buy";
-        private const string CommandLeave = "Leave";
-
-        private Player _player = new Player();
+        private Player _player = new Player(500, 10);
         private Trader _trader = new Trader();
+
+        public int CoinsToPay { get; private set; }
 
         public void Work()
         {
+            const string CommandShowInventoryPlayer = "Player";
+            const string CommandShowInventoryTrader = "Trader";
+            const string CommandBuyItem = "Buy";
+            const string CommandLeave = "Leave";
+
             string userInput;
 
             bool isWorking = true;
 
             while (isWorking == true)
             {
+                Console.WriteLine("\t\t\t==============|Лавка Старца|==============");
+
+                Console.Write("Возможные опции:" +
+                              $"\n\t> {CommandShowInventoryPlayer} - Показать Ваш (Игрока) инвентарь." +
+                              $"\n\t> {CommandShowInventoryTrader} - Показать инвентарь Продавца." +
+                              $"\n\t> {CommandBuyItem} -  Купить предмет." +
+                              $"\n\t> {CommandLeave} - Покинуть лавку.\n\n");
+
                 ShowInfo();
 
                 Console.Write("\nВведите команду: ");
@@ -333,14 +324,12 @@ namespace CS_JUNIOR
 
             if (_trader.TryGetItem(out Item temporaryItem))
             {
-                if (_trader.CheckSolvency(_player, temporaryItem) == true)
+                if (_player.CanPay(temporaryItem.Price) == true)
                 {
-                    if (_trader.CheckLevel(_player, temporaryItem) == true)
+                    if (_trader.IsLevelConformity(_player.Level, temporaryItem.Level) == true)
                     {
-                        _player.AddItem(temporaryItem);
-                        _trader.RemoveItem(temporaryItem);
-
-                        _trader.TakeCoins(_player.ToPay(_trader));
+                        _player.Buy(temporaryItem);
+                        _trader.Sell(temporaryItem);
                     }
                     else
                     {
@@ -356,14 +345,6 @@ namespace CS_JUNIOR
 
         private void ShowInfo()
         {
-            Console.WriteLine("\t\t\t==============|Лавка Старца|==============");
-
-            Console.Write("Возможные опции:" +
-                          $"\n\t> {CommandShowInventoryPlayer} - Показать Ваш (Игрока) инвентарь." +
-                          $"\n\t> {CommandShowInventoryTrader} - Показать инвентарь Продавца." +
-                          $"\n\t> {CommandBuyItem} -  Купить предмет." +
-                          $"\n\t> {CommandLeave} - Покинуть лавку.\n\n");
-
             _player.ShowLevel();
             _player.ShowCoins();
             _trader.ShowCoins();

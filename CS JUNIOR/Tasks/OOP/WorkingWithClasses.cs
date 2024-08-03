@@ -1,8 +1,12 @@
 ﻿using System;
 
+//Создать класс игрока, с полями, содержащими информацию об игроке и методом, 
+//который выводит информацию на экран.
+//В классе обязательно должен быть конструктор
+
 namespace CS_JUNIOR
 {
-    class WorkingWithClasses
+    class Program
     {
         static void Main()
         {

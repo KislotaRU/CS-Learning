@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace CS_JUNIOR
 {
-    class SuperMarket
+    class Program
     {
         static void Main()
         {
@@ -19,96 +19,236 @@ namespace CS_JUNIOR
 
             Supermarket supermarket = new Supermarket();
 
-            supermarket.Start();
+            supermarket.Run();
         }
     }
 
-    abstract class Human
+    class Inventory
     {
-        protected Inventory _inventory;
+        private const int LengthFooter = 55;
+        private const char FooterSymbol = '-';
 
-        protected const int LengthFooter = 40;
-        protected const char FooterSymbol = '-';
+        private readonly List<Cell> _cells;
 
-        protected string _userInput = null;
-
-        public Human(int coinsCount, Inventory inventory = null)
+        public Inventory()
         {
-            Coins = coinsCount;
-            _inventory = inventory;
+            _cells = new List<Cell>();
         }
 
-        public int Coins { get; private set; }
-        public int CoinsToPay { get; protected set; }
-
-        public virtual void ShowBalance()
+        public Inventory(Dictionary<Item, int> assortment)
         {
-            Console.Write($"Баланс: {Coins}");
+            _cells = new List<Cell>();
+
+            ReadCells(assortment);
         }
 
-        public virtual void ShowInventory()
+        public int CellsCount { get { return _cells.Count; } }
+
+        public void AddCell(Cell cell)
         {
-            _inventory.Show();
+            if (cell != null)
+            {
+                if (TryGetCell(out Cell temporaryCell, cell.IdItem) == true)
+                {
+                    if (temporaryCell.TrySetCountItem(cell.TemporaryCountItem) == true)
+                        temporaryCell.IncrementCount();
+                }
+                else
+                {
+                    temporaryCell = new Cell(cell);
+
+                    _cells.Add(temporaryCell);
+                }
+
+                Console.Write("Команда выполнена успешна.\n");
+            }
+            else
+            {
+                Console.Write($"Не удалось выполнить команду.\n");
+            }
         }
 
-        public virtual void AddItem(Item item)
+        public Cell GetCell()
         {
-            _inventory.AddItem(item);
+            if (TryGetCell(out Cell cell) == true)
+            {
+                if (cell.TrySetCountItem() == true)
+                {
+                    cell.DecrementCount();
+
+                    if (cell.CountItem == 0)
+                    {
+                        _cells.Remove(cell);
+                    }
+
+                    return cell;
+                }
+            }
+
+            return null;
         }
 
-        public virtual Item RemoveItem()
+        public void Show()
         {
-            return _inventory.TakeItem();
-        }
+            Console.Write($"\tId".PadRight(5) + $"\tНазвание".PadRight(20) + $"Цена".PadRight(10) + $"Кол-во" + "\n");
 
-        public virtual void TakeCoins(int takeCoins)
-        {
-            if (takeCoins > 0)
-                Coins += takeCoins;
-        }
-
-        public virtual void TakeAwayCoins(int takeAwayCoins)
-        {
-            if (takeAwayCoins > 0)
-                Coins -= takeAwayCoins;
-        }
-
-        public virtual int ToPay(Human human)
-        {
-            Coins -= human.CoinsToPay;
-            return human.CoinsToPay;
-        }
-
-        internal void CheckCommandMenu(string[] arrayMenu, out string userInput)
-        {
-            userInput = Console.ReadLine();
-
-            if (int.TryParse(userInput, out int result))
-                if ((result > 0) && (result <= arrayMenu.Length))
-                    userInput = arrayMenu[result - 1];
-        }
-
-        internal void PrintMenu(string[] arrayMenu)
-        {
-            Console.Write("\t\tДоступные команды:\n\n");
-
-            for (int i = 0; i < arrayMenu.Length; i++)
-                Console.Write($"\t{i + 1}. {arrayMenu[i]}\n");
+            foreach (Cell cell in _cells)
+                cell.Show();
 
             Console.WriteLine();
             Console.WriteLine(new string(FooterSymbol, LengthFooter));
-            Console.Write("Ожидается ввод: ");
+        }
+
+        private bool TryGetCell(out Cell cell, int id = 0)
+        {
+            string _userInput;
+
+            cell = null;
+
+            if (id == 0)
+            {
+                do
+                {
+                    Console.Write("Введите Id продукта: ");
+                    _userInput = Console.ReadLine();
+                }
+                while (int.TryParse(_userInput, out id) == false);
+            }
+
+            foreach (Cell temporaryCell in _cells)
+            {
+                if (temporaryCell.IdItem == id)
+                {
+                    cell = temporaryCell;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void ReadCells(Dictionary<Item, int> assortment)
+        {
+            foreach (Item item in assortment.Keys)
+                _cells.Add(new Cell(item, assortment[item]));
         }
     }
 
-    class Customer : Human
+    class Cell
     {
-        private const string CommandSelectProduct = "Выбрать товар";
-        private const string CommandRemoveProduct = "Убрать товар";
-        private const string CommandShowBasket = "Показать корзину";
-        private const string CommandFinishSelection = "Подойти к кассе";
+        private readonly Item _item;
 
-        private readonly string[] CustomerMenu = new string[]
+        public Cell(Item item, int countItem)
+        {
+            _item = item;
+            CountItem = countItem;
+        }
+
+        public Cell(Cell cell)
+        {
+            _item = new Item(cell.IdItem, cell._item.Name, cell.PriceItem);
+            CountItem = cell.TemporaryCountItem;
+        }
+
+        public int CountItem { get; private set; }
+        public int PriceItem { get { return _item.Price; } }
+        public int IdItem { get { return _item.Id; } }
+        public int TemporaryCountItem { get; private set; }
+
+        public void Show()
+        {
+            _item.Show(CountItem);
+        }
+
+        public void DecrementCount()
+        {
+            CountItem -= TemporaryCountItem;
+        }
+
+        public void IncrementCount()
+        {
+            CountItem += TemporaryCountItem;
+            TemporaryCountItem = 0;
+        }
+
+        public bool TrySetCountItem(int temporaryCountItem = 0)
+        {
+            string _userInput;
+
+            if (CountItem > 0)
+            {
+                if (temporaryCountItem == 0)
+                {
+                    do
+                    {
+                        Console.Write("Введите кол-во данного товара, которое хотите взять: ");
+                        _userInput = Console.ReadLine();
+                    }
+                    while (int.TryParse(_userInput, out temporaryCountItem) == false);
+                }
+
+                if (temporaryCountItem <= CountItem)
+                {
+                    TemporaryCountItem = temporaryCountItem;
+
+                    return true;
+                }
+                else
+                {
+                    Console.Write("Вы хотите выбрать несуществующие кол-во товара.\n");
+                }
+            }
+            else
+            {
+                Console.Write("Кол-во этого товара закончилось.\n");
+            }
+
+            return false;
+        }
+    }
+
+    class Item
+    {
+        private static int s_id = 1;
+
+        public Item(string name, int price)
+        {
+            Name = name;
+            Price = price;
+
+            Id = s_id++;
+        }
+
+        public Item(int id, string name, int price)
+        {
+            Name = name;
+            Price = price;
+            Id = id;
+        }
+
+        public int Id { get; private set; }
+        public string Name { get; private set; }
+        public int Price { get; private set; }
+
+        public void Show(int count = 0)
+        {
+            Console.Write($"\t{Id}".PadRight(5) + $"\t{Name}".PadRight(20) + $"{Price}".PadRight(10) + $"{count}" + "\n");
+        }
+    }
+
+    class Customer
+    {
+        public const string CommandSelectProduct = "Выбрать товар";
+        public const string CommandRemoveProduct = "Убрать товар";
+        public const string CommandShowBasket = "Показать корзину";
+        public const string CommandFinishSelection = "Подойти к кассе";
+
+        private const int LengthFooter = 40;
+        private const char FooterSymbol = '-';
+
+        private readonly Inventory _inventory;
+
+        private readonly string[] _customerMenu = new string[]
         {
             CommandSelectProduct,
             CommandRemoveProduct,
@@ -116,93 +256,32 @@ namespace CS_JUNIOR
             CommandFinishSelection
         };
 
-        private Random _random;
-
-        private int _maxRandomNumber = 500;
-        private int _minRandomNumber = 200;
-
-        private bool _isFinishPurchase = false;
-        private bool _isFinishSelectItem = true;
-
-        public Customer(int coinsCount = 0, Inventory inventory = null) : base(coinsCount, inventory)
+        public Customer()
         {
-            coinsCount = GetRandomCoinCount();
+            Coins = GetRandomCountCoins();
             _inventory = new Inventory();
         }
 
-        public void StartPurchase()
+        public string UserInput { get; private set; }
+        public int Coins { get; private set; }
+        public int CoinsToPay { get; private set; }
+        public bool IsBusyInventory { get { return _inventory.CellsCount > 0; } }
+        public bool IsFinishPurchase { get; private set; }
+
+        public void PurchaseProducts()
         {
-            _isFinishPurchase = false;
+            IsFinishPurchase = false;
 
-            if (_isFinishSelectItem == false)
-                MenuPurchase();
-            else
-                MainMenu();
-        }
+            PrintMenu(_customerMenu);
 
-        public override void ShowBalance()
-        {
-            Console.Write("Показать баланс клиента.\n");
-            base.ShowBalance();
-        }
+            ReadInput(_customerMenu);
 
-        public override void ShowInventory()
-        {
-            Console.Write("\nКорзина клиента:\n");
-
-            if (_inventory.ItemsCount > 0)
-                base.ShowInventory();
-            else
-                Console.Write("В корзине пусто.\n");
-        }
-
-        public bool GetStatusPurchase()
-        {
-            return _isFinishPurchase;
-        }
-
-        public bool GetStatusSelectItem()
-        {
-            return _isFinishSelectItem;
-        }
-
-        private void SelectProduct()
-        {
-            _isFinishSelectItem = false;
-        }
-
-        private void RemoveProduct()
-        {
-
-        }
-
-        private void FinishSelection()
-        {
-            _isFinishPurchase = true;
-            Console.Write("Клиент закончил с выбором продуктов.");
-        }
-
-        private int GetRandomCoinCount()
-        {
-            _random = new Random();
-
-            return _random.Next(_minRandomNumber, _maxRandomNumber);
-        }
-
-        private void MainMenu()
-        {
-            PrintMenu(CustomerMenu);
-
-            CheckCommandMenu(CustomerMenu, out _userInput);
-
-            switch (_userInput)
+            switch (UserInput)
             {
                 case CommandSelectProduct:
-                    SelectProduct();
                     break;
 
                 case CommandRemoveProduct:
-                    RemoveProduct();
                     break;
 
                 case CommandShowBasket:
@@ -215,108 +294,33 @@ namespace CS_JUNIOR
 
                 default:
                     Console.Write("Неизвестная команда!");
+                    Console.ReadKey();
                     break;
             }
         }
 
-        private void MenuPurchase()
+        public void ShowInventory()
         {
-            Console.WriteLine();
-            Console.WriteLine(new string(FooterSymbol, LengthFooter));
+            Console.Clear();
 
-            //_inventory.AddItem();
-        }
-    }
+            Console.Write("Корзина клиента:\n\n");
 
-    class Cashier : Human
-    {
-        private const string CommandServeQueue = "Обслужить очередь";
-        private const string CommandAddCustomer = "Добавить клиента";
-        private const string CommandBreakWork = "Прервать работу";
-
-        private readonly List<Item> _assortment = new List<Item>()
-        {
-            new Item("Яблоки", 21, 5),
-            new Item("Бананы", 13, 4),
-            new Item("Йогурт", 38, 5),
-            new Item("Сметана", 13, 9),
-            new Item("Майонез", 19, 9),
-            new Item("Шоколад", 74, 2),
-            new Item("Молоко", 45, 6),
-            new Item("Печенье", 47, 7),
-            new Item("Зубная паста", 13, 10),
-            new Item("Хлопья", 24, 9),
-            new Item("Сок", 90, 3),
-            new Item("Конфеты", 10, 10),
-        };
-
-        private readonly string[] CashierMenu = new string[]
-        {
-            CommandServeQueue,
-            CommandAddCustomer,
-            CommandBreakWork
-        };
-
-        private CustomerLine _customerLine;
-        private Customer _customer;
-
-        private int _customerCount = 1;
-
-        private bool _isOpenShop = true;
-        private bool _isAddNewCustomer = false;
-        private bool _isFinishSelectItem = true;
-
-        public Cashier(int coinCount, Inventory inventory = null) : base(coinCount, inventory)
-        {
-            _inventory = new Inventory(_assortment);
-            _customerLine = new CustomerLine();
+            if (IsBusyInventory == true)
+                _inventory.Show();
+            else
+                Console.Write("В корзине пусто.\n");
         }
 
-        public void Start()
+        public void ResetUserInput()
         {
-            _isOpenShop = true;
+            UserInput = null;
+        }
 
-            while (_isOpenShop == true)
+        public bool TryPay(int totalAmountCoins)
+        {
+            if (Coins >= totalAmountCoins)
             {
-                PrintMenu(CashierMenu);
-
-                CheckCommandMenu(CashierMenu, out _userInput);
-
-                switch (_userInput)
-                {
-                    case CommandServeQueue:
-                        ServeQueue();
-                        break;
-
-                    case CommandAddCustomer:
-                        AddCustomer();
-                        break;
-
-                    case CommandBreakWork:
-                        BreakWork();
-                        break;
-
-                    default:
-                        Console.Write("Неизвестная команда!");
-                        break;
-                }
-
-                Console.ReadLine();
-                Console.Clear();
-            }
-        }
-
-        public override void ShowInventory()
-        {
-            Console.Write("Актуальный ассортимент супермаркета.\n\n");
-            base.ShowInventory();
-        }
-
-        public bool CheckSolvency(Customer customer, int price)
-        {
-            if (customer.Coins >= price)
-            {
-                CoinsToPay = price;
+                CoinsToPay = totalAmountCoins;
                 return true;
             }
             else
@@ -326,425 +330,258 @@ namespace CS_JUNIOR
             }
         }
 
-        public void ServeQueue()
+        public int ToPay()
         {
-            Console.Clear();
+            Coins -= CoinsToPay;
+            return CoinsToPay;
+        }
 
-            Console.Write("\t\tИнтерфейс обслуживания очереди.\n\n");
-            Console.Write($"Кол-во клиентов в очереди: {_customerLine.CustomerCount}\n");
+        public void AddCell(Cell cell)
+        {
+            _inventory.AddCell(cell);
+        }
 
-            if (_customerLine.TryGetCustomer() == true)
-            {
-                Console.Write($"Клиент #{_customerCount++}.\n");
+        public Cell GetCell()
+        {
+            return _inventory.GetCell();
+        }
 
-                _customer = _customerLine.RemoveCustomer();
-                _customer.ShowInventory();
+        private void FinishSelection()
+        {
+            IsFinishPurchase = true;
 
-                //...
-            }
+            if (IsBusyInventory == true)
+                Console.Write("Клиент закончил с выбором продуктов.\n");
             else
-            {
-                Console.Write("Очередь пуста!\n" +
-                              "Добавьте клиентов.\n");
-            }
+                Console.Write("Клиент ничего не выбрал.\n");
         }
 
-        public void AddCustomer()
+        private int GetRandomCountCoins()
         {
-            Item temporaryItem;
+            Random _random = new Random();
 
-            _customer = new Customer();
+            int _maxRandomNumber = 150;
+            int _minRandomNumber = 70;
 
-            do
-            {
-                Console.ReadLine();
-                Console.Clear();
-
-                ShowInventory();
-
-                _customer.StartPurchase();
-
-                _isAddNewCustomer = _customer.GetStatusPurchase();
-                _isFinishSelectItem = _customer.GetStatusSelectItem();
-
-                if (_isFinishSelectItem == false)
-                {
-                    temporaryItem = _inventory.TakeItem();
-                    _customer.AddItem(temporaryItem);
-                }
-
-
-            }
-            while (_isAddNewCustomer == false);
-
-            _isAddNewCustomer = false;
+            return _random.Next(_minRandomNumber, _maxRandomNumber);
         }
 
-        public void BreakWork()
+        private void ReadInput(string[] arrayMenu)
         {
-            _isOpenShop = false;
-            Console.Write("Вы прервали работу кассиром и вышли в главное меню программы.\n");
-        }
-    }
+            UserInput = Console.ReadLine();
 
-    class Inventory
-    {
-        private const int DefaultItemsCount = 0;
-
-        private const int LengthFooter = 55;
-        private const char FooterSymbol = '-';
-
-        private List<Item> _items;
-
-        private string _userInput = "";
-
-        public Inventory(List<Item> items = null)
-        {
-            _items = items;
-            ItemsCount = items?.Count ?? DefaultItemsCount;
+            if (int.TryParse(UserInput, out int result))
+                if ((result > 0) && (result <= arrayMenu.Length))
+                    UserInput = arrayMenu[result - 1];
         }
 
-        public int ItemsCount { get; private set; }
-
-        public void AddItem(Item item)
+        private void PrintMenu(string[] arrayMenu)
         {
-            Item temporaryItem;
+            Console.Write("\t\tДоступные команды:\n\n");
 
-            if (item != null)
-            {
-                if (TryGetItem(out temporaryItem, (int)item?.Id) == true)
-                {
-                    if (temporaryItem.TrySetIncrementCount(item.Count) == true)
-                    {
-                        temporaryItem.IncrementCount();
-                    }
-                }
-                else
-                {
-                    temporaryItem = new Item(item.Id, item.Name, item.Price);
-
-                    if (temporaryItem.TrySetIncrementCount(item.Count) == true)
-                    {
-                        temporaryItem.IncrementCount();
-                        _items.Add(temporaryItem);
-                    }
-                    else
-                    {
-                        temporaryItem = null;
-                    }
-                }
-
-                if (temporaryItem == null)
-                    Console.Write($"Не удалось добавить продукт.\n");
-                else
-                    Console.Write("Команда успешно выполнена.\n");
-            }
-        }
-
-        public Item TakeItem()
-        {
-            if (TryGetItem(out Item item) == true)
-            {
-                if (item.TrySetDecrementCount() == true)
-                {
-                    item.DecrementCount();
-
-                    if (item.Count == 0)
-                        _items.Remove(item);
-
-                    Console.Write("Команда успешно выполнена.\n");
-                    return item;
-                }
-            }
-
-            Console.Write($"Не удалось удалить продукт.\n");
-            return null;
-        }
-
-        public void Show()
-        {
-            Console.Write($"\tID".PadRight(5) + $"\tНазвание".PadRight(20) + $"Цена".PadRight(10) + $"Кол-во" + "\n");
-
-            foreach (Item item in _items)
-                item.Show();
+            for (int i = 0; i < arrayMenu.Length; i++)
+                Console.Write($"\t{i + 1}. {arrayMenu[i]}\n");
 
             Console.WriteLine();
             Console.WriteLine(new string(FooterSymbol, LengthFooter));
-        }
-
-        private bool TryGetItem(out Item item, int id = 0)
-        {
-            item = null;
-
-            if (id == 0)
-            {
-                do
-                {
-                    Console.Write("Введите ID продукта: ");
-                    _userInput = Console.ReadLine();
-                }
-                while (int.TryParse(_userInput, out id) == false);
-            }
-
-            foreach (Item temporaryItem in _items)
-            {
-                if (temporaryItem.Id == id)
-                {
-                    item = temporaryItem;
-                    return true;
-                }
-            }
-
-            if (item == null)
-                Console.Write($"Такого продукта нет.");
-
-            return false;
+            Console.Write("Ожидается ввод: ");
         }
     }
 
-    class CustomerLine
+    class CustomersLine
     {
-        private const int CustomerMaxCount = 3;
-        private const int CustomerMinCount = 0;
+        private const int MaxCountSlots = 3;
 
-        private Queue<Customer> _customers;
+        private readonly Queue<Customer> _slots;
 
-        public CustomerLine()
+        public CustomersLine()
         {
-            CustomerCount = CustomerMinCount;
+            _slots = new Queue<Customer>();
         }
 
-        public int CustomerCount { get; private set; }
+        public int Count { get { return _slots.Count; } }
+        public bool IsBusy { get { return _slots?.Count > 0; } }
+        public bool IsFull { get { return Count >= MaxCountSlots; } }
 
         public void AddCustomer(Customer customer)
         {
-            if (CustomerCount < CustomerMaxCount)
-            {
-                CustomerCount++;
-                _customers.Enqueue(customer);
-            }
+            if (IsFull == false)
+                _slots.Enqueue(customer);
         }
 
-        public Customer RemoveCustomer()
+        public Customer GetCustomer()
         {
-            if (CustomerCount > 0)
-            {
-                CustomerCount--;
-                return _customers.Dequeue();
-            }
+            if (IsBusy == true)
+                return _slots.Dequeue();
 
             return null;
         }
-
-        public bool TryGetCustomer()
-        {
-            if (_customers?.Count > 0)
-                return true;
-            else
-                return false;
-        }
     }
 
-    class Item
+    class Cashier
     {
-        private static int _id = 1;
+        private readonly Inventory _inventory;
 
-        private int _decrementNumber = 0;
-        private int _incrementNumber = 0;
-
-        private bool _isDecrementCorrect = false;
-        private bool _isIncrementCorrect = false;
-
-        private string _userInput = "";
-
-        public Item(string name, int price, int count)
+        public Cashier(Dictionary<Item, int> assortment)
         {
-            Name = name;
-            Price = price;
-            Count = count;
-
-            Id = _id++;
+            _inventory = new Inventory(assortment);
         }
 
-        public Item(int id, string name, int price, int count = 0)
+        public int Coins { get; private set; }
+        public int CoinsToPay { get; private set; }
+        public int CountServedCustomers { get; private set; }
+
+        public void ShowInventory()
         {
-            Name = name;
-            Price = price;
-            Id = id;
-            Count = count;
+            Console.Write("Актуальный ассортимент супермаркета.\n\n");
+            _inventory.Show();
         }
 
-        public int Id { get; private set; }
-        public string Name { get; private set; }
-        public int Price { get; private set; }
-        public int Count { get; private set; }
-
-        public void Show()
+        public void ShowStatus()
         {
-            Console.Write($"\t{Id}".PadRight(5) + $"\t{Name}".PadRight(20) + $"{Price}".PadRight(10) + $"{Count}" + "\n");
+            Console.Write($"Актуальная выручка кассира: {Coins}\n" +
+                          $"Кол-во обслуженных клиентов: {CountServedCustomers}\n");
         }
 
-        public void DecrementCount()
+        public void ServeCustomer(Customer customer)
         {
-            if (_isDecrementCorrect == true)
+            do
             {
-                _isDecrementCorrect = false;
-                Count -= _decrementNumber;
-                _incrementNumber = _decrementNumber;
-            }
-        }
+                customer.ShowInventory();
 
-        public void IncrementCount()
-        {
-            if (_isIncrementCorrect == true)
-            {
-                _isIncrementCorrect = false;
-                Count += _incrementNumber;
-            }
-        }
+                Console.Write($"Итоговая сумма к оплате: {CoinsToPay}\n\n");
 
-        public bool TrySetDecrementCount(int decrementNumber = 0)
-        {
-            if (Count > 0)
-            {
-                if (decrementNumber == 0)
+                if (customer.TryPay(CoinsToPay))
                 {
-                    do
-                    {
-                        Console.Write("Введите кол-во данного товара, которое хотите убрать.");
-                        _userInput = Console.ReadLine();
-                    }
-                    while (int.TryParse(_userInput, out decrementNumber));
-                }
+                    TakeCoins(customer.ToPay());
+                    Console.Write("Клиент оплатил чек.\n");
 
-                if (decrementNumber <= Count)
-                {
-                    _decrementNumber = decrementNumber;
-                    _isDecrementCorrect = true;
-
-                    return true;
+                    CountServedCustomers++;
+                    CoinsToPay = 0;
                 }
                 else
                 {
-                    Console.Write("Вы хотите убрать несуществующие кол-во товара.\n");
+                    Console.Write("Недостаточно денег для оплаты.\n" +
+                                  "Клиент должен выложить из корзины какой-то товар.\n");
+
+                    Console.ReadKey();
+
+                    _inventory.AddCell(customer.GetCell());
+
+                    if (CoinsToPay <= 0)
+                        Console.Write("\nКлиент выложил все товары из своей карзины.\n" +
+                                      "Клиент ушёл.\n");
                 }
 
+                Console.ReadKey();
+                Console.Clear();
             }
-            else
-            {
-                Console.Write("Кол-во такого товара закончилось.\n");
-            }
-
-            return false;
+            while (CoinsToPay > 0);
         }
 
-        public bool TrySetIncrementCount(int allQuantity, int incrementNumber = 0)
+        public void AddCell(Cell cell)
         {
-            if (incrementNumber == 0)
-            {
-                do
-                {
-                    Console.Write("Введите кол-во данного товара, которое хотите взять.");
-                    _userInput = Console.ReadLine();
-                }
-                while (int.TryParse(_userInput, out incrementNumber));
-            }
+            _inventory.AddCell(cell);
 
-            if (allQuantity >= incrementNumber)
-            {
-                _incrementNumber = incrementNumber;
-                _isIncrementCorrect = true;
+            if (cell != null)
+                CoinsToPay -= cell.TemporaryCountItem * cell.PriceItem;
+        }
 
-                return true;
-            }
-            else
-            {
-                Console.Write("Вы хотите взять несуществующие кол-во товара.\n");
-            }
+        public Cell GetCell()
+        {
+            Cell temporaryCell = _inventory.GetCell();
 
-            return false;
+            if (temporaryCell != null)
+                CoinsToPay += temporaryCell.TemporaryCountItem * temporaryCell.PriceItem;
+
+            return temporaryCell;
+        }
+
+        private void TakeCoins(int takeCoins)
+        {
+            if (takeCoins > 0)
+                Coins += takeCoins;
         }
     }
 
     class Supermarket
     {
-        private const string CommandOpenShop = "Открыть магазин";
-        private const string CommandShowProducts = "Показать ассортимент";
+        private const string CommandServeQueue = "Обслужить очередь";
+        private const string CommandAddCustomer = "Добавить клиента";
+        private const string CommandShowStatus = "Показать статус";
         private const string CommandCloseProgram = "Завершить программу";
-        private const string CommandBackMainMenu = "Вернуться в главное меню";
 
-        private readonly string[] MainMenu = new string[]
+        private const int LengthFooter = 40;
+        private const char FooterSymbol = '-';
+
+        private readonly Dictionary<Item, int> _assortment;
+        private readonly Cashier _cashier;
+        private readonly CustomersLine _customerLine;
+
+        private readonly string[] _mainMenu = new string[]
         {
-            CommandOpenShop,
-            CommandShowProducts,
+            CommandServeQueue,
+            CommandAddCustomer,
+            CommandShowStatus,
             CommandCloseProgram
         };
 
-        private readonly string[] MenuViewingProducts = new string[]
-        {
-            CommandBackMainMenu
-        };
+        private int _numberCustomer = 1;
 
-        private Cashier _cashier;
-
-        private int coinsCount = 0;
-
-        private string _userInput;
         private bool _isWorking = true;
-        private bool _isViewingProducts = true;
 
         public Supermarket()
         {
-            _cashier = new Cashier(coinsCount);
-        }
-
-        public void ShowProducts()
-        {
-            _isViewingProducts = true;
-
-            while (_isViewingProducts == true)
+            _assortment = new Dictionary<Item, int>()
             {
-                Console.Clear();
+                { new Item("Яблоки", 21), 5 },
+                { new Item("Бананы", 13), 4 },
+                { new Item("Йогурт", 38), 5 },
+                { new Item("Сметана", 13), 9 },
+                { new Item("Майонез", 19), 9 },
+                { new Item("Шоколад", 74), 2 },
+                { new Item("Молоко", 45), 6 },
+                { new Item("Печенье", 47), 7 },
+                { new Item("Зубная паста", 13), 10 },
+                { new Item("Хлопья", 24), 9 },
+                { new Item("Сок", 90), 3 },
+                { new Item("Конфеты", 10), 10 },
+            };
 
-                _cashier.ShowInventory();
-
-                _cashier.PrintMenu(MenuViewingProducts);
-
-                _cashier.CheckCommandMenu(MenuViewingProducts, out _userInput);
-
-                switch (_userInput)
-                {
-                    case CommandBackMainMenu:
-                        _isViewingProducts = false;
-                        break;
-
-                    default:
-                        PrintMessage();
-                        break;
-                }
-            }
-
-            Console.Clear();
+            _cashier = new Cashier(_assortment);
+            _customerLine = new CustomersLine();
         }
 
-        public void Start()
+        public string UserInput { get; private set; }
+
+        public void Run()
         {
-            PrintMessage();
+            Console.Write("\t\tДобро пожаловать в программу супермаркета \"Los Pollos Hermanos!\"\n\n" +
+                          "\tПрограмма загружена и готова к работе.\n" +
+                          "\tДля навигации в программе ипользуйте цифры.\n\n" +
+                          "Для продолжения нажмите любую кнопку...\n");
+
+            Console.ReadKey();
+            Console.Clear();
 
             while (_isWorking == true)
             {
-                _cashier.PrintMenu(MainMenu);
+                PrintMenu(_mainMenu);
 
-                _cashier.CheckCommandMenu(MainMenu, out _userInput);
+                ReadInput(_mainMenu);
 
-                switch (_userInput)
+                switch (UserInput)
                 {
-                    case CommandOpenShop:
-                        OpenShop();
+                    case CommandServeQueue:
+                        ServeQueue();
                         break;
 
-                    case CommandShowProducts:
-                        ShowProducts();
+                    case CommandAddCustomer:
+                        AddCustomer();
+                        break;
+
+                    case CommandShowStatus:
+                        ShowStatus();
                         break;
 
                     case CommandCloseProgram:
@@ -752,17 +589,102 @@ namespace CS_JUNIOR
                         break;
 
                     default:
-                        PrintMessage();
+                        Console.Write("Неизвестная команда!");
                         break;
+                }
+
+                if (UserInput != CommandCloseProgram)
+                {
+                    Console.ReadKey();
+                    Console.Clear();
                 }
             }
         }
 
-        private void OpenShop()
+        private void ShowStatus()
         {
-            PrintMessage();
+            Console.Clear();
 
-            _cashier.Start();
+            _cashier.ShowInventory();
+            _cashier.ShowStatus();
+        }
+
+        private void AddCustomer()
+        {
+            Customer temporaryCustomer;
+            Cell temporaryCell;
+
+            if (_customerLine.IsFull == true)
+            {
+                Console.Write("Очередь полностью заполнена!\n");
+            }
+            else
+            {
+                temporaryCustomer = new Customer();
+
+                do
+                {
+                    Console.Clear();
+
+                    Console.Write("\t\tИнтерфейс добавления клиента.\n\n");
+
+                    _cashier.ShowInventory();
+
+                    if (temporaryCustomer.UserInput == Customer.CommandSelectProduct)
+                    {
+                        temporaryCell = _cashier.GetCell();
+
+                        temporaryCustomer.AddCell(temporaryCell);
+
+                        temporaryCustomer.ResetUserInput();
+                        Console.ReadKey();
+                    }
+                    else if (temporaryCustomer.UserInput == Customer.CommandRemoveProduct)
+                    {
+                        temporaryCustomer.ShowInventory();
+
+                        if (temporaryCustomer.IsBusyInventory == true)
+                        {
+                            temporaryCell = temporaryCustomer.GetCell();
+
+                            _cashier.AddCell(temporaryCell);
+                        }
+
+                        temporaryCustomer.ResetUserInput();
+                        Console.ReadKey();
+                    }
+                    else
+                    {
+                        temporaryCustomer.PurchaseProducts();
+
+                        if (temporaryCustomer.UserInput == Customer.CommandShowBasket)
+                            Console.ReadKey();
+                    }
+                }
+                while (temporaryCustomer.IsFinishPurchase == false);
+
+                if (temporaryCustomer.IsBusyInventory == true)
+                    _customerLine.AddCustomer(temporaryCustomer);
+            }
+        }
+
+        private void ServeQueue()
+        {
+            while (_customerLine.IsBusy == true)
+            {
+                Console.Clear();
+
+                Console.Write("\t\tИнтерфейс обслуживания очереди.\n\n");
+                Console.Write($"Кол-во клиентов в очереди: {_customerLine.Count}\n");
+                Console.Write($"Клиент #{_numberCustomer}.\n");
+                Console.ReadKey();
+
+                _cashier.ServeCustomer(_customerLine.GetCustomer());
+                _numberCustomer++;
+            }
+
+            Console.Write("Очередь пуста!\n" +
+                          "Добавьте новых клиентов.\n");
         }
 
         private void CloseProgram()
@@ -771,31 +693,25 @@ namespace CS_JUNIOR
             Console.Write("Вы завершили работу программы.\n");
         }
 
-        private void PrintMessage()
+        private void ReadInput(string[] arrayMenu)
         {
-            Console.Clear();
+            UserInput = Console.ReadLine();
 
-            if (_userInput == null)
-            {
-                Console.Write("\t\tДобро пожаловать в программу супермаркета \"Los Pollos Hermanos!\"\n\n" +
-                              "\tПрограмма загружена и готова к работе.\n" +
-                              "\tДля навигации в программе можно использовать цифры.\n\n" +
-                              "Для продолжения нажмите любую кнопку...\n");
-            }
-            else if (_userInput == CommandOpenShop)
-            {
-                Console.Write("\t\tМагазин открыт.\n\n" +
-                              "\tВы открыли магазин и начали появляться первые клиенты.\n" +
-                              "\tДля администрирования очереди воспользуйтесь следующим меню.\n\n" +
-                              "Для продолжения нажмите любую кнопку...\n");
-            }
-            else
-            {
-                Console.Write("Неизвестная команда!");
-            }
+            if (int.TryParse(UserInput, out int result))
+                if ((result > 0) && (result <= arrayMenu.Length))
+                    UserInput = arrayMenu[result - 1];
+        }
 
-            Console.ReadLine();
-            Console.Clear();
+        private void PrintMenu(string[] arrayMenu)
+        {
+            Console.Write("\tДоступные команды:\n\n");
+
+            for (int i = 0; i < arrayMenu.Length; i++)
+                Console.Write($"\t{i + 1}. {arrayMenu[i]}\n");
+
+            Console.WriteLine();
+            Console.WriteLine(new string(FooterSymbol, LengthFooter));
+            Console.Write("Ожидается ввод: ");
         }
     }
 }

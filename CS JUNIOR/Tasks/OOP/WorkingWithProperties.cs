@@ -1,8 +1,12 @@
 ﻿using System;
 
+//Создать класс игрока, у которого есть поля с его положением в x, y.
+//Создать класс отрисовщик, с методом, который отрисует игрока.
+//Попрактиковаться в работе со свойствами.
+
 namespace CS_JUNIOR
 {
-    class WorkingWithProperties
+    class Program
     {
         static void Main()
         {
