@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
+//Создать программу, которая принимает от пользователя слово и выводит его значение. 
+//Если такого слова нет, то следует вывести соответствующее сообщение.
+
 namespace CS_JUNIOR
 {
     class ExplanatoryDictionary
@@ -26,8 +29,8 @@ namespace CS_JUNIOR
             while (isExit == false)
             {
                 Console.WriteLine("Доступные команды:" +
-                  $"\n\t{CommandSearchWords} - найти значение слова." +
-                  $"\n\t{CommandExit} - завершить программу.\n");
+                                 $"\n\t{CommandSearchWords} - найти значение слова." +
+                                 $"\n\t{CommandExit} - завершить программу.\n");
 
                 Console.Write("Введите команду для выполнения: ");
                 userInput = Console.ReadLine();
@@ -37,9 +40,11 @@ namespace CS_JUNIOR
                     case CommandSearchWords:
                         SearchWord(words);
                         break;
+
                     case CommandExit:
                         isExit = true;
                         break;
+
                     default:
                         Console.WriteLine("Неизвестная команда. Попробуйте ещё раз.");
                         break;

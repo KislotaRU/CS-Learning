@@ -1,6 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 
+//В функциях вы выполняли задание "Кадровый учёт"
+//Используя одну из изученных коллекций, вы смогли бы сильно себе упростить код выполненной программы, ведь у нас данные, это ФИО и позиция.
+//Поиск в данном задании не нужен.
+//1) добавить досье
+//2) вывести все досье (в одну строку через “-” фио и должность)
+//3) удалить досье
+//4) выход
+
 namespace CS_JUNIOR
 {
     class AdvancedPersonnelAccounting
@@ -35,16 +43,20 @@ namespace CS_JUNIOR
                     case CommandAddDossier:
                         AddDossier(fullNames, workingPositions);
                         break;
+
                     case CommandWithDrawAllDossiers:
                         PrintAllDossiers(fullNames, workingPositions);
                         break;
+
                     case CommandRemoveDossier:
                         RemoveDossier(fullNames, workingPositions);
                         break;
+
                     case CommandExit:
                         Console.WriteLine("Завершение программы...");
                         isWorking = false;
                         break;
+
                     default:
                         Console.WriteLine("Неизвестная команда. Попробуйте ещё.");
                         break;
@@ -82,7 +94,7 @@ namespace CS_JUNIOR
         static void RemoveDossier(List<string> fullNames, List<string> workingPositions)
         {
             Console.Write("Введите индекс досье: ");
-
+            
             if (int.TryParse(Console.ReadLine(), out int indexDelet) == true)
             {
                 if (indexDelet <= fullNames.Count && indexDelet > 0)
