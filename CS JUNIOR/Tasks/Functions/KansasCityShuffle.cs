@@ -1,5 +1,7 @@
 ﻿using System;
 
+//Реализуйте функцию Shuffle, которая перемешивает элементы массива в случайном порядке.
+
 namespace CS_JUNIOR
 {
     class KansasCityShuffle
@@ -7,7 +9,7 @@ namespace CS_JUNIOR
         static void Main()
         {
             int[] numbers = new int[] { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 };
-
+            
             PrintArray(numbers);
 
             ShuffleArray(numbers);
