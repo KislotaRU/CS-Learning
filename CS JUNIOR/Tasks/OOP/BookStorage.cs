@@ -11,7 +11,7 @@ using System.IO;
 
 namespace CS_JUNIOR
 {
-    class Program
+    class BookStorage
     {
         static void Main()
         {

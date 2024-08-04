@@ -6,7 +6,7 @@
 
 namespace CS_JUNIOR
 {
-    class Program
+    class WorkingWithProperties
     {
         static void Main()
         {

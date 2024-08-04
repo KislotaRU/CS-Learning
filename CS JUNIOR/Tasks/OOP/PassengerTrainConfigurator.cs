@@ -13,7 +13,7 @@ using System.IO;
 
 namespace CS_JUNIOR
 {
-    class Program
+    class PassengerTrainConfigurator
     {
         static void Main()
         {

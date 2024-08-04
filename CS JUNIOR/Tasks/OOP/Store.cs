@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace CS_JUNIOR
 {
-    class Program
+    class Store
     {
         static void Main()
         {
@@ -24,11 +24,11 @@ namespace CS_JUNIOR
         private const int DefaultCoins = 0;
         private const int DefaultLevel = 1;
 
-        protected Inventory Inventory;
+        protected Inventory _inventory;
 
         public Human()
         {
-            Inventory = new Inventory();
+            _inventory = new Inventory();
 
             Coins = DefaultCoins;
             Level = DefaultLevel;
@@ -39,7 +39,7 @@ namespace CS_JUNIOR
 
         public virtual void ShowInventory()
         {
-            Inventory.Show();
+            _inventory.Show();
         }
 
         public virtual void ShowCoins()
@@ -92,7 +92,7 @@ namespace CS_JUNIOR
 
         private void AddItem(Item item)
         {
-            Inventory.AddItem(item);
+            _inventory.AddItem(item);
             Console.Write("Предмет добавлен в инвентарь игрока.");
         }
 
@@ -131,7 +131,7 @@ namespace CS_JUNIOR
 
         public bool TryGetItem(out Item item)
         {
-            return Inventory.TryGetItem(out item);
+            return _inventory.TryGetItem(out item);
         }
 
         public bool IsLevelConformity(int playerLevel, int itemLevel)
@@ -153,14 +153,14 @@ namespace CS_JUNIOR
 
         private void RemoveItem(Item item)
         {
-            Inventory.RemoveItem(item);
+            _inventory.RemoveItem(item);
         }
 
         private void SetInventory()
         {
             for (int i = 0; i < _items.Count; i++)
             {
-                Inventory.AddItem(_items[i]);
+                _inventory.AddItem(_items[i]);
             }
         }
     }

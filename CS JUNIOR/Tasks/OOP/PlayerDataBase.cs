@@ -10,7 +10,7 @@ using System.IO;
 
 namespace CS_JUNIOR
 {
-    class Program
+    class PlayerDataBase
     {
         static void Main()
         {

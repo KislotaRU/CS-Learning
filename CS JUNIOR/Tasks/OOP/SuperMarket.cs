@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace CS_JUNIOR
 {
-    class Program
+    class SuperMarket
     {
         static void Main()
         {

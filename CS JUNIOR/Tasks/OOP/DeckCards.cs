@@ -9,7 +9,7 @@ using System.IO;
 
 namespace CS_JUNIOR
 {
-    class Program
+    class DeckCards
     {
         static void Main()
         {
