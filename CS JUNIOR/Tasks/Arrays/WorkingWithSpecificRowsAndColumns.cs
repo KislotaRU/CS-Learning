@@ -1,5 +1,9 @@
 ﻿using System;
 
+//Дан двумерный массив.
+//Вычислить сумму второй строки и произведение первого столбца.
+//Вывести исходную матрицу и результаты вычислений.
+
 namespace CS_JUNIOR
 {
     class WorkingWithSpecificRowsAndColumns
@@ -30,7 +34,7 @@ namespace CS_JUNIOR
 
             for (int i = 0; i < array.GetLength(0); i++)
             {
-                productOfNumber *= array[i, colomnForCounting];
+                productOfNumber *= array[i, colomnForCounting]; 
             }
 
             for (int i = 0; i < array.GetLength(1); i++)
