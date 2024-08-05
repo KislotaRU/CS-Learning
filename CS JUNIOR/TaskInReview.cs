@@ -63,8 +63,6 @@ class Squad
 {
     private const string ProfessionRifleman = "Rifleman";
     private const string ProfessionTankman = "Tankman";
-    private const string ProfessionDoctor = "Doctor";
-    private const string ProfessionArtilleryman = "Artilleryman";
 
     private const int MaxCountSoldiers = 4;
 
