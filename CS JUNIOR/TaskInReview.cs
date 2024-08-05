@@ -63,7 +63,6 @@ class Squad
 {
     private const string ProfessionRifleman = "Rifleman";
     private const string ProfessionTankman = "Tankman";
-    private const string ProfessionBorderman = "Borderman";
     private const string ProfessionDoctor = "Doctor";
     private const string ProfessionArtilleryman = "Artilleryman";
 
@@ -81,12 +80,10 @@ class Squad
         {
             ProfessionRifleman,
             ProfessionTankman,
-            ProfessionBorderman,
-            ProfessionDoctor,
-            ProfessionArtilleryman
         };
     }
 
+    private Soldier ActiveSoldier { get; set; }
     public int CountSoldiers { get { return _soldiers.Count; } }
     public int DistanceInFight { get; private set; }
 
@@ -96,6 +93,7 @@ class Squad
         {
             string[] status = new string[]
             {
+                $"{soldier.GetType().Name}",
                 $"Здоровье: {soldier.HealthPoints}",
                 $"Дальняя атака: {soldier.ShootingAttack}",
                 $"Ближняя атака: {soldier.MeleeAttack}",
@@ -130,44 +128,53 @@ class Squad
         }
     }
 
-    public void ShowAttack(float damageTaken, int healthTaken, string typeAttack)
+    public void ShowAction(float damageTaken, int healthTaken, string typeAttack, string nameEnemy)
     {
-        Console.Write($"Атаковал противника {typeAttack} на {(int)damageTaken} единиц урона.\n");
+        Console.Write($"{ActiveSoldier} атаковал противника {nameEnemy} {typeAttack} на {(int)damageTaken} единиц урона.\n");
 
         if (healthTaken > 0)
-            Console.Write($"Противник восстановил себе здоровье на {healthTaken} единиц.");
+            Console.Write($"Противник {nameEnemy} восстановил себе здоровье на {healthTaken} единиц.");
     }
 
-    public void MakeMove()
+    public void MakeMove(int distanceToEnemy, string nameSquad)
     {
-        //int step;
+        int minStepDistance = -2;
+        int maxStepDistance = distanceToEnemy + 1;
 
-        //DistanceInFight += step;
+        int step = UserUtils.GenerateRandomNumber(minStepDistance, maxStepDistance);
 
-        //if (DistanceInFight < 0)
-        //    DistanceInFight = 0;
+        DistanceInFight += step;
 
-        //int minStepDistance = -2;
-        //int maxStepDistance = _distanceEnemys + 1;
+        if (DistanceInFight < 0)
+            DistanceInFight = 0;
 
-        //int step = UserUtils.GenerateRandomNumber(minStepDistance, maxStepDistance);
+        if (step > 0)
+            Console.Write($"\n{nameSquad} продвинулся к противнику на кол-во клеток ({step}).\n");
+        else if (step == 0)
+            Console.Write($"\n{nameSquad} удерживает позицию.\n");
+        else
+            Console.Write($"\n{nameSquad} отступил от противника на кол-во клеток ({step}).\n");
+    }
 
-        //Console.Write($"Ходит {nameSquad}:\n\n");
+    public int Attack(int distanceEnemy, out string typeAttack)
+    {
+        int indexSoldier = UserUtils.GenerateRandomNumber(_soldiers.Count);
+        ActiveSoldier = _soldiers[indexSoldier];
 
-        //squadAttacking.Walk(step);
+        return ActiveSoldier.Attack(distanceEnemy, out typeAttack);
+    }
 
-        //_distanceEnemys = _distanceBattle - (squadAttacking.DistanceInFight + squadDefending.DistanceInFight);
+    public void TakeDamage(int damage, out float damageTake, out int healthTake, out string nameSoldier)
+    {
+        int indexSoldier = UserUtils.GenerateRandomNumber(_soldiers.Count);
+        ActiveSoldier = _soldiers[indexSoldier];
 
-        //squadDefending.TakeDamage(squadAttacking.Attack(_distanceEnemys, out string typeAttack), out float damageTaken, out int HealthTaken);
+        nameSoldier = ActiveSoldier.GetType().Name;
 
-        //squadAttacking.ShowAttack(damageTaken, HealthTaken, typeAttack);
+        ActiveSoldier.TakeDamage(damage, out damageTake, out healthTake);
 
-        //if (step > 0)
-        //    Console.Write($"\n{nameSquad} продвинулся к противнику на кол-во клеток ({step}).\n");
-        //else if (step == 0)
-        //    Console.Write($"\n{nameSquad} удерживает позицию.\n");
-        //else
-        //    Console.Write($"\n{nameSquad} отступил от противника на кол-во клеток ({step}).\n");
+        if (ActiveSoldier.HealthPoints <= 0)
+            _soldiers.Remove(ActiveSoldier);
     }
 
     public void Create()
@@ -190,18 +197,6 @@ class Squad
                 case ProfessionTankman:
                     _soldiers.Add(new Tankman());
                     break;
-
-                case ProfessionBorderman:
-                    _soldiers.Add(new Borderman());
-                    break;
-
-                case ProfessionDoctor:
-                    _soldiers.Add(new Doctor());
-                    break;
-
-                case ProfessionArtilleryman:
-                    _soldiers.Add(new Artilleryman());
-                    break;
             }
         }
     }
@@ -209,18 +204,15 @@ class Squad
 
 class Battle
 {
+    private const int DistanceBattle = 10;
+
     private readonly Squad _squadRed;
     private readonly Squad _squadBlue;
-
-    private int _distanceBattle = 10;
-    private int _distanceEnemys = 0;
 
     public Battle()
     {
         _squadRed = new Squad();
         _squadBlue = new Squad();
-
-        _distanceEnemys = _distanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
     }
 
     public void Begin()
@@ -243,10 +235,10 @@ class Battle
 
         Console.Write("Дистанция между взводами:\n");
 
-        Console.Write("┌" + new string('─', _distanceBattle) + "┐\n");
+        Console.Write("┌" + new string('─', DistanceBattle) + "┐\n");
         Console.Write("│");
 
-        freeDistance = _distanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
+        freeDistance = DistanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
 
         UserUtils.PaintForeground(UserUtils.ColorRed);
         Console.Write(new string('#', _squadRed.DistanceInFight));
@@ -263,7 +255,7 @@ class Battle
         UserUtils.PaintForeground(UserUtils.ColorDefault);
 
         Console.Write("│");
-        Console.Write("\n└" + new string('─', _distanceBattle) + "┘\n");
+        Console.Write("\n└" + new string('─', DistanceBattle) + "┘\n");
     }
 
     public void Fight()
@@ -273,8 +265,11 @@ class Battle
 
         string squadWinner;
 
-        int numberOpponents = 2;
+        int countOpponents = 2;
         int countMoves = 0;
+
+        int damageToEnemy;
+        int distanceToEnemy;
 
         while (_squadRed.CountSoldiers > 0 & _squadBlue.CountSoldiers > 0)
         {
@@ -287,15 +282,30 @@ class Battle
 
             Console.Write($"Ход #{++countMoves}\n");
 
-            if (countMoves % numberOpponents == 0)
+            distanceToEnemy = DistanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
+
+            if (countMoves % countOpponents == 0)
             {
+                Console.Write($"Ходит {nameSquadBlue}:\n");
+
                 UserUtils.PaintForeground(UserUtils.ColorBlue);
-                _squadBlue.MakeMove();
+                damageToEnemy = _squadBlue.Attack(distanceToEnemy, out string typeAttack);
+                _squadBlue.MakeMove(distanceToEnemy, nameSquadBlue);
+                _squadRed.TakeDamage(damageToEnemy, out float damageTake, out int healthTake, out string nameSoldier);
+
+                _squadBlue.ShowAction(damageTake, healthTake, typeAttack, nameSoldier);
             }
             else
             {
+                Console.Write($"Ходит {nameSquadRed}:\n");
+
+
                 UserUtils.PaintForeground(UserUtils.ColorRed);
-                _squadRed.MakeMove();
+                damageToEnemy = _squadRed.Attack(distanceToEnemy, out string typeAttack);
+                _squadRed.MakeMove(distanceToEnemy, nameSquadRed);
+                _squadBlue.TakeDamage(damageToEnemy, out float damageTake, out int healthTake, out string nameSoldier);
+
+                _squadRed.ShowAction(damageTake, healthTake, typeAttack, nameSoldier);
             }
 
             UserUtils.PaintForeground(UserUtils.ColorDefault);
@@ -361,6 +371,7 @@ abstract class Soldier
     public virtual void TakeDamage(int damage, out float damageTake, out int healthTake)
     {
         int fullAmount = 100;
+        int halfAmount = 50;
         healthTake = 0;
         damageTake = damage - (float)damage / fullAmount * Armor;
 
@@ -368,12 +379,12 @@ abstract class Soldier
         {
             HealthPoints -= (int)damageTake;
 
-            healthTake = (int)(damageTake / fullAmount * Medication) < 0 ? 1 : (int)(damageTake / fullAmount * Medication);
-
-            HealthPoints += healthTake;
-
             if (Medication > 0)
+            {
+                healthTake = (int)(damageTake / fullAmount * halfAmount);
+                HealthPoints += healthTake;
                 Medication--;
+            }
         }
         else
         {
@@ -411,6 +422,7 @@ class Tankman : Soldier
     private readonly int _fightingSpirit = 20;
     private readonly int _medication = 2;
 
+    private readonly int _chanceBlockDamage = 50;
 
     public Tankman()
     {
@@ -422,98 +434,16 @@ class Tankman : Soldier
         Medication = UserUtils.GenerateRandomNumber(_medication);
     }
 
-    public override void TakeDamage(int damage, out float damageTake, out int HealthTake)
+    public override void TakeDamage(int damage, out float damageTake, out int healthTake)
     {
-        base.TakeDamage(damage, out damageTake, out HealthTake);
-    }
-}
-
-class Borderman : Soldier
-{
-    private readonly int _shootingAttack = 25;
-    private readonly int _meleeAttack = 0;
-    private readonly int _healthPoints = 120;
-    private readonly int _armor = 25;
-    private readonly int _fightingSpirit = -10;
-    private readonly int _medication = 4;
-
-    public Borderman()
-    {
-        ShootingAttack = UserUtils.GenerateRandomNumber(_shootingAttack);
-        MeleeAttack = UserUtils.GenerateRandomNumber(_meleeAttack);
-        HealthPoints = UserUtils.GenerateRandomNumber(_healthPoints);
-        Armor = UserUtils.GenerateRandomNumber(_armor);
-        FightingSpirit = UserUtils.GenerateRandomNumber(_fightingSpirit);
-        Medication = UserUtils.GenerateRandomNumber(_medication);
-    }
-
-    public override int Attack(int distanceEnemy, out string typeAttack)
-    {
-        return base.Attack(distanceEnemy, out typeAttack);
-    }
-
-    public override void TakeDamage(int damage, out float damageTake, out int HealthTake)
-    {
-        base.TakeDamage(damage, out damageTake, out HealthTake);
-    }
-}
-
-class Doctor : Soldier
-{
-    private readonly int _shootingAttack = 5;
-    private readonly int _meleeAttack = 10;
-    private readonly int _healthPoints = 180;
-    private readonly int _armor = 20;
-    private readonly int _fightingSpirit = 5;
-    private readonly int _medication = 10;
-
-    public Doctor()
-    {
-        ShootingAttack = UserUtils.GenerateRandomNumber(_shootingAttack);
-        MeleeAttack = UserUtils.GenerateRandomNumber(_meleeAttack);
-        HealthPoints = UserUtils.GenerateRandomNumber(_healthPoints);
-        Armor = UserUtils.GenerateRandomNumber(_armor);
-        FightingSpirit = UserUtils.GenerateRandomNumber(_fightingSpirit);
-        Medication = UserUtils.GenerateRandomNumber(_medication);
-    }
-
-    public override int Attack(int distanceEnemy, out string typeAttack)
-    {
-        return base.Attack(distanceEnemy, out typeAttack);
-    }
-
-    public override void TakeDamage(int damage, out float damageTake, out int HealthTake)
-    {
-        base.TakeDamage(damage, out damageTake, out HealthTake);
-    }
-}
-
-class Artilleryman : Soldier
-{
-    private readonly int _shootingAttack = 60;
-    private readonly int _meleeAttack = 0;
-    private readonly int _healthPoints = 90;
-    private readonly int _armor = 25;
-    private readonly int _fightingSpirit = 20;
-    private readonly int _medication = 5;
-
-    public Artilleryman()
-    {
-        ShootingAttack = UserUtils.GenerateRandomNumber(_shootingAttack);
-        MeleeAttack = UserUtils.GenerateRandomNumber(_meleeAttack);
-        HealthPoints = UserUtils.GenerateRandomNumber(_healthPoints);
-        Armor = UserUtils.GenerateRandomNumber(_armor);
-        FightingSpirit = UserUtils.GenerateRandomNumber(_fightingSpirit);
-        Medication = UserUtils.GenerateRandomNumber(_medication);
-    }
-
-    public override int Attack(int distanceEnemy, out string typeAttack)
-    {
-        return base.Attack(distanceEnemy, out typeAttack);
-    }
-
-    public override void TakeDamage(int damage, out float damageTake, out int HealthTake)
-    {
-        base.TakeDamage(damage, out damageTake, out HealthTake);
+        if (_chanceBlockDamage > UserUtils.GenerateRandomPercent())
+        {
+            base.TakeDamage(damage, out damageTake, out healthTake);
+        }
+        else
+        {
+            damageTake = 0;
+            healthTake = 0;
+        }
     }
 }
