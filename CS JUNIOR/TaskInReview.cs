@@ -43,7 +43,9 @@ static class UserUtils
 
     public static int GenerateRandomNumber(int maxNumber)
     {
-        return s_random.Next(maxNumber);
+        int halfAmount = 2;
+
+        return s_random.Next(maxNumber / halfAmount, maxNumber);
     }
 
     public static int GenerateRandomPercent()
@@ -66,23 +68,24 @@ class Squad
 
     private const int MaxCountSoldiers = 4;
 
-    private readonly string[] _professionsSoldiers;
+    private readonly Soldier[] _professionsSoldiers;
 
     private readonly List<Soldier> _soldiers;
+
+    private Soldier _activeSoldier;
 
     public Squad()
     {
         _soldiers = new List<Soldier>();
 
-        _professionsSoldiers = new string[]
+        _professionsSoldiers = new Soldier[]
         {
-            ProfessionRifleman,
-            ProfessionTankman,
+            new Rifleman(),
+            new Tankman(),
         };
     }
 
-    private Soldier ActiveSoldier { get; set; }
-    public int CountSoldiers { get { return _soldiers.Count; } }
+    public int CountSoldiers => _soldiers.Count;
     public int DistanceInFight { get; private set; }
 
     public void ShowStatus(ConsoleColor colorSquad, ConsoleColor colorDefault)
@@ -128,7 +131,7 @@ class Squad
 
     public void ShowAction(float damageTaken, int healthTaken, string typeAttack, string nameEnemy)
     {
-        Console.Write($"{ActiveSoldier} атаковал противника {nameEnemy} {typeAttack} на {(int)damageTaken} единиц урона.\n");
+        Console.Write($"{_activeSoldier} атаковал противника {nameEnemy} {typeAttack} на {(int)damageTaken} единиц урона.\n");
 
         if (healthTaken > 0)
             Console.Write($"Противник {nameEnemy} восстановил себе здоровье на {healthTaken} единиц.");
@@ -157,22 +160,22 @@ class Squad
     public int Attack(int distanceEnemy, out string typeAttack)
     {
         int indexSoldier = UserUtils.GenerateRandomNumber(_soldiers.Count);
-        ActiveSoldier = _soldiers[indexSoldier];
+        _activeSoldier = _soldiers[indexSoldier];
 
-        return ActiveSoldier.Attack(distanceEnemy, out typeAttack);
+        return _activeSoldier.Attack(distanceEnemy, out typeAttack);
     }
 
     public void TakeDamage(int damage, out float damageTake, out int healthTake, out string nameSoldier)
     {
         int indexSoldier = UserUtils.GenerateRandomNumber(_soldiers.Count);
-        ActiveSoldier = _soldiers[indexSoldier];
+        _activeSoldier = _soldiers[indexSoldier];
 
-        nameSoldier = ActiveSoldier.GetType().Name;
+        nameSoldier = _activeSoldier.GetType().Name;
 
-        ActiveSoldier.TakeDamage(damage, out damageTake, out healthTake);
+        _activeSoldier.TakeDamage(damage, out damageTake, out healthTake);
 
-        if (ActiveSoldier.HealthPoints <= 0)
-            _soldiers.Remove(ActiveSoldier);
+        if (_activeSoldier.HealthPoints <= 0)
+            _soldiers.Remove(_activeSoldier);
     }
 
     public void Create()
@@ -184,18 +187,7 @@ class Squad
         {
             int indexProfession = UserUtils.GenerateRandomNumber(minNumber, maxNumber);
 
-            string professionsSoldier = _professionsSoldiers[indexProfession];
-
-            switch (professionsSoldier)
-            {
-                case ProfessionRifleman:
-                    _soldiers.Add(new Rifleman());
-                    break;
-
-                case ProfessionTankman:
-                    _soldiers.Add(new Tankman());
-                    break;
-            }
+            _soldiers.Add(_professionsSoldiers[indexProfession].Clone());
         }
     }
 }
@@ -227,7 +219,7 @@ class Battle
         Fight();
     }
 
-    public void Show()
+    private void Show()
     {
         int freeDistance;
 
@@ -256,7 +248,7 @@ class Battle
         Console.Write("\n└" + new string('─', DistanceBattle) + "┘\n");
     }
 
-    public void Fight()
+    private void Fight()
     {
         string nameSquadRed = "Красный взвод";
         string nameSquadBlue = "Синий взвод";
@@ -296,7 +288,6 @@ class Battle
             else
             {
                 Console.Write($"Ходит {nameSquadRed}:\n");
-
 
                 UserUtils.PaintForeground(UserUtils.ColorRed);
                 damageToEnemy = _squadRed.Attack(distanceToEnemy, out string typeAttack);
@@ -389,6 +380,8 @@ abstract class Soldier
             HealthPoints = 0;
         }
     }
+
+    public abstract Soldier Clone();
 }
 
 class Rifleman : Soldier
@@ -409,6 +402,8 @@ class Rifleman : Soldier
         FightingSpirit = UserUtils.GenerateRandomNumber(_fightingSpirit);
         Medication = UserUtils.GenerateRandomNumber(_medication);
     }
+
+    public override Soldier Clone() => new Rifleman();
 }
 
 class Tankman : Soldier
@@ -431,6 +426,8 @@ class Tankman : Soldier
         FightingSpirit = UserUtils.GenerateRandomNumber(_fightingSpirit);
         Medication = UserUtils.GenerateRandomNumber(_medication);
     }
+
+    public override Soldier Clone() => new Tankman();
 
     public override void TakeDamage(int damage, out float damageTake, out int healthTake)
     {
