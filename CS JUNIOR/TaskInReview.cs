@@ -29,6 +29,9 @@ static class UserUtils
     public const ConsoleColor ColorRed = ConsoleColor.Red;
     public const ConsoleColor ColorBlue = ConsoleColor.Blue;
 
+    public const int FullValue = 100;
+    public const int HalfValue = 50;
+
     private static readonly Random s_random;
 
     static UserUtils()
@@ -46,13 +49,6 @@ static class UserUtils
         return s_random.Next(maxNumber);
     }
 
-    public static int GenerateRandomPercent()
-    {
-        int fullAmount = 100;
-
-        return s_random.Next(fullAmount);
-    }
-
     public static void PaintForeground(ConsoleColor consoleColor)
     {
         Console.ForegroundColor = consoleColor;
@@ -66,24 +62,38 @@ class Squad
 
     private const int MaxCountSoldiers = 4;
 
-    private readonly string[] _professionsSoldiers;
+    private readonly Soldier[] _professionsSoldiers;
 
     private readonly List<Soldier> _soldiers;
+
+    private Soldier _activeSoldier;
 
     public Squad()
     {
         _soldiers = new List<Soldier>();
 
-        _professionsSoldiers = new string[]
+        _professionsSoldiers = new Soldier[]
         {
-            ProfessionRifleman,
-            ProfessionTankman,
+            new Rifleman(),
+            new Tankman(),
         };
     }
 
-    private Soldier ActiveSoldier { get; set; }
-    public int CountSoldiers { get { return _soldiers.Count; } }
+    public int CountSoldiers => _soldiers.Count;
     public int DistanceInFight { get; private set; }
+
+    public void Create()
+    {
+        int minNumber = 0;
+        int maxNumber = _professionsSoldiers.Length;
+
+        while (CountSoldiers < MaxCountSoldiers)
+        {
+            int indexProfession = UserUtils.GenerateRandomNumber(minNumber, maxNumber);
+
+            _soldiers.Add(_professionsSoldiers[indexProfession].Clone());
+        }
+    }
 
     public void ShowStatus(ConsoleColor colorSquad, ConsoleColor colorDefault)
     {
@@ -126,20 +136,27 @@ class Squad
         }
     }
 
-    public void ShowAction(float damageTaken, int healthTaken, string typeAttack, string nameEnemy)
+    public void ShowAction(int damageToEnemy, int healthTaken, string typeAttack, string nameEnemy)
     {
-        Console.Write($"{ActiveSoldier} атаковал противника {nameEnemy} {typeAttack} на {(int)damageTaken} единиц урона.\n");
+        Console.Write($"{_activeSoldier} атаковал противника {nameEnemy} {typeAttack} на {damageToEnemy} единиц урона.\n");
 
         if (healthTaken > 0)
             Console.Write($"Противник {nameEnemy} восстановил себе здоровье на {healthTaken} единиц.");
     }
 
-    public void MakeMove(int distanceToEnemy, string nameSquad)
+    public void MakeMove(Squad squadEnemy, string nameSquadAttacker, ConsoleColor colorSquad, int distanceToEnemy)
     {
         int minStepDistance = -2;
         int maxStepDistance = distanceToEnemy + 1;
 
         int step = UserUtils.GenerateRandomNumber(minStepDistance, maxStepDistance);
+
+        Soldier soldierEnemy = squadEnemy.GetRandomSoldier();
+
+        UserUtils.PaintForeground(colorSquad);
+        Console.Write($"Ходит {nameSquadAttacker}:\n");
+
+        Attack(soldierEnemy, distanceToEnemy, out string typeAttack, out int damageTake, out int healthTake);
 
         DistanceInFight += step;
 
@@ -147,57 +164,28 @@ class Squad
             DistanceInFight = 0;
 
         if (step > 0)
-            Console.Write($"\n{nameSquad} продвинулся к противнику на кол-во клеток ({step}).\n");
+            Console.Write($"\n{nameSquadAttacker} продвинулся к противнику на кол-во клеток ({step}).\n");
         else if (step == 0)
-            Console.Write($"\n{nameSquad} удерживает позицию.\n");
+            Console.Write($"\n{nameSquadAttacker} удерживает позицию.\n");
         else
-            Console.Write($"\n{nameSquad} отступил от противника на кол-во клеток ({step}).\n");
+            Console.Write($"\n{nameSquadAttacker} отступил от противника на кол-во клеток ({step}).\n");
+
+        ShowAction(damageTake, healthTake, typeAttack, soldierEnemy.GetType().Name);
+
+        if (soldierEnemy.HealthPoints <= 0)
+            squadEnemy.RemoveSolder(soldierEnemy);
     }
 
-    public int Attack(int distanceEnemy, out string typeAttack)
+    private void Attack(Soldier soldierEnemy, int distanceToEnemy, out string typeAttack, out int damageTake, out int healthTake)
     {
-        int indexSoldier = UserUtils.GenerateRandomNumber(_soldiers.Count);
-        ActiveSoldier = _soldiers[indexSoldier];
+        _activeSoldier = GetRandomSoldier();
 
-        return ActiveSoldier.Attack(distanceEnemy, out typeAttack);
+        _activeSoldier.Attack(soldierEnemy, distanceToEnemy, out typeAttack, out damageTake, out healthTake);
     }
 
-    public void TakeDamage(int damage, out float damageTake, out int healthTake, out string nameSoldier)
-    {
-        int indexSoldier = UserUtils.GenerateRandomNumber(_soldiers.Count);
-        ActiveSoldier = _soldiers[indexSoldier];
+    private Soldier GetRandomSoldier() => _soldiers[UserUtils.GenerateRandomNumber(CountSoldiers)];
 
-        nameSoldier = ActiveSoldier.GetType().Name;
-
-        ActiveSoldier.TakeDamage(damage, out damageTake, out healthTake);
-
-        if (ActiveSoldier.HealthPoints <= 0)
-            _soldiers.Remove(ActiveSoldier);
-    }
-
-    public void Create()
-    {
-        int minNumber = 0;
-        int maxNumber = _professionsSoldiers.Length;
-
-        while (CountSoldiers < MaxCountSoldiers)
-        {
-            int indexProfession = UserUtils.GenerateRandomNumber(minNumber, maxNumber);
-
-            string professionsSoldier = _professionsSoldiers[indexProfession];
-
-            switch (professionsSoldier)
-            {
-                case ProfessionRifleman:
-                    _soldiers.Add(new Rifleman());
-                    break;
-
-                case ProfessionTankman:
-                    _soldiers.Add(new Tankman());
-                    break;
-            }
-        }
-    }
+    private void RemoveSolder(Soldier soldier) => _soldiers.Remove(soldier);
 }
 
 class Battle
@@ -227,7 +215,7 @@ class Battle
         Fight();
     }
 
-    public void Show()
+    private void Show()
     {
         int freeDistance;
 
@@ -256,7 +244,7 @@ class Battle
         Console.Write("\n└" + new string('─', DistanceBattle) + "┘\n");
     }
 
-    public void Fight()
+    private void Fight()
     {
         string nameSquadRed = "Красный взвод";
         string nameSquadBlue = "Синий взвод";
@@ -266,7 +254,6 @@ class Battle
         int countOpponents = 2;
         int countMoves = 0;
 
-        int damageToEnemy;
         int distanceToEnemy;
 
         while (_squadRed.CountSoldiers > 0 & _squadBlue.CountSoldiers > 0)
@@ -283,28 +270,9 @@ class Battle
             distanceToEnemy = DistanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
 
             if (countMoves % countOpponents == 0)
-            {
-                Console.Write($"Ходит {nameSquadBlue}:\n");
-
-                UserUtils.PaintForeground(UserUtils.ColorBlue);
-                damageToEnemy = _squadBlue.Attack(distanceToEnemy, out string typeAttack);
-                _squadBlue.MakeMove(distanceToEnemy, nameSquadBlue);
-                _squadRed.TakeDamage(damageToEnemy, out float damageTake, out int healthTake, out string nameSoldier);
-
-                _squadBlue.ShowAction(damageTake, healthTake, typeAttack, nameSoldier);
-            }
+                _squadBlue.MakeMove(_squadRed, nameSquadBlue, UserUtils.ColorBlue, distanceToEnemy);
             else
-            {
-                Console.Write($"Ходит {nameSquadRed}:\n");
-
-
-                UserUtils.PaintForeground(UserUtils.ColorRed);
-                damageToEnemy = _squadRed.Attack(distanceToEnemy, out string typeAttack);
-                _squadRed.MakeMove(distanceToEnemy, nameSquadRed);
-                _squadBlue.TakeDamage(damageToEnemy, out float damageTake, out int healthTake, out string nameSoldier);
-
-                _squadRed.ShowAction(damageTake, healthTake, typeAttack, nameSoldier);
-            }
+                _squadRed.MakeMove(_squadBlue, nameSquadRed, UserUtils.ColorRed, distanceToEnemy);
 
             UserUtils.PaintForeground(UserUtils.ColorDefault);
             Console.ReadKey();
@@ -346,47 +314,47 @@ abstract class Soldier
     public int FightingSpirit { get; protected set; }
     public int Medication { get; protected set; }
 
-    public virtual int Attack(int distanceEnemy, out string typeAttack)
-    {
-        int fullAmount = 100;
-        int distanceMeleeAttack = 1;
-        float damage;
+    public abstract Soldier Clone();
 
-        if (distanceEnemy > distanceMeleeAttack)
+    public virtual void Attack(Soldier soldierEnemy, int distanceToEnemy, out string typeAttack, out int damageTake, out int healthTake)
+    {
+        int distanceMeleeAttack = 1;
+        int damage;
+
+        if (distanceToEnemy > distanceMeleeAttack)
         {
-            damage = ShootingAttack + (float)ShootingAttack / fullAmount * FightingSpirit;
+            damage = (int)(ShootingAttack + (float)ShootingAttack / UserUtils.FullValue * FightingSpirit);
             typeAttack = "ДАЛЬНИМ оружием";
         }
         else
         {
-            damage = MeleeAttack + (float)MeleeAttack / fullAmount * FightingSpirit;
+            damage = (int)(MeleeAttack + (float)MeleeAttack / UserUtils.FullValue * FightingSpirit);
             typeAttack = "БЛИЖНИМ оружием";
         }
 
-        return (int)damage;
+        soldierEnemy.TakeDamage(damage, out damageTake);
+        soldierEnemy.TakeHealth(damageTake, out healthTake);
     }
 
-    public virtual void TakeDamage(int damage, out float damageTake, out int healthTake)
+    protected virtual void TakeDamage(int damage, out int damageTake)
     {
-        int fullAmount = 100;
-        int halfAmount = 50;
-        healthTake = 0;
-        damageTake = damage - (float)damage / fullAmount * Armor;
+        damageTake = (int)(damage - (float)damage / UserUtils.FullValue * Armor);
 
-        if (HealthPoints - (int)damageTake > 0)
+        HealthPoints -= (HealthPoints - damageTake > 0) ? damageTake : HealthPoints;
+    }
+
+    protected virtual void TakeHealth(int damageTake, out int healthTake)
+    {
+        healthTake = (int)((float)damageTake / UserUtils.FullValue * UserUtils.HalfValue);
+
+        if (Medication > 0)
         {
-            HealthPoints -= (int)damageTake;
-
-            if (Medication > 0)
-            {
-                healthTake = (int)(damageTake / fullAmount * halfAmount);
-                HealthPoints += healthTake;
-                Medication--;
-            }
+            HealthPoints += healthTake;
+            Medication--;
         }
         else
         {
-            HealthPoints = 0;
+            healthTake = 0; 
         }
     }
 }
@@ -398,17 +366,19 @@ class Rifleman : Soldier
     private readonly int _healthPoints = 120;
     private readonly int _armor = 25;
     private readonly int _fightingSpirit = 5;
-    private readonly int _medication = 2;
+    private readonly int _medication = 3;
 
     public Rifleman()
     {
-        ShootingAttack = UserUtils.GenerateRandomNumber(_shootingAttack);
-        MeleeAttack = UserUtils.GenerateRandomNumber(_meleeAttack);
-        HealthPoints = UserUtils.GenerateRandomNumber(_healthPoints);
-        Armor = UserUtils.GenerateRandomNumber(_armor);
-        FightingSpirit = UserUtils.GenerateRandomNumber(_fightingSpirit);
-        Medication = UserUtils.GenerateRandomNumber(_medication);
+        ShootingAttack = UserUtils.GenerateRandomNumber(_shootingAttack / (UserUtils.FullValue / UserUtils.HalfValue), _shootingAttack);
+        MeleeAttack = UserUtils.GenerateRandomNumber(_meleeAttack / (UserUtils.FullValue / UserUtils.HalfValue), _meleeAttack);
+        HealthPoints = UserUtils.GenerateRandomNumber(_healthPoints / (UserUtils.FullValue / UserUtils.HalfValue), _healthPoints);
+        Armor = UserUtils.GenerateRandomNumber(_armor / (UserUtils.FullValue / UserUtils.HalfValue), _armor);
+        FightingSpirit = UserUtils.GenerateRandomNumber(_fightingSpirit / (UserUtils.FullValue / UserUtils.HalfValue), _fightingSpirit);
+        Medication = UserUtils.GenerateRandomNumber(_medication / (UserUtils.FullValue / UserUtils.HalfValue), _medication);
     }
+
+    public override Soldier Clone() => new Rifleman();
 }
 
 class Tankman : Soldier
@@ -424,24 +394,21 @@ class Tankman : Soldier
 
     public Tankman()
     {
-        ShootingAttack = UserUtils.GenerateRandomNumber(_shootingAttack);
-        MeleeAttack = UserUtils.GenerateRandomNumber(_meleeAttack);
-        HealthPoints = UserUtils.GenerateRandomNumber(_healthPoints);
-        Armor = UserUtils.GenerateRandomNumber(_armor);
-        FightingSpirit = UserUtils.GenerateRandomNumber(_fightingSpirit);
-        Medication = UserUtils.GenerateRandomNumber(_medication);
+        ShootingAttack = UserUtils.GenerateRandomNumber(_shootingAttack / (UserUtils.FullValue / UserUtils.HalfValue), _shootingAttack);
+        MeleeAttack = UserUtils.GenerateRandomNumber(_meleeAttack / (UserUtils.FullValue / UserUtils.HalfValue), _meleeAttack);
+        HealthPoints = UserUtils.GenerateRandomNumber(_healthPoints / (UserUtils.FullValue / UserUtils.HalfValue), _healthPoints);
+        Armor = UserUtils.GenerateRandomNumber(_armor / (UserUtils.FullValue / UserUtils.HalfValue), _armor);
+        FightingSpirit = UserUtils.GenerateRandomNumber(_fightingSpirit / (UserUtils.FullValue / UserUtils.HalfValue), _fightingSpirit);
+        Medication = UserUtils.GenerateRandomNumber(_medication / (UserUtils.FullValue / UserUtils.HalfValue), _medication);
     }
 
-    public override void TakeDamage(int damage, out float damageTake, out int healthTake)
+    public override Soldier Clone() => new Tankman();
+
+    protected override void TakeDamage(int damage, out int damageTake)
     {
-        if (_chanceBlockDamage > UserUtils.GenerateRandomPercent())
-        {
-            base.TakeDamage(damage, out damageTake, out healthTake);
-        }
+        if (_chanceBlockDamage > UserUtils.GenerateRandomNumber(UserUtils.FullValue))
+            base.TakeDamage(damage, out damageTake);
         else
-        {
             damageTake = 0;
-            healthTake = 0;
-        }
     }
 }
