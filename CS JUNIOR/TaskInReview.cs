@@ -25,14 +25,14 @@ namespace CS_JUNIOR
 
 static class UserUtils
 {
+    private static readonly Random s_random;
+
     public const ConsoleColor ColorDefault = ConsoleColor.White;
     public const ConsoleColor ColorRed = ConsoleColor.Red;
     public const ConsoleColor ColorBlue = ConsoleColor.Blue;
 
     public const int FullValue = 100;
     public const int HalfValue = 50;
-
-    private static readonly Random s_random;
 
     static UserUtils()
     {
@@ -169,7 +169,7 @@ class Squad
 
     public void TryRemoveDeadSolder()
     {
-        for (int i = CountSoldiers; i > 0; i--)
+        for (int i = CountSoldiers - 1; i >= 0; i--)
         {
             if (_soldiers[i].HealthPoints <= 0)
                 _soldiers.Remove(_soldiers[i]);
@@ -189,10 +189,10 @@ class Squad
 
 class Battle
 {
-    private const int DistanceBattle = 10;
-
     private readonly Squad _squadRed;
     private readonly Squad _squadBlue;
+
+    private readonly int _distanceBattle = 10;
 
     public Battle()
     {
@@ -222,10 +222,10 @@ class Battle
 
         Console.Write("Дистанция между взводами:\n");
 
-        Console.Write("┌" + new string('─', DistanceBattle) + "┐\n");
+        Console.Write("┌" + new string('─', _distanceBattle) + "┐\n");
         Console.Write("│");
 
-        freeDistance = DistanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
+        freeDistance = _distanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
 
         UserUtils.PaintForeground(UserUtils.ColorRed);
         Console.Write(new string('#', _squadRed.DistanceInFight));
@@ -242,7 +242,7 @@ class Battle
         UserUtils.PaintForeground(UserUtils.ColorDefault);
 
         Console.Write("│");
-        Console.Write("\n└" + new string('─', DistanceBattle) + "┘\n");
+        Console.Write("\n└" + new string('─', _distanceBattle) + "┘\n");
     }
 
     private void Fight()
@@ -269,7 +269,7 @@ class Battle
 
             Console.Write($"Ход #{++countMoves}\n");
 
-            distanceToEnemy = DistanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
+            distanceToEnemy = _distanceBattle - (_squadRed.DistanceInFight + _squadBlue.DistanceInFight);
 
             if (countMoves % countOpponents == 0)
             {
