@@ -1,0 +1,26 @@
+name: dotnet format
+
+on:
+    push:
+        branches:
+            - master
+
+    pull_request:
+        branches:
+            - master
+
+jobs:
+    check-format:
+        runs-on: windows-latest
+
+        steps:
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: '8.0.x'
+
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Run dotnet format
+              run: dotnet format --no-restore
