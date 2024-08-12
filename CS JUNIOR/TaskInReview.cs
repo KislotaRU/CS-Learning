@@ -17,8 +17,10 @@ namespace CS_JUNIOR
             UserUtils.PaintForeground(UserUtils.ColorDefault);
 
             Battle battle = new Battle();
-            
-            battle.Work();
+
+            Battle battle2 = battle;
+
+            battle2.Work();
         }
     }
 }
