@@ -18,9 +18,7 @@ namespace CS_JUNIOR
 
             Battle battle = new Battle();
 
-            Battle battle2 = battle;
-
-            battle2.Work();
+            battle.Work();
         }
     }
 }
