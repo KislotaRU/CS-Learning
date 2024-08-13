@@ -17,14 +17,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET Framework 4.8
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '4.8'
-
-      - name: Restore NuGet packages
-        run: nuget restore "CS JUNIOR.sln"
-
       - name: Build solution in Release mode
         run: MSBuild.exe "CS JUNIOR/CS JUNIOR.sln" /p:Configuration=Release 
 
