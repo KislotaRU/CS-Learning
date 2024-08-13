@@ -1,0 +1,32 @@
+name: dotnet test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: Check and install
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+     
+      - name: Setup .NET Framework 4.8
+        run: |
+          nuget install Microsoft.Net.Framework -Version 4.8.0 -OutputDirectory tools
+
+      - name: Restore NuGet packages
+        run: nuget restore "CS JUNIOR.sln"
+
+      - name: Build solution in Release mode
+        run: MSBuild.exe "CS JUNIOR/CS JUNIOR.sln" /p:Configuration=Release 
+
+      - name: Run application
+        run: |
+          "CS JUNIOR/bin/Release/CS JUNIOR.exe"
