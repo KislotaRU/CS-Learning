@@ -1,10 +1,11 @@
 name: Linting .NET
 on:
-  workflow_run:
-    workflows:
-      - dotnet
-    types:
-      - completed
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   linting:
@@ -20,4 +21,4 @@ jobs:
           dotnet-version: '8.0.x'
        
       - name: Run dotnet format
-        run: dotnet format ---check --no-restore --verify-no-changes
+        run: dotnet format --no-restore --verify-no-changes
