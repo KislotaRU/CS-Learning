@@ -22,9 +22,7 @@ jobs:
         dotnet-version: 8.0.x
     - name: Build
       run: |
-        cd "CS JUNIOR"
         dotnet build --no-restore
     - name: Test
       run: |
-        cd "CS JUNIOR"
         dotnet test --no-build --verbosity normal
