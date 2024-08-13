@@ -16,10 +16,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-     
-      - name: Setup .NET Framework 4.8
-        run: |
-          nuget install Microsoft.Net.Framework -Version 4.8.0 -OutputDirectory tools
 
       - name: Restore NuGet packages
         run: nuget restore "CS JUNIOR.sln"
