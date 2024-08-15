@@ -50,7 +50,7 @@ static class UserUtils
             Console.Write($"\t{i + 1}. {arrayMenu[i]}\n");
     }
 
-    public static void ReadInput(string[] arrayMenu, out string userInput)
+    public static void ReadInputMenu(string[] arrayMenu, out string userInput)
     {
         userInput = Console.ReadLine();
 
@@ -72,6 +72,7 @@ class Aquarium
 
     private int _maxCountFish = 20;
     private int _workTime = 0;
+    private int _uniqueCountFishes = 0;
 
     public Aquarium()
     {
@@ -83,7 +84,7 @@ class Aquarium
 
     public void Work()
     {
-        string[] mainMenu = new string[]
+        string[] menu = new string[]
         {
             CommandCelebrateNewYear,
             CommandAddFish,
@@ -95,14 +96,23 @@ class Aquarium
 
         while (userInput != CommandExit)
         {
-            Console.Write("\tДоступные команды:\n\n");
+            Console.Write("\t\t--- Ваш аквариум ---\n\n");
 
-            UserUtils.PrintMenu(mainMenu);
+            Show(_fishes);
+
+            Console.Write($"\nКол-во лет работы вашего Аквариума: {_workTime}" +
+                          $"\nКол-во уникальных рыб за это время: {_uniqueCountFishes}");
+
+            Console.Write("\t\n\nДоступные команды:\n\n");
+
+            UserUtils.PrintMenu(menu);
 
             Console.WriteLine();
             Console.Write("Ожидается ввод: ");
 
-            UserUtils.ReadInput(mainMenu, out userInput);
+            UserUtils.ReadInputMenu(menu, out userInput);
+
+            Console.Clear();
 
             switch (userInput)
             {
@@ -124,8 +134,11 @@ class Aquarium
 
                 default:
                     Console.Write("Ввод не соответствует номеру команды.");
-                    continue;
+                    break;
             }
+
+            Console.ReadKey();
+            Console.Clear();
         }
     }
 
@@ -133,38 +146,114 @@ class Aquarium
     {
         int numberFish = 1;
 
-        foreach (Fish fish in fishes)
+        if (fishes.Count > 0)
         {
-            Console.Write($"{numberFish++}. ");
-            fish.Show();
+            foreach (Fish fish in fishes)
+            {
+                Console.Write($"{numberFish++}. ");
+                fish.Show();
+            }
+        }
+        else
+        {
+            Console.Write("Здесь будут отображаться ваши рыбы, но пока здесь пусто.\n");
         }
     }
 
     private void CelebrateNewYear()
     {
         _workTime++;
-    }
 
-    private void UpdateFishes()
-    {
+        foreach (Fish fish in _fishes)
+            fish.Grow();
 
+        UpdateFishesShop();
     }
 
     private void AddFish()
     {
         if (_fishes.Count < _maxCountFish)
-            _fishes.Add(_spawn.GetFish());
+        {
+            Console.Write("\t\t--- МАГАЗИН РЫБ ---\n\n");
+
+            Show(_fishesShop);
+
+            Console.Write("\nВыберите рыбу, которую хотите добавить: ");
+
+            if (TryGetFish(_fishesShop, out Fish fishFound))
+            {
+                _uniqueCountFishes++;
+                _fishes.Add(fishFound);
+                _fishesShop.Remove(fishFound);
+            }
+            else
+            {
+                Console.Write("\nНе удалось добавить рыбу.");
+            }
+        }
+        else
+        {
+            Console.Write("\nВ вашем аквариуме нет места для новой рыбы.\n");
+        }
     }
 
     private void RemoveFish()
     {
-        
+        if (_fishes.Count > 0)
+        {
+            Show(_fishes);
+
+            if (TryGetFish(_fishes, out Fish fishFound))
+            {
+                _fishes.Remove(fishFound);
+            }
+            else
+            {
+                Console.Write("\nНе удалось удалить рыбу из аквариума.");
+            }
+        }
+        else
+        {
+            Console.Write("Ваш аквариум пуст.");
+        }
     }
 
     private void Exit()
     {
-        Console.Write("\nВы решили уйти на пенсию и оставили рыбные дела своим приемникам,\n" +
-                      "чтобы посвятить оставшееся время путешествиям по миру.\n\n");
+        Console.Write("Вы решили уйти на пенсию и оставили рыбные дела своим приемникам,\n" +
+                      "чтобы посвятить оставшееся время путешествиям по миру.\n");
+    }
+
+    private bool TryGetFish(List<Fish> fishes, out Fish fishFound)
+    {
+        string userInput = Console.ReadLine();
+
+        if (int.TryParse(userInput, out int index))
+        {
+            if (index > 0 && index <= fishes.Count)
+            {
+                fishFound = fishes[index - 1];
+                return true;
+            }
+            else
+            {
+                Console.Write("\nТакой рыбы нет");
+            }
+        }
+        else
+        {
+            Console.Write("\nТребуется ввести номер рыбы.");
+        }
+
+        fishFound = null;
+        return false;
+    }
+
+    private void UpdateFishesShop()
+    {
+        _fishesShop.Clear();
+
+        CreateFishes();
     }
 
     private void CreateFishes()
@@ -190,52 +279,52 @@ class Aquarium
 
 abstract class Fish
 {
+    private const string StateOld = "Старенькая особь";
+    private const string StateAdult = "Взрослая особь";
+    private const string StateYoung = "Молодняк";
+    private const string StateTadpole = "Головастик";
+    private const string StateDead = "Мёртвая";
+
     public string Type { get; protected set; }
     public string State { get; protected set; }
     public int Lifespan { get; protected set; }
-    public int Age { get; private set; }
+    public int Age { get; protected set; }
 
     public abstract Fish Clone();
 
     public void Show()
     {
-        Console.Write($"Вид рыбы: {Type} | Возраст: {Age} | Статус: {State}");
+        Console.Write($"\tВид рыбы: {Type}| Возраст: {Age}| Состояние: {State}\n");
     }
 
     public void Grow()
     {
-        Age++;
+        if (State != StateDead)
+            Age++;
 
         UpdateState();
     }
 
-    protected void SetLifespan(int minLifespan, int maxLifespan)
-    {
-        Random random = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
-
-        Lifespan = random.Next(minLifespan, maxLifespan);
-    }
-
-    private void Die()
-    {
-        
-    }
-
-    private void UpdateState()
+    protected void UpdateState()
     {
         int middleAge = Lifespan / UserUtils.HalfValue;
         int oldAge = middleAge + middleAge / UserUtils.HalfValue;
 
-        if (Age >= oldAge)
-            State = "Старенькая особь";
-        else if (Age >= middleAge)
-            State = "Взрослая особь";
-        else if (Age > 0)
-            State = "Молодняк";
-        else if (Age == 0)
-            State = "Головастик";
+        if (Age <= Lifespan)
+        {
+            if (Age >= oldAge)
+                State = StateOld;
+            else if (Age >= middleAge)
+                State = StateAdult;
+            else if (Age == 0)
+                State = StateTadpole;
+            else if (Age < middleAge)
+                State = StateYoung;
+        }
         else
-            State = "Умерла";
+        {
+            State = StateDead;
+        }
     }
 }
 
@@ -249,8 +338,10 @@ class Salmon : Fish
     public Salmon()
     {
         Type = _type;
-
         Lifespan = UserUtils.GenerateRandomNumber(_minLifespan, _maxLifespan);
+        Age = UserUtils.GenerateRandomNumber(Lifespan);
+
+        UpdateState();
     }
 
     public override Fish Clone() =>
@@ -267,8 +358,10 @@ class Perch : Fish
     public Perch()
     {
         Type = _type;
-
         Lifespan = UserUtils.GenerateRandomNumber(_minLifespan, _maxLifespan);
+        Age = UserUtils.GenerateRandomNumber(Lifespan);
+
+        UpdateState();
     }
 
     public override Fish Clone() =>
@@ -285,8 +378,10 @@ class Crucian : Fish
     public Crucian()
     {
         Type = _type;
-
         Lifespan = UserUtils.GenerateRandomNumber(_minLifespan, _maxLifespan);
+        Age = UserUtils.GenerateRandomNumber(Lifespan);
+
+        UpdateState();
     }
 
     public override Fish Clone() =>
@@ -303,8 +398,10 @@ class Goldfish : Fish
     public Goldfish()
     {
         Type = _type;
-
         Lifespan = UserUtils.GenerateRandomNumber(_minLifespan, _maxLifespan);
+        Age = UserUtils.GenerateRandomNumber(Lifespan);
+
+        UpdateState();
     }
 
     public override Fish Clone() =>
