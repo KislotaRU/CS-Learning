@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace CS_JUNIOR
 {
-    class Aquarium
+    class Program
     {
         static void Main()
         {
