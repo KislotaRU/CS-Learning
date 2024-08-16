@@ -10,13 +10,13 @@ using System.Collections.Generic;
 
 namespace CS_JUNIOR
 {
-    class Aquarium
+    class Program
     {
         static void Main()
         {
             Console.ForegroundColor = ConsoleColor.White; 
 
-            global::Aquarium aquarium = new global::Aquarium();
+            Aquarium aquarium = new Aquarium();
 
             aquarium.Work();
         }
