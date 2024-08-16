@@ -16,7 +16,7 @@ namespace CS_JUNIOR
         {
             Console.ForegroundColor = ConsoleColor.White; 
 
-            global::Aquarium aquarium = new global::Aquarium();
+            Aquarium aquarium = new Aquarium();
 
             aquarium.Work();
         }
