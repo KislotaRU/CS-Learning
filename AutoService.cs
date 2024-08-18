@@ -64,11 +64,17 @@ static class UserUtils
 
 class AutoService
 {
+    private const string CommandOrderPart = "Заказать деталь";
+    private const string CommandServeCustomer = "Обслужить клиента";
+    private const string CommandExit = "Завершить работу";
+
+    private readonly Wallet _wallet;
     private readonly Storage _storage;
     private readonly Queue<Customer> _customers;
 
     public AutoService()
     {
+        _wallet = new Wallet();
         _storage = new Storage();
     }
 
@@ -80,24 +86,57 @@ class AutoService
 
 class Storage
 {
-    private readonly List<Part> _parts;
+    private readonly List<Shelf> _shelfs;
 
     public Storage()
     {
-        _parts = new List<Part>();
+        _shelfs = new List<Shelf>();
+    }
+}
+
+class Shelf
+{
+    private Part _part;
+    private int _itemCount;
+
+    public Shelf(string name, int itemCount)
+    {
+        _part = new Part(name);
+        _itemCount = itemCount;
     }
 
+    public void Show()
+    {
+        Console.Write($"Запчасть: {_part.Name} | Количество: {_itemCount}\n");
+    }
 
+    public void AddItem(Part part, int )
+    {
+        if (_part == null)
+        {
+            _part = part;
+        }
+    }
 }
 
 class Part
 {
+    public Part(string name)
+    {
+        Name = name;
+    }
 
+    public string Name { get; private set; }
 }
 
 class Customer
 {
+    private readonly Wallet _wallet;
 
+    public Customer()
+    {
+        _wallet = new Wallet();
+    }
 }
 
 class Wallet
