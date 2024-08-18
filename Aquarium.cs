@@ -27,7 +27,7 @@ static class UserUtils
 {
     private static readonly Random s_random;
 
-    public const int HalfValue = 2;
+    public const float HalfValue = 0.5f;
 
     static UserUtils()
     {
@@ -308,8 +308,8 @@ abstract class Fish
 
     protected void UpdateState()
     {
-        int middleAge = Lifespan / UserUtils.HalfValue;
-        int oldAge = middleAge + middleAge / UserUtils.HalfValue;
+        int middleAge = (int)(Lifespan * UserUtils.HalfValue);
+        int oldAge = (int)(middleAge + middleAge * UserUtils.HalfValue);
 
         if (Age <= Lifespan)
         {
