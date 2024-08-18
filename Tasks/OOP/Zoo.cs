@@ -61,7 +61,7 @@ static class UserUtils
 
 class Zoo
 {
-    private const string CommandChooseEnclosures = "Выбрать вольер";
+    private const string CommandChooseEnclosure = "Выбрать вольер";
     private const string CommandExit = "Выйти";
 
     private readonly List<Enclosure> _enclosures;
@@ -79,7 +79,7 @@ class Zoo
     {
         string[] menu = new string[]
         {
-            CommandChooseEnclosures,
+            CommandChooseEnclosure,
             CommandExit
         };
 
@@ -101,7 +101,7 @@ class Zoo
 
             switch (userInput)
             {
-                case CommandChooseEnclosures:
+                case CommandChooseEnclosure:
                     ChooseEnclosure();
                     break;
 
@@ -204,7 +204,6 @@ class Enclosure
     private readonly List<Animal> _animals;
 
     private readonly int _maxCountAnimal = 10;
-
 
     private string _soundAnimals;
 
