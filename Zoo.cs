@@ -61,7 +61,7 @@ static class UserUtils
 
 class Zoo
 {
-    private const string CommandShowEnclosure = "Показать вольер";
+    private const string CommandChooseEnclosures = "Выбрать вольер";
     private const string CommandExit = "Выйти";
 
     private readonly List<Enclosure> _enclosures;
@@ -79,7 +79,7 @@ class Zoo
     {
         string[] menu = new string[]
         {
-            CommandShowEnclosure,
+            CommandChooseEnclosures,
             CommandExit
         };
 
@@ -101,13 +101,13 @@ class Zoo
 
             switch (userInput)
             {
-                case CommandShowEnclosure:
-                    ShowEnclosure();
+                case CommandChooseEnclosures:
+                    ChooseEnclosure();
                     break;
 
                 case CommandExit:
                     Exit();
-                    break;
+                    continue;
 
                 default:
                     Console.Write("Ввод не соответствует номеру команды.");
@@ -119,69 +119,42 @@ class Zoo
         }
     }
 
-    private void ShowEnclosure()
+    private void ChooseEnclosure()
     {
-        int indexEnclosure = UserUtils.GenerateRandomNumber(_enclosures.Count);
+        ShowEnclosures();
 
-        _enclosures[indexEnclosure].Show();
+        Console.Write("\nВыберите клетку, которую хотите посмотреть: ");
 
-        Console.Write($"\nВольер {indexEnclosure + 1}/{_enclosures.Count}\n");
+        if (TryGetEnclosure(_enclosures, out Enclosure foundEnclosure))
+        {
+            Console.Clear();
+            foundEnclosure.Show();
+        }
+        else
+        {
+            Console.Write("Не удалось найти указанную клетку.");
+        }
+    }
+
+    private void ShowEnclosures()
+    {
+        int numberEnclosure = 0;
+
+        Console.Write("Перед вами представлены все вольеры Зоопарка ДИНО:\n\n");
+
+        foreach (Enclosure enclosure in _enclosures)
+        {
+            Console.Write($"\t{++numberEnclosure}. " +
+                          $"Вольер, где содержится вид животных: {enclosure?.TypeAnimal ?? "..."}\n");
+        }
     }
 
     private void Exit()
     {
-        Console.Write("Вы решили покинуть Зоопарк.");
+        Console.Write("Вы решили покинуть Зоопарк.\n");
     }
 
     private void CreateEnclosures()
-    {
-        while (_enclosures.Count < _maxCountEnclosures)
-        {
-            _enclosures.Add(new Enclosure());
-        }
-    }
-}
-
-class Enclosure
-{
-    private readonly List<Animal> _animals;
-
-    private readonly int _maxCountAnimal = 10;
-
-    private string _typeAnimal;
-    private string _soundAnimals;
-
-    private int _malesCount = 0;
-    private int _femalesCount = 0;
-
-    public Enclosure()
-    {
-        _animals = new List<Animal>();
-
-        CreateAnimals();
-    }
-
-    public void Show()
-    {
-        if (_animals.Count > 0)
-        {
-            Console.Write($"Вы подошли к вольеру, где содержится вид животных: {_typeAnimal}\n" +
-                          $"Всего в данном вольере сожержится {_animals.Count}\n" +
-                          $"Из них мужского пола {_malesCount} и женского пола {_femalesCount}\n" +
-                          $"Животные данного вида в основном издают звук: {_soundAnimals}\n\n");
-
-            foreach (Animal animal in _animals)
-            {
-                animal.Show();
-            }
-        }
-        else
-        {
-            Console.Write("Данный вольер ещё не успели заселить.\n");
-        }
-    }
-
-    private void CreateAnimals()
     {
         List<Animal> availableAnimals = new List<Animal>()
         {
@@ -191,24 +164,99 @@ class Enclosure
             new Penguin()
         };
 
-        int indexAnimal = UserUtils.GenerateRandomNumber(availableAnimals.Count);
-
-        int actualCountAnimal = UserUtils.GenerateRandomNumber(_maxCountAnimal);
-
-        _typeAnimal = availableAnimals[indexAnimal].Name;
-        _soundAnimals = availableAnimals[indexAnimal].Sound;
-
-        while (_animals.Count < actualCountAnimal)
+        while (_enclosures.Count < _maxCountEnclosures)
         {
-            _animals.Add(availableAnimals[indexAnimal].Clone());
+            int indexAnimal = UserUtils.GenerateRandomNumber(availableAnimals.Count);
+
+            _enclosures.Add(new Enclosure(availableAnimals[indexAnimal]));
+        }
+    }
+
+    private bool TryGetEnclosure(List<Enclosure> enclosures, out Enclosure foundEnclosure)
+    {
+        string userInput = Console.ReadLine();
+
+        if (int.TryParse(userInput, out int index))
+        {
+            if (index > 0 && index <= enclosures.Count)
+            {
+                foundEnclosure = enclosures[index - 1];
+                return true;
+            }
+            else
+            {
+                Console.Write("Под таким номером нет клетки.\n");
+            }
+
+        }
+        else
+        {
+            Console.Write("Требуется ввести номер клетки.\n");
         }
 
-        foreach (Animal animal in _animals)
+        foundEnclosure = null;
+        return false;
+    }
+}
+
+class Enclosure
+{
+    private readonly List<Animal> _animals;
+
+    private readonly int _maxCountAnimal = 10;
+
+
+    private string _soundAnimals;
+
+    private int _malesCount = 0;
+    private int _femalesCount = 0;
+
+    public Enclosure(Animal animal)
+    {
+        _animals = new List<Animal>();
+
+        CreateAnimals(animal);
+    }
+
+    public string TypeAnimal{ get; private set; }
+
+    public void Show()
+    {
+        if (_animals.Count > 0)
         {
-            if (animal.Gender == Animal.GenderMale)
-                _malesCount++;
-            else
-                _femalesCount++;
+            Console.Write($"Вы подошли к вольеру, где содержится вид животных: {TypeAnimal}\n" +
+                          $"Всего в данном вольере сожержится {_animals.Count}\n" +
+                          $"Из них мужского пола {_malesCount} и женского пола {_femalesCount}\n" +
+                          $"Животные данного вида в основном издают звук: {_soundAnimals}\n\n");
+
+            foreach (Animal animal in _animals)
+                animal.Show();
+        }
+        else
+        {
+            Console.Write("Данный вольер ещё не успели заселить.\n");
+        }
+    }
+
+    private void CreateAnimals(Animal modelAnimal)
+    {
+        int actualCountAnimal = UserUtils.GenerateRandomNumber(_maxCountAnimal);
+
+        if (actualCountAnimal > 0)
+        {
+            TypeAnimal = modelAnimal.Name;
+            _soundAnimals = modelAnimal.Sound;
+
+            while (_animals.Count < actualCountAnimal)
+                _animals.Add(modelAnimal.Clone());
+
+            foreach (Animal animal in _animals)
+            {
+                if (animal.Gender == Animal.GenderMale)
+                    _malesCount++;
+                else
+                    _femalesCount++;
+            }
         }
     }
 }
@@ -224,7 +272,7 @@ abstract class Animal
 
     public void Show()
     {
-        Console.Write($"{Name} | Пол: {Gender} |Издаёт звук: {Sound}\n");
+        Console.Write($"{Name} | Пол: {Gender} | Издаёт звук: {Sound}\n");
     }
 
     public abstract Animal Clone();
