@@ -31,7 +31,7 @@ static class UserUtils
 {
     private static readonly Random s_random;
 
-    public const float HalfValue = 0.5f; 
+    public const float HalfValue = 0.5f;
 
     static UserUtils()
     {
@@ -54,13 +54,15 @@ static class UserUtils
             Console.Write($"\t{i + 1}. {arrayMenu[i]}\n");
     }
 
-    public static void ReadInputMenu(string[] arrayMenu, out string userInput)
+    public static string GetParagraphMenu(string[] arrayMenu)
     {
-        userInput = Console.ReadLine();
+        string userInput = Console.ReadLine();
 
         if (int.TryParse(userInput, out int index))
             if (index > 0 && index <= arrayMenu.Length)
-                userInput = arrayMenu[index - 1];
+                return arrayMenu[index - 1];
+
+        return null;
     }
 
     public static void ShuffleList<T>(List<T> list)
@@ -88,6 +90,8 @@ class AutoService
     private const string CommandServeCustomer = "Обслужить машину";
     private const string CommandOrderPart = "Заказать запчасть";
     private const string CommandExit = "Завершить работу";
+    private const string CommandDeny = "Отказать";
+    private const string CommandContinue = "Продолжить";
 
     private readonly Storage _storage;
 
@@ -119,7 +123,7 @@ class AutoService
 
         while (userInput != CommandExit)
         {
-            Console.Write("\t\tАвтосервис \"100 по 100\"\n");
+            Console.Write("\t\tАвтосервис \"100 по 100\"\n\n");
 
             ShowBalance();
 
@@ -127,7 +131,7 @@ class AutoService
             UserUtils.PrintMenu(menu);
 
             Console.Write("\nОжидается ввод: ");
-            UserUtils.ReadInputMenu(menu, out userInput);
+            userInput = UserUtils.GetParagraphMenu(menu);
 
             Console.Clear();
 
@@ -146,7 +150,7 @@ class AutoService
                     break;
 
                 case CommandExit:
-                    Exit();
+                    Console.Write("Вы завершии работу Автосервиса.\n");
                     continue;
 
                 default:
@@ -159,7 +163,7 @@ class AutoService
         }
     }
 
-    private void ShowStorage(int priceWork = 0)
+    private void ShowStorage()
     {
         Console.Write("\t\tСклад Автосервиса \"100 по 100\"\n");
 
@@ -167,97 +171,71 @@ class AutoService
     }
 
     private void ShowBalance() =>
-        Console.Write($"\nКол-во денег на счету Автосервиса: {_coins}$\n");
+        Console.Write($"Кол-во денег на счету Автосервиса: {_coins}$\n");
+
+    private void ShowResult(bool isFixedCar, string userInput, int pricePenalty)
+    {
+        if (_carCustomer.IsFixedCar)
+            Console.Write("Машина полностью исправна.\n");
+        else
+            Console.Write("Машина осталась непочиненной.\n");
+
+        if (userInput == CommandDeny)
+            Console.Write("Автосервис отказал клиенту в обслуживании.\n");
+
+        if (pricePenalty > 0)
+            Console.Write("Автосервис не в силах оплачивать штрафы.\n");
+
+        Console.Write("Клиент ушёл.\n");
+    }
 
     private void ServeCustomer()
     {
         _carCustomer = new Car();
 
-        string CommandYes = "Да";
-        string CommandNo = "Нет";
-
         string[] menu = new string[]
         {
-            CommandYes,
-            CommandNo
+            CommandDeny,
+            CommandContinue
         };
 
         string userInput = null;
 
         int pricePenalty = 0;
-        int priceRepair = 0;
 
-        while ((_carCustomer.IsFixedCar == false) && (userInput != CommandNo) && (pricePenalty == 0))
+        while ((_carCustomer.IsFixedCar == false) && (userInput != CommandDeny) && (pricePenalty == 0))
         {
             Console.Clear();
+
+            ShowBalance();
 
             Console.Write("Машина клиента:\n");
             _carCustomer.Show();
 
-            Console.Write("\nВыберити какую запчасть хотите заменить: ");
-            userInput = Console.ReadLine();
-
-            if (_carCustomer.TryGetPart(userInput, out Part partCar))
-            {
-                Console.Clear();
-                ShowStorage();
-
-                Console.Write("\nТеперь выберите запчасть со своего склада: ");
-                userInput = Console.ReadLine();
-
-                if (_storage.TryGetPart(userInput, out Part partAutoService))
-                {
-                    if (_carCustomer.TryFixBrokenPart(partCar, partAutoService))
-                    {
-                        Console.Write("Запчасть машины успешна заменена на новую.\n");
-                        priceRepair = _priceWork + partAutoService.Price;
-
-                        Console.Write($"Цена починки составила {partAutoService.Price}$ + {_priceWork}$ = {priceRepair}$.\n");
-                    }
-                    else
-                    {
-                        Console.Write("Была заменена не та запчасть.\n" +
-                                      "Автосервису выписан штраф.\n");
-                        pricePenalty = (int)(partAutoService.Price * UserUtils.HalfValue);
-                    }
-
-                    _storage.RemovePart(partAutoService);
-                }
-                else
-                {
-                    Console.Write("Не удалось получить запчасть со склада.\n");
-
-                    Console.Write("\nОтказать клиенту в обслуживани?\n");
-                    UserUtils.PrintMenu(menu);
-
-                    Console.Write("\nВведите номер: ");
-                    UserUtils.ReadInputMenu(menu, out userInput);
-
-                    if (userInput == CommandYes)
-                    {
-                        Console.Write("Клиенту отказано в обслуживание.\n" +
-                                      "Автосервису выписан штраф.\n");
-                        pricePenalty = _pricePenatly;
-                    }
-                }
-            }
-            else
-            {
-                Console.Write("Не удалось получить запчасть из машины.\n");
-            }
-
-            if (priceRepair > 0)
+            if (TryFixBrokenPart(_carCustomer, out int priceRepair, out pricePenalty))
             {
                 Console.Write($"Полученна сумма за проделанную работу в размере {priceRepair}$.\n");
                 CollectCoins(priceRepair);
+            }
+            else
+            {
+                Console.Write("\nОтказать клиенту в обслуживани?\n");
+                UserUtils.PrintMenu(menu);
 
-                priceRepair = 0;
+                Console.Write("\nОжидается ввод: ");
+                userInput = UserUtils.GetParagraphMenu(menu);
+
+                if (userInput == CommandDeny)
+                {
+                    Console.Write("Клиенту отказано в обслуживание.\n");
+                    pricePenalty += _pricePenatly;
+                }
             }
 
             if (pricePenalty > 0)
             {
-                Console.Write($"Штраф в размере {pricePenalty}$.\n");
-                
+                Console.Write($"Итоговая сумма штрафа составила {pricePenalty}$.\n");
+
                 if (TryToPay(pricePenalty))
                 {
                     ToPay();
@@ -271,25 +249,66 @@ class AutoService
                 }
             }
 
-            ShowBalance();
-
             Console.ReadKey();
         }
 
         Console.Clear();
 
-        if (_carCustomer.IsFixedCar)
-            Console.Write("Машина полностью исправна.\n");
+        ShowResult(_carCustomer.IsFixedCar, userInput, pricePenalty);
+    }
+
+    private bool TryFixBrokenPart(Car carCustomer, out int priceRepair, out int pricePenalty)
+    {
+        string userInput;
+
+        priceRepair = 0;
+        pricePenalty = 0;
+
+        Console.Write("\nВыберити какую запчасть хотите заменить: ");
+        userInput = Console.ReadLine();
+
+        if (carCustomer.TryGetPart(userInput, out Part partCar))
+        {
+            Console.Clear();
+            ShowStorage();
+
+            Console.Write("\nТеперь выберите запчасть со своего склада: ");
+            userInput = Console.ReadLine();
+
+            if (_storage.TryGetShelf(userInput, out Shelf foundShelf))
+            {
+                Part partAutoService = foundShelf.GetPart();
+
+                if (carCustomer.TryFixBrokenPart(partCar, partAutoService))
+                {
+                    Console.Write("Запчасть машины успешна заменена на новую.\n");
+                    priceRepair = _priceWork + partAutoService.Price;
+
+                    Console.Write($"Цена починки составила {partAutoService.Price}$ + {_priceWork}$ = {priceRepair}$.\n");
+                    return true;
+                }
+                else
+                {
+                    Console.Write("Была заменена не та запчасть.\n Автосервису выписан штраф.\n");
+
+                    pricePenalty = (int)(partAutoService.Price * UserUtils.HalfValue);
+
+                    Console.Write($"Размер штрафа {pricePenalty}$\n");
+                }
+
+                _storage.RemovePart(partAutoService);
+            }
+            else
+            {
+                Console.Write("Не удалось получить запчасть со склада.\n");
+            }
+        }
         else
-            Console.Write("Машина осталась непочиненной.\n");
+        {
+            Console.Write("Не удалось получить запчасть из машины.\n");
+        }
 
-        if (userInput == CommandNo)
-            Console.Write("Автосервис отказал клиенту в обслуживании.\n");
-
-        if (pricePenalty > 0)
-            Console.Write("Автосервис не в силах оплачивать штрафы.\n");
-
-        Console.Write("Клиент ушёл.\n");
+        return false;
     }
 
     private void OrderPart()
@@ -299,9 +318,11 @@ class AutoService
         ShowStorage();
         ShowBalance();
 
-        if (_storage.TryOrderPart(out Part part, out int partCount))
+        if (_storage.TryOrderPart(out Shelf foundShelf, out int partCount))
         {
-            coinsToPay = part.Price * partCount;
+            Part orderPart = foundShelf.GetPart();
+
+            coinsToPay = orderPart.Price * partCount;
 
             Console.Write($"Сумма заказа составляет: {coinsToPay}$\n");
 
@@ -309,7 +330,7 @@ class AutoService
             {
                 ToPay();
 
-                _storage.AddPart(part);
+                _storage.AddPart(orderPart, partCount);
                 Console.Write("Заказ успешно оформлен.\n");
             }
             else
@@ -321,11 +342,6 @@ class AutoService
         {
             Console.Write("Не получилось заказать деталь.\n");
         }
-    }
-
-    private void Exit()
-    {
-        Console.Write("Вы завершии работу Автосервиса.\n");
     }
 
     private bool TryToPay(int coinsToPay)
@@ -366,7 +382,7 @@ class Storage
         }
     }
 
-    public bool TryOrderPart(out Part part, out int partCount)
+    public bool TryOrderPart(out Shelf shelf, out int partCount)
     {
         string userInput;
 
@@ -375,19 +391,16 @@ class Storage
         Console.Write("Введите номер необходимой запчасти, которую хотите заказать: ");
         userInput = Console.ReadLine();
 
-        if (TryGetPart(userInput, out part))
+        if (TryGetShelf(userInput, out shelf))
         {
-            if (TryGetShelf(part, out Shelf shelf))
+            if (shelf.TryIncrementCount(out partCount))
             {
-                if (shelf.TryIncrementCount(out partCount))
-                {
-                    Console.Write("Теперь необходимо оплатить заказ.\n");
-                    return true;
-                }
-                else
-                {
-                    Console.Write("Не удалось выбрать кол-во запчасти.\n");
-                }
+                Console.Write("Теперь необходимо оплатить заказ.\n");
+                return true;
+            }
+            else
+            {
+                Console.Write("Не удалось выбрать кол-во запчасти.\n");
             }
         }
         else
@@ -398,61 +411,53 @@ class Storage
         return false;
     }
 
-    public void AddPart(Part part)
-    {
-        if (TryGetShelf(part, out Shelf shelf))
-            shelf.IncrementCount();
-        else
-            Console.Write("Не удалось добавить запчасть.\n");
-    }
-
-    public void RemovePart(Part part)
-    {
-        if (TryGetShelf(part, out Shelf shelf))
-            shelf.DecrementCount();
-        else
-            Console.Write("Не удалось удалить запчасть.\n");
-    }
-
-    public bool TryGetPart(string userInput, out Part foundPart)
-    {
-        if (int.TryParse(userInput, out int indexPartAutoService))
-        {
-            if (indexPartAutoService > 0 && indexPartAutoService <= _shelfs.Count)
-            {
-                if (_shelfs[indexPartAutoService - 1].PartCount > 0)
-                {
-                    foundPart = _shelfs[indexPartAutoService - 1].GetPart();
-                    return true;
-                }
-                else
-                {
-                    Console.Write("Закончилась на складе.\n");
-                }
-            }
-            else
-            {
-                Console.Write("Под таким номером нет запчасти.\n");
-            }
-        }
-        else
-        {
-            Console.Write("Требуется ввести номер запчасти.\n");
-        }
-
-        foundPart = null;
-        return false;
-    }
-
-    private bool TryGetShelf(Part part, out Shelf foundShelf)
+    public void AddPart(Part part, int partCount)
     {
         foreach (Shelf shelf in _shelfs)
         {
             if (shelf.PartName == part.Name)
             {
-                foundShelf = shelf;
-                return true;
+                shelf.IncrementCount(partCount);
+                break;
             }
+        }
+    }
+
+    public void RemovePart(Part part)
+    {
+        foreach (Shelf shelf in _shelfs)
+        {
+            if (shelf.PartName == part.Name)
+            {
+                shelf.DecrementCount();
+                break;
+            }
+        }
+    }
+
+    public bool TryGetShelf(string userInput, out Shelf foundShelf)
+    {
+        if (int.TryParse(userInput, out int indexShelf))
+        {
+            if (indexShelf > 0 && indexShelf <= _shelfs.Count)
+            {
+                foreach (Shelf shelf in _shelfs)
+                {
+                    if (shelf.PartName == _shelfs[indexShelf - 1].PartName)
+                    {
+                        foundShelf = shelf;
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                Console.Write("Такого стеллажа не существует.\n");
+            }
+        }
+        else
+        {
+            Console.Write("Требуется ввести номер стеллажа.\n");
         }
 
         foundShelf = null;
@@ -461,7 +466,7 @@ class Storage
 
     private void CreateShelfs()
     {
-        List<Part> _possibleParts = new List<Part>()
+        List<Part> possibleParts = new List<Part>()
         {
             new Transmission (),
             new Wheel (),
@@ -473,7 +478,7 @@ class Storage
             new Bumper ()
         };
 
-        foreach (Part part in _possibleParts)
+        foreach (Part part in possibleParts)
             _shelfs.Add(new Shelf(part));
     }
 }
@@ -482,8 +487,6 @@ class Shelf
 {
     private readonly int _maxCountPart = 10;
     private readonly Part _part;
-
-    private int _incrementingCount;
 
     public Shelf(Part part, int partCount = 0)
     {
@@ -509,20 +512,16 @@ class Shelf
         _part.Show();
     }
 
-    public Part GetPart()
-    {
-        return PartCount > 0 ? _part : null;
-    }
+    public Part GetPart() =>
+        PartCount > 0 ? _part : null;
 
-    public void IncrementCount()
+    public void IncrementCount(int partCount)
     {
-        PartCount += _incrementingCount;
+        if (partCount > 0)
+            PartCount += partCount;
 
         if (PartCount > _maxCountPart)
-        {
             PartCount = _maxCountPart;
-            _incrementingCount = 0;
-        }
     }
 
     public void DecrementCount()
@@ -549,7 +548,6 @@ class Shelf
 
                 if (temporaryPartCount <= _maxCountPart)
                 {
-                    _incrementingCount = partCount;
                     return true;
                 }
                 else
@@ -617,7 +615,7 @@ class Car
         }
         else
         {
-            Console.Write("Требуется ввести номер запчасти машины для замены.\n");
+            Console.Write("Требуется ввести номер запчасти машины.\n");
         }
 
         partCar = null;
@@ -639,7 +637,7 @@ class Car
 
     private void CreateParts()
     {
-        List<Part> _possibleCarParts = new List<Part>()
+        List<Part> possibleParts = new List<Part>()
         {
             new Transmission (Part.ConditionWorking),
             new Wheel (Part.ConditionWorking),
@@ -654,7 +652,7 @@ class Car
         int indexPart;
         int countBrokenParts = UserUtils.GenerateRandomNumber(_minCountBrokenParts, _maxCountBrokenParts);
 
-        foreach (Part part in _possibleCarParts)
+        foreach (Part part in possibleParts)
         {
             _parts.Add(part.Clone(Part.ConditionWorking));
         }
