@@ -29,9 +29,9 @@ namespace CS_JUNIOR
 
 static class UserUtils
 {
-    private static readonly Random s_random;
-
     public const float HalfValue = 0.5f;
+
+    private static readonly Random s_random;
 
     static UserUtils()
     {
@@ -58,9 +58,9 @@ static class UserUtils
     {
         string userInput = Console.ReadLine();
 
-        if (int.TryParse(userInput, out int index))
-            if (index > 0 && index <= arrayMenu.Length)
-                return arrayMenu[index - 1];
+        if (int.TryParse(userInput, out int number))
+            if (number > 0 && number <= arrayMenu.Length)
+                return arrayMenu[number - 1];
 
         return null;
     }
@@ -101,13 +101,12 @@ class AutoService
     private Car _carCustomer;
 
     private int _coins = 1000;
+    private int _coinsToPay = 0;
 
     public AutoService()
     {
         _storage = new Storage();
     }
-
-    public int CoinsToPay { get; private set; }
 
     public void Work()
     {
@@ -173,7 +172,7 @@ class AutoService
     private void ShowBalance() =>
         Console.Write($"Кол-во денег на счету Автосервиса: {_coins}$\n");
 
-    private void ShowResult(bool isFixedCar, string userInput, int pricePenalty)
+    private void ShowResult(string userInput, int pricePenalty)
     {
         if (_carCustomer.IsFixedCar)
             Console.Write("Машина полностью исправна.\n");
@@ -254,7 +253,7 @@ class AutoService
 
         Console.Clear();
 
-        ShowResult(_carCustomer.IsFixedCar, userInput, pricePenalty);
+        ShowResult(userInput, pricePenalty);
     }
 
     private bool TryFixBrokenPart(Car carCustomer, out int priceRepair, out int pricePenalty)
@@ -285,18 +284,18 @@ class AutoService
                     priceRepair = _priceWork + partAutoService.Price;
 
                     Console.Write($"Цена починки составила {partAutoService.Price}$ + {_priceWork}$ = {priceRepair}$.\n");
-                    return true;
                 }
                 else
                 {
-                    Console.Write("Была заменена не та запчасть.\n Автосервису выписан штраф.\n");
+                    Console.Write("Была заменена не та запчасть.\nАвтосервису выписан штраф.\n");
 
                     pricePenalty = (int)(partAutoService.Price * UserUtils.HalfValue);
 
                     Console.Write($"Размер штрафа {pricePenalty}$\n");
                 }
 
-                _storage.RemovePart(partAutoService);
+                _storage.RemovePart(partAutoService.Name);
+                return true;
             }
             else
             {
@@ -318,11 +317,11 @@ class AutoService
         ShowStorage();
         ShowBalance();
 
-        if (_storage.TryOrderPart(out Shelf foundShelf, out int partCount))
+        if (_storage.TryOrderPart(out string partName, out int partPrice, out int partCount))
         {
-            Part orderPart = foundShelf.GetPart();
+            Console.Write("Теперь необходимо оплатить заказ.\n");
 
-            coinsToPay = orderPart.Price * partCount;
+            coinsToPay = partPrice * partCount;
 
             Console.Write($"Сумма заказа составляет: {coinsToPay}$\n");
 
@@ -330,7 +329,7 @@ class AutoService
             {
                 ToPay();
 
-                _storage.AddPart(orderPart, partCount);
+                _storage.AddPart(partName, partCount);
                 Console.Write("Заказ успешно оформлен.\n");
             }
             else
@@ -346,12 +345,12 @@ class AutoService
 
     private bool TryToPay(int coinsToPay)
     {
-        CoinsToPay = _coins >= coinsToPay ? coinsToPay : 0;
+        _coinsToPay = _coins >= coinsToPay ? coinsToPay : 0;
         return _coins >= coinsToPay;
     }
 
     private void ToPay() =>
-        _coins -= CoinsToPay;
+        _coins -= _coinsToPay;
 
     private void CollectCoins(int coinsCollected)
     {
@@ -373,34 +372,33 @@ class Storage
 
     public void ShowShelfs()
     {
-        int indexShelf = 0;
+        int numberShelf = 1;
 
         foreach (Shelf shelf in _shelfs)
         {
-            Console.Write($"\t{++indexShelf}. ");
+            Console.Write($"\t{numberShelf++}. ");
             shelf.Show();
         }
     }
 
-    public bool TryOrderPart(out Shelf shelf, out int partCount)
+    public bool TryOrderPart(out string partName, out int partPrice, out int partCount)
     {
         string userInput;
 
+        partName = null;
         partCount = 0;
+        partPrice = 0;
 
         Console.Write("Введите номер необходимой запчасти, которую хотите заказать: ");
         userInput = Console.ReadLine();
 
-        if (TryGetShelf(userInput, out shelf))
+        if (TryGetShelf(userInput, out Shelf shelf))
         {
-            if (shelf.TryIncrementCount(out partCount))
+            if (shelf.CanIncrementCount(out partCount))
             {
-                Console.Write("Теперь необходимо оплатить заказ.\n");
+                partName = shelf.PartName;
+                partPrice = shelf.PartPrice;
                 return true;
-            }
-            else
-            {
-                Console.Write("Не удалось выбрать кол-во запчасти.\n");
             }
         }
         else
@@ -411,11 +409,11 @@ class Storage
         return false;
     }
 
-    public void AddPart(Part part, int partCount)
+    public void AddPart(string partName, int partCount)
     {
         foreach (Shelf shelf in _shelfs)
         {
-            if (shelf.PartName == part.Name)
+            if (shelf.PartName == partName)
             {
                 shelf.IncrementCount(partCount);
                 break;
@@ -423,11 +421,11 @@ class Storage
         }
     }
 
-    public void RemovePart(Part part)
+    public void RemovePart(string partName)
     {
         foreach (Shelf shelf in _shelfs)
         {
-            if (shelf.PartName == part.Name)
+            if (shelf.PartName == partName)
             {
                 shelf.DecrementCount();
                 break;
@@ -437,13 +435,13 @@ class Storage
 
     public bool TryGetShelf(string userInput, out Shelf foundShelf)
     {
-        if (int.TryParse(userInput, out int indexShelf))
+        if (int.TryParse(userInput, out int numberShelf))
         {
-            if (indexShelf > 0 && indexShelf <= _shelfs.Count)
+            if (numberShelf > 0 && numberShelf <= _shelfs.Count)
             {
                 foreach (Shelf shelf in _shelfs)
                 {
-                    if (shelf.PartName == _shelfs[indexShelf - 1].PartName)
+                    if (shelf.PartName == _shelfs[numberShelf - 1].PartName)
                     {
                         foundShelf = shelf;
                         return true;
@@ -466,17 +464,9 @@ class Storage
 
     private void CreateShelfs()
     {
-        List<Part> possibleParts = new List<Part>()
-        {
-            new Transmission (),
-            new Wheel (),
-            new Windshield (),
-            new Battery (),
-            new SparkPlug (),
-            new EngineOil (),
-            new ExhaustManifold (),
-            new Bumper ()
-        };
+        FactoryParts factoryParts = new FactoryParts();
+
+        List<Part> possibleParts = factoryParts.GetParts();
 
         foreach (Part part in possibleParts)
             _shelfs.Add(new Shelf(part));
@@ -485,8 +475,9 @@ class Storage
 
 class Shelf
 {
-    private readonly int _maxCountPart = 10;
     private readonly Part _part;
+
+    private readonly int _maxCountPart = 10;
 
     public Shelf(Part part, int partCount = 0)
     {
@@ -507,7 +498,7 @@ class Shelf
 
     public void Show()
     {
-        Console.Write($"{PartCount}/{_maxCountPart} ");
+        Console.Write($"{PartCount}/{_maxCountPart} ".PadLeft(6));
 
         _part.Show();
     }
@@ -532,7 +523,7 @@ class Shelf
             PartCount = 0;
     }
 
-    public bool TryIncrementCount(out int partCount)
+    public bool CanIncrementCount(out int partCount)
     {
         string userInput;
         int temporaryPartCount;
@@ -572,10 +563,10 @@ class Shelf
 
 class Car
 {
-    private readonly List<Part> _parts;
-
     private readonly int _minCountBrokenParts = 2;
     private readonly int _maxCountBrokenParts = 6;
+
+    private readonly List<Part> _parts;
 
     private int _countBrokenParts;
 
@@ -590,22 +581,22 @@ class Car
 
     public void Show()
     {
-        int numberPart = 0;
+        int numberPart = 1;
 
         foreach (Part part in _parts)
         {
-            Console.Write($"\t{++numberPart}. ");
+            Console.Write($"\t{numberPart++}. ");
             part.Show();
         }
     }
 
     public bool TryGetPart(string userInput, out Part partCar)
     {
-        if (int.TryParse(userInput, out int indexPartCar))
+        if (int.TryParse(userInput, out int numberPartCar))
         {
-            if (indexPartCar > 0 && indexPartCar <= _parts.Count)
+            if (numberPartCar > 0 && numberPartCar <= _parts.Count)
             {
-                partCar = _parts[indexPartCar - 1];
+                partCar = _parts[numberPartCar - 1];
                 return true;
             }
             else
@@ -627,7 +618,7 @@ class Car
         if (partCar.Name == partAutoService.Name && partCar.Condition == Part.ConditionBroken)
         {
             _parts.Remove(partCar);
-            _parts.Add(partAutoService.Clone(partAutoService.Condition));
+            _parts.Add(partAutoService.Clone(partAutoService.Name, partAutoService.Condition));
             _countBrokenParts--;
             return true;
         }
@@ -637,31 +628,21 @@ class Car
 
     private void CreateParts()
     {
-        List<Part> possibleParts = new List<Part>()
-        {
-            new Transmission (Part.ConditionWorking),
-            new Wheel (Part.ConditionWorking),
-            new Windshield (Part.ConditionWorking),
-            new Battery (Part.ConditionWorking),
-            new SparkPlug (Part.ConditionWorking),
-            new EngineOil (Part.ConditionWorking),
-            new ExhaustManifold (Part.ConditionWorking),
-            new Bumper (Part.ConditionWorking)
-        };
+        FactoryParts factoryParts = new FactoryParts();
+
+        List<Part> temporaryParts = factoryParts.GetParts();
 
         int indexPart;
         int countBrokenParts = UserUtils.GenerateRandomNumber(_minCountBrokenParts, _maxCountBrokenParts);
-
-        foreach (Part part in possibleParts)
-        {
-            _parts.Add(part.Clone(Part.ConditionWorking));
-        }
+        
+        foreach (Part part in temporaryParts)
+            _parts.Add(part.Clone(part.Name, Part.ConditionWorking));
 
         for (int i = 0; i < countBrokenParts; i++)
         {
             indexPart = UserUtils.GenerateRandomNumber(_parts.Count);
 
-            _parts.Add(_parts[indexPart].Clone(Part.ConditionBroken));
+            _parts.Add(_parts[indexPart].Clone(_parts[indexPart].Name, Part.ConditionBroken));
             _parts.Remove(_parts[indexPart]);
         }
 
@@ -675,16 +656,64 @@ class Car
     }
 }
 
-abstract class Part
+class FactoryParts
+{
+    private readonly List<Part> _parts;
+
+    public FactoryParts()
+    {
+        _parts = new List<Part>()
+        {
+            new Part("Трансмиссия", 70, 80),
+            new Part("Колесо", 15, 25),
+            new Part("Лобовое стекло", 30, 40),
+            new Part("Аккумулятор", 5, 15),
+            new Part("Свеча зажигания", 5, 10),
+            new Part("Моторное масло", 10, 20),
+            new Part("Выхлопной коллектор", 20, 30),
+            new Part("Бампер", 25, 35),
+        };
+    }
+
+    public List<Part> GetParts()
+    {
+        List<Part> temporaryParts = new List<Part>();
+
+        foreach (Part part in _parts)
+            temporaryParts.Add(part.Clone(part.Name, part.Price));
+
+        return temporaryParts;
+    }
+}
+
+class Part
 {
     public const string ConditionBroken = "Сломанное";
     public const string ConditionWorking = "Рабочее";
 
+    public Part(string name, int minPrice, int maxPrice)
+    {
+        Name = name;
+        Price = UserUtils.GenerateRandomNumber(minPrice, maxPrice);
+        Condition = ConditionWorking;
+    }
+
+    public Part(string name, int price)
+    {
+        Name = name;
+        Price = price;
+        Condition = ConditionWorking;
+    }
+
+    public Part(string name, string condition = ConditionWorking)
+    {
+        Name = name;
+        Condition = condition;
+    }
+
     public string Name { get; protected set; }
     public int Price { get; protected set; }
     public string Condition { get; protected set; }
-
-    abstract public Part Clone(string condition);
 
     public void Show()
     {
@@ -693,196 +722,10 @@ abstract class Part
         else
             Console.Write($"{Name}".PadRight(20) + $"Цена: {Price}$".PadRight(10) + $"Состояние: {Condition}\n");
     }
-}
 
-class Transmission : Part
-{
-    private readonly string _name = "Трансмиссия";
+    public Part Clone(string name, string condition = ConditionWorking) =>
+        new Part(name, condition);
 
-    private readonly int _minPrice = 70;
-    private readonly int _maxPrice = 80;
-
-    public Transmission(string condition = ConditionWorking)
-    {
-        Name = _name;
-        Condition = condition;
-    }
-
-    public Transmission()
-    {
-        Name = _name;
-        Price = UserUtils.GenerateRandomNumber(_minPrice, _maxPrice);
-        Condition = ConditionWorking;
-    }
-
-    public override Part Clone(string condition = ConditionWorking) =>
-        new Transmission(condition);
-}
-
-class Wheel : Part
-{
-    private readonly string _name = "Колесо";
-
-    private readonly int _minPrice = 15;
-    private readonly int _maxPrice = 25;
-
-    public Wheel(string condition = ConditionWorking)
-    {
-        Name = _name;
-        Condition = condition;
-    }
-
-    public Wheel()
-    {
-        Name = _name;
-        Price = UserUtils.GenerateRandomNumber(_minPrice, _maxPrice);
-        Condition = ConditionWorking;
-    }
-
-    public override Part Clone(string condition = ConditionWorking) =>
-        new Wheel(condition);
-}
-
-class Windshield : Part
-{
-    private readonly string _name = "Лобовое стекло";
-
-    private readonly int _minPrice = 30;
-    private readonly int _maxPrice = 40;
-
-    public Windshield(string condition = ConditionWorking)
-    {
-        Name = _name;
-        Condition = condition;
-    }
-
-    public Windshield()
-    {
-        Name = _name;
-        Price = UserUtils.GenerateRandomNumber(_minPrice, _maxPrice);
-        Condition = ConditionWorking;
-    }
-
-    public override Part Clone(string condition = ConditionWorking) =>
-        new Windshield(condition);
-}
-
-class Battery : Part
-{
-    private readonly string _name = "Аккумулятор";
-
-    private readonly int _minPrice = 5;
-    private readonly int _maxPrice = 15;
-
-    public Battery(string condition = ConditionWorking)
-    {
-        Name = _name;
-        Condition = condition;
-    }
-
-    public Battery()
-    {
-        Name = _name;
-        Price = UserUtils.GenerateRandomNumber(_minPrice, _maxPrice);
-        Condition = ConditionWorking;
-    }
-
-    public override Part Clone(string condition = ConditionWorking) =>
-        new Battery(condition);
-}
-
-class SparkPlug : Part
-{
-    private readonly string _name = "Свеча зажигания";
-
-    private readonly int _minPrice = 5;
-    private readonly int _maxPrice = 10;
-
-    public SparkPlug(string condition = ConditionWorking)
-    {
-        Name = _name;
-        Condition = condition;
-    }
-
-    public SparkPlug()
-    {
-        Name = _name;
-        Price = UserUtils.GenerateRandomNumber(_minPrice, _maxPrice);
-        Condition = ConditionWorking;
-    }
-
-    public override Part Clone(string condition = ConditionWorking) =>
-        new SparkPlug(condition);
-}
-
-class EngineOil : Part
-{
-    private readonly string _name = "Моторное масло";
-
-    private readonly int _minPrice = 10;
-    private readonly int _maxPrice = 20;
-
-    public EngineOil(string condition = ConditionWorking)
-    {
-        Name = _name;
-        Condition = condition;
-    }
-
-    public EngineOil()
-    {
-        Name = _name;
-        Price = UserUtils.GenerateRandomNumber(_minPrice, _maxPrice);
-        Condition = ConditionWorking;
-    }
-
-    public override Part Clone(string condition = ConditionWorking) =>
-        new EngineOil(condition);
-}
-
-class ExhaustManifold : Part
-{
-    private readonly string _name = "Выхлопной коллектор";
-
-    private readonly int _minPrice = 20;
-    private readonly int _maxPrice = 30;
-
-    public ExhaustManifold(string condition = ConditionWorking)
-    {
-        Name = _name;
-        Condition = condition;
-    }
-
-    public ExhaustManifold()
-    {
-        Name = _name;
-        Price = UserUtils.GenerateRandomNumber(_minPrice, _maxPrice);
-        Condition = ConditionWorking;
-    }
-
-    public override Part Clone(string condition = ConditionWorking) =>
-        new ExhaustManifold(condition);
-}
-
-class Bumper : Part
-{
-    private readonly string _name = "Бампер";
-
-    private readonly int _minPrice = 25;
-    private readonly int _maxPrice = 35;
-
-    public Bumper(string condition = ConditionWorking)
-    {
-        Name = _name;
-        Condition = condition;
-    }
-
-    public Bumper()
-    {
-        Name = _name;
-        Price = UserUtils.GenerateRandomNumber(_minPrice, _maxPrice);
-        Condition = ConditionWorking;
-    }
-
-    public override Part Clone(string condition = ConditionWorking) =>
-        new Bumper(condition);
+    public Part Clone(string name, int price) =>
+        new Part(name, price);
 }
