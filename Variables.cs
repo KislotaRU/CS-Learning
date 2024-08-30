@@ -9,10 +9,22 @@
 
 namespace CS_JUNIOR
 {
-    static void Main()
+    class Program
     {
-        Console.ForegroundColor = ConsoleColor.White;
+        static void Main()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
 
-
+            int health = 100;
+            float halfValue = 0.5f;
+            string commandExit = "Выйти";
+            char signSpace = ' ';
+            bool isFixBrokenPart = false;
+            byte armor = 30;
+            string userName = null;
+            long coinsCount = 3229994;
+            ushort fishPrice = 80;
+            short heightHouse = -99;
+        }
     }
 }
