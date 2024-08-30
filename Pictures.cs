@@ -15,10 +15,10 @@ namespace CS_JUNIOR
             Console.ForegroundColor = ConsoleColor.White;
 
             int picturesCount = 52;
-            int maxCountPictures = 3;
+            int maxCountPicturesInRow = 3;
 
-            int rowsFilledCount = picturesCount / maxCountPictures;
-            int remainderPictures = picturesCount % maxCountPictures;
+            int rowsFilledCount = picturesCount / maxCountPicturesInRow;
+            int remainderPictures = picturesCount % maxCountPicturesInRow;
 
             Console.Write($"Кол-во заполненных рядов: {rowsFilledCount}\n" +
                           $"Кол-во оставшихся картинок: {remainderPictures}\n");
