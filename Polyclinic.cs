@@ -13,9 +13,9 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            int hourInMinutes = 60;
+            int minutesInHour = 60;
 
-            int AppointmentDurationInMinutes = 10;
+            int appointmentDurationInMinutes = 10;
 
             int queueTimeInMinutes;
             int hoursCount;
@@ -27,15 +27,15 @@ namespace CS_JUNIOR
 
             Console.Write("\tПоликлиника Новикова\n");
 
-            Console.Write($"Вам надо попасть на приём к врачу. Приём занимает {AppointmentDurationInMinutes} минут.\n");
+            Console.Write($"Вам надо попасть на приём к врачу. Приём занимает {appointmentDurationInMinutes} минут.\n");
 
             Console.Write("Введите кол-во людей, стоящие перед вами в очереди: ");
             peopleCount = Convert.ToInt32(Console.ReadLine());
 
-            queueTimeInMinutes = peopleCount * AppointmentDurationInMinutes;
+            queueTimeInMinutes = peopleCount * appointmentDurationInMinutes;
 
-            hoursCount = queueTimeInMinutes / hourInMinutes;
-            minutesCount = queueTimeInMinutes % hourInMinutes;
+            hoursCount = queueTimeInMinutes / minutesInHour;
+            minutesCount = queueTimeInMinutes % minutesInHour;
 
             Console.Write($"\nВаша очередь подойдёт через кол-во часов {hoursCount} и минут {minutesCount}\n");
         }
