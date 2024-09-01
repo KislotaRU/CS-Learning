@@ -29,7 +29,8 @@ namespace CS_JUNIOR
 
 static class UserUtils
 {
-    public const float HalfValue = 0.5f;
+    public const int FullValue = 100;
+    public const int HalfValue = 50;
 
     private static readonly Random s_random;
 
@@ -235,9 +236,9 @@ class AutoService
             {
                 Console.Write($"Итоговая сумма штрафа составила {pricePenalty}$.\n");
 
-                if (TryToPay(pricePenalty))
+                if (CanToPay(pricePenalty))
                 {
-                    ToPay();
+                    Pay();
 
                     pricePenalty = 0;
                     Console.Write("Штраф оплачен.\n");
@@ -289,7 +290,7 @@ class AutoService
                 {
                     Console.Write("Была заменена не та запчасть.\nАвтосервису выписан штраф.\n");
 
-                    pricePenalty = (int)(partAutoService.Price * UserUtils.HalfValue);
+                    pricePenalty = (int)((float)partAutoService.Price / UserUtils.FullValue * UserUtils.HalfValue);
 
                     Console.Write($"Размер штрафа {pricePenalty}$\n");
                 }
@@ -325,9 +326,9 @@ class AutoService
 
             Console.Write($"Сумма заказа составляет: {coinsToPay}$\n");
 
-            if (TryToPay(coinsToPay))
+            if (CanToPay(coinsToPay))
             {
-                ToPay();
+                Pay();
 
                 _storage.AddPart(partName, partCount);
                 Console.Write("Заказ успешно оформлен.\n");
@@ -343,13 +344,13 @@ class AutoService
         }
     }
 
-    private bool TryToPay(int coinsToPay)
+    private bool CanToPay(int coinsToPay)
     {
         _coinsToPay = _coins >= coinsToPay ? coinsToPay : 0;
         return _coins >= coinsToPay;
     }
 
-    private void ToPay() =>
+    private void Pay() =>
         _coins -= _coinsToPay;
 
     private void CollectCoins(int coinsCollected)
