@@ -14,14 +14,14 @@ namespace CS_JUNIOR
             const string CommandConvertYuansToDollars = "Юани в доллары";
             const string CommandExit = "Выйти";
 
-            float rubleToDollar = 89.55f;
-            float rubleToYuans = 12.59f;
+            float rublesToDollars = 89.55f;
+            float rublsToYuans = 12.59f;
 
-            float dollarToRubles = 0.011f;
-            float dollarToYuans = 0.14f;
+            float dollarsToRubles = 0.011f;
+            float dollarsToYuans = 0.14f;
 
-            float YuanToRubles = 0.079f;
-            float YuanToDollars = 7.11f;
+            float YuansToRubles = 0.079f;
+            float YuansToDollars = 7.11f;
 
             float rublesCount;
             float dollarsCount;
@@ -71,7 +71,7 @@ namespace CS_JUNIOR
 
                         if (exchangeCurrencyCount <= rublesCount)
                         {
-                            dollarsCount += exchangeCurrencyCount / rubleToDollar;
+                            dollarsCount += exchangeCurrencyCount / rublesToDollars;
                             rublesCount -= exchangeCurrencyCount;
                         }
                         else
@@ -87,7 +87,7 @@ namespace CS_JUNIOR
 
                         if (exchangeCurrencyCount <= rublesCount)
                         {
-                            yuansCount += exchangeCurrencyCount / rubleToYuans;
+                            yuansCount += exchangeCurrencyCount / rublsToYuans;
                             rublesCount -= exchangeCurrencyCount;
                         }
                         else
@@ -103,7 +103,7 @@ namespace CS_JUNIOR
 
                         if (exchangeCurrencyCount <= dollarsCount)
                         {
-                            rublesCount += exchangeCurrencyCount / dollarToRubles;
+                            rublesCount += exchangeCurrencyCount / dollarsToRubles;
                             dollarsCount -= exchangeCurrencyCount;
                         }
                         else
@@ -119,7 +119,7 @@ namespace CS_JUNIOR
 
                         if (exchangeCurrencyCount <= dollarsCount)
                         {
-                            yuansCount += exchangeCurrencyCount / dollarToYuans;
+                            yuansCount += exchangeCurrencyCount / dollarsToYuans;
                             dollarsCount -= exchangeCurrencyCount;
                         }
                         else
@@ -135,7 +135,7 @@ namespace CS_JUNIOR
 
                         if (exchangeCurrencyCount <= yuansCount)
                         {
-                            rublesCount += exchangeCurrencyCount / YuanToRubles;
+                            rublesCount += exchangeCurrencyCount / YuansToRubles;
                             yuansCount -= exchangeCurrencyCount;
                         }
                         else
@@ -151,7 +151,7 @@ namespace CS_JUNIOR
 
                         if (exchangeCurrencyCount <= yuansCount)
                         {
-                            dollarsCount += exchangeCurrencyCount / YuanToDollars;
+                            dollarsCount += exchangeCurrencyCount / YuansToDollars;
                             yuansCount -= exchangeCurrencyCount;
                         }
                         else
