@@ -27,20 +27,20 @@ namespace CS_JUNIOR
             float dollarsCount;
             float yuansCount;
 
-            int exchangeCurrencyCount;
+            float exchangeCurrencyCount;
 
             string userInput = null;
 
             Console.ForegroundColor = ConsoleColor.White;
 
             Console.Write("Введите кол-во рублей: ");
-            rublesCount = Convert.ToInt32(Console.ReadLine());
+            rublesCount = Convert.ToSingle(Console.ReadLine());
 
             Console.Write("Введите кол-во долларов: ");
-            dollarsCount = Convert.ToInt32(Console.ReadLine());
+            dollarsCount = Convert.ToSingle(Console.ReadLine());
 
             Console.Write("Введите кол-во юаней: ");
-            yuansCount = Convert.ToInt32(Console.ReadLine());
+            yuansCount = Convert.ToSingle(Console.ReadLine());
 
             while (userInput != CommandExit)
             {
@@ -67,7 +67,7 @@ namespace CS_JUNIOR
                 {
                     case CommandConvertRublesToDollars:
                         Console.Write("Введите кол-во рублей, которое хотите поменять: ");
-                        exchangeCurrencyCount = Convert.ToInt32(Console.ReadLine());
+                        exchangeCurrencyCount = Convert.ToSingle(Console.ReadLine());
 
                         if (exchangeCurrencyCount <= rublesCount)
                         {
@@ -83,7 +83,7 @@ namespace CS_JUNIOR
 
                     case CommandConvertRublesToYuans:
                         Console.Write("Введите кол-во рублей, которое хотите поменять: ");
-                        exchangeCurrencyCount = Convert.ToInt32(Console.ReadLine());
+                        exchangeCurrencyCount = Convert.ToSingle(Console.ReadLine());
 
                         if (exchangeCurrencyCount <= rublesCount)
                         {
@@ -99,7 +99,7 @@ namespace CS_JUNIOR
 
                     case CommandConvertDollarsToRubles:
                         Console.Write("Введите кол-во долларов, которое хотите поменять: ");
-                        exchangeCurrencyCount = Convert.ToInt32(Console.ReadLine());
+                        exchangeCurrencyCount = Convert.ToSingle(Console.ReadLine());
 
                         if (exchangeCurrencyCount <= dollarsCount)
                         {
@@ -115,7 +115,7 @@ namespace CS_JUNIOR
 
                     case CommandConvertDollarsToYuans:
                         Console.Write("Введите кол-во долларов, которое хотите поменять: ");
-                        exchangeCurrencyCount = Convert.ToInt32(Console.ReadLine());
+                        exchangeCurrencyCount = Convert.ToSingle(Console.ReadLine());
 
                         if (exchangeCurrencyCount <= dollarsCount)
                         {
@@ -131,7 +131,7 @@ namespace CS_JUNIOR
 
                     case CommandConvertYuansToRubles:
                         Console.Write("Введите кол-во юаний, которое хотите поменять: ");
-                        exchangeCurrencyCount = Convert.ToInt32(Console.ReadLine());
+                        exchangeCurrencyCount = Convert.ToSingle(Console.ReadLine());
 
                         if (exchangeCurrencyCount <= yuansCount)
                         {
@@ -147,7 +147,7 @@ namespace CS_JUNIOR
 
                     case CommandConvertYuansToDollars:
                         Console.Write("Введите кол-во юаний, которое хотите поменять: ");
-                        exchangeCurrencyCount = Convert.ToInt32(Console.ReadLine());
+                        exchangeCurrencyCount = Convert.ToSingle(Console.ReadLine());
 
                         if (exchangeCurrencyCount <= yuansCount)
                         {
