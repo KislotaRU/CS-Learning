@@ -9,7 +9,7 @@ namespace CS_JUNIOR
             Random random = new Random();
 
             int maxNumber = 100;
-            int randomNumber;
+            int number;
 
             int firstDivider = 3;
             int secondDivider = 5;
@@ -18,13 +18,13 @@ namespace CS_JUNIOR
 
             Console.ForegroundColor = ConsoleColor.White;
 
-            randomNumber = random.Next(maxNumber + 1);
+            number = random.Next(maxNumber + 1);
 
-            Console.Write($"Рандомное максимальное число: {randomNumber}\n");
+            Console.Write($"Рандомное максимальное число: {number}\n");
 
-            for (int i = 0; i <= randomNumber; i++)
+            for (int i = 0; i <= number; i++)
             {
-                if ((i % firstDivider == 0) && (i % secondDivider == 0))
+                if ((i % firstDivider == 0) || (i % secondDivider == 0))
                     sumNumbers += i;
             }
 
