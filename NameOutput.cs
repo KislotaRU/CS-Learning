@@ -20,9 +20,7 @@ namespace CS_JUNIOR
             Console.Write("Введите символ обводки вашего имени: ");
             frameSign = Console.ReadKey(true).KeyChar;
 
-            middleLine += frameSign;
-            middleLine += userName;
-            middleLine += frameSign;
+            middleLine = frameSign + userName + frameSign;
 
             for (int i = 0; i < middleLine.Length; i++)
                 border += frameSign;
