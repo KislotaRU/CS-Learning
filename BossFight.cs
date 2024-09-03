@@ -102,16 +102,20 @@ namespace CS_JUNIOR
                             break;
 
                         case CommandHealing:
+                            float temporaryHalfValue;
+
                             if (playerEstusesCount > 0)
                             {
                                 playerEstusesCount--;
 
-                                playerHealthPoints += (int)((float)playerMaxHealthPoints / FullValue * HalfValue);
+                                temporaryHalfValue = HalfValue / FullValue;
+
+                                playerHealthPoints += (int)(playerMaxHealthPoints * temporaryHalfValue);
 
                                 if (playerHealthPoints > playerMaxHealthPoints)
                                     playerHealthPoints = playerMaxHealthPoints;
 
-                                playerMagicPoints += (int)((float)playerMaxMagicPoints / FullValue * HalfValue);
+                                playerMagicPoints += (int)(playerMaxMagicPoints * temporaryHalfValue);
 
                                 if (playerMagicPoints > playerMaxMagicPoints)
                                     playerMagicPoints = playerMaxMagicPoints;
@@ -156,8 +160,10 @@ namespace CS_JUNIOR
 
             if (playerHealthPoints > 0)
                 Console.Write("Игрок одержал верх над боссом.\n");
-            else
+            else if (bossHealthPoints > 0)
                 Console.Write("Босс одержал верх над игроком.\n");
+            else
+                Console.Write("Ничья.\n");
         }
     }
 }
