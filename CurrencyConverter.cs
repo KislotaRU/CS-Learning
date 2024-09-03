@@ -1,5 +1,12 @@
 ﻿using System;
 
+/*
+ * У пользователя есть баланс в каждой из представленных валют.
+ * Он может попросить сконвертировать часть баланса с одной валюты в другую.
+ * Тогда у него с баланса одной валюты снимется X и зачислится на баланс другой Y.
+ * Курс конвертации должен быть просто прописан в программе.
+*/
+
 namespace CS_JUNIOR
 {
     class Program
@@ -20,8 +27,8 @@ namespace CS_JUNIOR
             float dollarsToRubles = 0.011f;
             float dollarsToYuans = 0.14f;
 
-            float YuansToRubles = 0.079f;
-            float YuansToDollars = 7.11f;
+            float yuansToRubles = 0.079f;
+            float yuansToDollars = 7.11f;
 
             float rublesCount;
             float dollarsCount;
@@ -135,7 +142,7 @@ namespace CS_JUNIOR
 
                         if (exchangeCurrencyCount <= yuansCount)
                         {
-                            rublesCount += exchangeCurrencyCount / YuansToRubles;
+                            rublesCount += exchangeCurrencyCount / yuansToRubles;
                             yuansCount -= exchangeCurrencyCount;
                         }
                         else
@@ -151,7 +158,7 @@ namespace CS_JUNIOR
 
                         if (exchangeCurrencyCount <= yuansCount)
                         {
-                            dollarsCount += exchangeCurrencyCount / YuansToDollars;
+                            dollarsCount += exchangeCurrencyCount / yuansToDollars;
                             yuansCount -= exchangeCurrencyCount;
                         }
                         else
