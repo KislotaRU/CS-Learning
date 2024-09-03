@@ -23,9 +23,14 @@ namespace CS_JUNIOR
                 userInput = Console.ReadLine();
 
                 if (userInput == password)
+                {
                     Console.Write("Пароль верный. Вам доступен секрет.\n\n");
+                    break;
+                }
                 else
+                {
                     Console.Write("Пароль неверный.\n\n");
+                }
             }
         }
     }
