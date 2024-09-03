@@ -21,7 +21,7 @@ namespace CS_JUNIOR
 
             Console.Write($"Заданно число: {randomNumber}\n");
 
-            while (randomNumber > result)
+            while (randomNumber >= result)
             {
                 degreeNumber++;
                 result *= number;
