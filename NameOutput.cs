@@ -6,7 +6,8 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            int frameLength = 2;
+            string border = "";
+            string middleLine = "";
 
             string userName;
             char frameSign;
@@ -17,19 +18,18 @@ namespace CS_JUNIOR
             userName = Console.ReadLine();
 
             Console.Write("Введите символ обводки вашего имени: ");
-            frameSign = Convert.ToChar(Console.ReadLine());
+            frameSign = Console.ReadKey(true).KeyChar;
 
-            frameLength += userName.Length;
+            middleLine += frameSign;
+            middleLine += userName;
+            middleLine += frameSign;
 
-            for (int i = 0; i < frameLength; i++)
-                Console.Write(frameSign);
+            for (int i = 0; i < middleLine.Length; i++)
+                border += frameSign;
 
-            Console.Write($"\n{frameSign}{userName}{frameSign}\n");
-
-            for (int i = 0; i < frameLength; i++)
-                Console.Write(frameSign);
-
-            Console.WriteLine();
+            Console.Write($"\n{border}");
+            Console.Write($"\n{frameSign}{userName}{frameSign}");
+            Console.Write($"\n{border}\n");
         }
     }
 }
