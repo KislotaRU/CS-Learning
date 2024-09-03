@@ -1,5 +1,9 @@
 ﻿using System;
 
+/*
+ *  Создать приложение, которое может обрабатывать команды.
+*/
+
 namespace CS_JUNIOR
 {
     class Program
