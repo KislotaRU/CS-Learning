@@ -23,14 +23,9 @@ namespace CS_JUNIOR
 
             Console.Write($"Число N: {randomNumber}\n");
 
-            for ( int i = minNumber; i <= maxNumber; i++)
+            for ( int i = 0; i <= maxNumber; i += randomNumber)
             {
-                int temporaryNumber = i;
-
-                while (temporaryNumber > 0)
-                    temporaryNumber -= randomNumber;
-
-                if (temporaryNumber == 0)
+                if (i >= minNumber)
                     multiplesNumbersCount++;
             }
 
