@@ -42,7 +42,6 @@ namespace CS_JUNIOR
                 Console.Write($"Здоровье Игрока: {playerHealthPoints}\n" +
                               $"Здоровье Босса: {bossHealthPoints}\n\n");
 
-
                 Console.Write("Доступные действия:\n" +
                             $"\t{CommandBaseAttack} - Наносит стандартный урон.\n" +
                             $"\t{CommandFireballAttack} - Наносит урон огненным шаром.\n" +
