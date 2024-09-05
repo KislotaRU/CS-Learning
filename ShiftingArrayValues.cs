@@ -9,7 +9,6 @@ namespace CS_JUNIOR
             int[] numbers = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
             int shiftLength;
-            int lastIndex = numbers.Length - 1;
 
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -28,7 +27,7 @@ namespace CS_JUNIOR
             {
                 int temporaryNumber;
 
-                for (int j = 0; j < lastIndex; j++)
+                for (int j = 0; j < numbers.Length - 1; j++)
                 {
                     temporaryNumber = numbers[j];
                     numbers[j] = numbers[j + 1];
