@@ -30,10 +30,12 @@ namespace CS_JUNIOR
                 int temporaryNumber = arrayNumbers[i];
                 int temporaryRepetitionsCount = 0;
 
-                for (int j = 0; j < arrayNumbers.Length; j++)
+                for (int j = i; j < arrayNumbers.Length; j++)
                 {
                     if (temporaryNumber == arrayNumbers[j])
                         temporaryRepetitionsCount++;
+                    else
+                        break;
                 }
 
                 if (repetitionsCount < temporaryRepetitionsCount)
@@ -43,7 +45,7 @@ namespace CS_JUNIOR
                 }
             }
 
-            Console.Write($"\n\nБольше всего повтором в массиве у числа {number}, повторяется кол-во раз {repetitionsCount}.\n\n");
+            Console.Write($"\n\nБольше всего повтором подряд у числа {number}, повторяется кол-во раз подряд {repetitionsCount}.\n\n");
         }
     }
 }
