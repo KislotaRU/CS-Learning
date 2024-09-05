@@ -10,23 +10,18 @@ namespace CS_JUNIOR
 
             int maxNumber = 10;
 
-            int[,] arrayNumber = new int[4, 4];
+            int rowsCount = 4;
+            int columnsCount = 4;
 
-            int rowRequested = 2;
-            int columnRequested = 1;
+            int[,] arrayNumber = new int[rowsCount, columnsCount];
 
-            int sumNumbers = 0;
-            int productNumbers = 1;
+            int rowIndex = 2;
+            int columnIndex = 1;
+
+            int sum = 0;
+            int product = 1;
 
             Console.ForegroundColor = ConsoleColor.White;
-
-            for (int i = 0; i < arrayNumber.GetLength(0); i++)
-            {
-                for (int j = 0; j < arrayNumber.GetLength(1); j++)
-                {
-                    arrayNumber[i, j] = random.Next(maxNumber);
-                }
-            }
 
             Console.Write($"Двумерный массив:\n\n");
 
@@ -34,26 +29,25 @@ namespace CS_JUNIOR
             {
                 for (int j = 0; j < arrayNumber.GetLength(1); j++)
                 {
+                    arrayNumber[i, j] = random.Next(maxNumber);
                     Console.Write($"{arrayNumber[i, j]} ");
                 }
 
                 Console.WriteLine();
             }
 
-            for (int i = 0;i < arrayNumber.GetLength(0); i++)
+            for (int j = 0; j < arrayNumber.GetLength(1); j++)
             {
-                for (int j = 0;j < arrayNumber.GetLength(1); j++)
-                {
-                    if (rowRequested - 1 == i)
-                        sumNumbers += arrayNumber[i, j];
-
-                    if (columnRequested - 1 == j)
-                        productNumbers *= arrayNumber[i, j];
-                }
+                sum += arrayNumber[rowIndex - 1, j];
             }
 
-            Console.Write($"\nСумма чисел строки под номером {rowRequested} = {sumNumbers}\n" +
-                          $"Произведение чисел столбца под номером {columnRequested} = {productNumbers}\n\n");
+            for (int i = 0; i < arrayNumber.GetLength(0); i++)
+            {
+                product *= arrayNumber[i, columnIndex - 1];
+            }
+
+            Console.Write($"\nСумма чисел строки под номером {rowIndex} = {sum}\n" +
+                          $"Произведение чисел столбца под номером {columnIndex} = {product}\n\n");
         }
     }
 }
