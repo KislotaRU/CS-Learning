@@ -11,35 +11,36 @@ namespace CS_JUNIOR
             int minNumber = 10;
             int maxNumber = 100;
 
-            int elementsCount = 30;
-            int step = 2;
+            int elementsCount = 2;
 
-            int[] arrayNumbers = new int[elementsCount];
+            int[] numbers = new int[elementsCount];
+
+            int lastIndex = numbers.Length - 1;
 
             Console.ForegroundColor = ConsoleColor.White;
 
             Console.Write($"Одномерный массив с кол-во элементов {elementsCount}:\n");
 
-            for ( int i = 0; i < arrayNumbers.Length; i++)
+            for ( int i = 0; i < numbers.Length; i++)
             {
-                arrayNumbers[i] = random.Next(minNumber, maxNumber);
+                numbers[i] = random.Next(minNumber, maxNumber);
 
-                Console.Write($"{arrayNumbers[i]} ");
+                Console.Write($"{numbers[i]} ");
             }
 
             Console.Write("\n\nЛокальные максимумы одномерного массива:\n\n");
 
-            if (arrayNumbers[0] > arrayNumbers[1])
-                Console.Write($"{arrayNumbers[0]} ");
+            if (numbers[0] > numbers[1])
+                Console.Write($"{numbers[0]} ");
 
-            for (int i = 1; i < arrayNumbers.Length - 1; i++)
+            for (int i = 1; i < numbers.Length - 1; i++)
             {
-                if (arrayNumbers[i - 1] < arrayNumbers[i] && arrayNumbers[i] > arrayNumbers[i + 1])
-                    Console.Write($"{arrayNumbers[i]} ");
+                if (numbers[i - 1] < numbers[i] && numbers[i] > numbers[i + 1])
+                    Console.Write($"{numbers[i]} ");
             }
 
-            if (arrayNumbers[arrayNumbers.Length - 1] >= arrayNumbers[arrayNumbers.Length - step])
-                Console.Write($"{arrayNumbers[arrayNumbers.Length - 1]}\n\n");
+            if (numbers[lastIndex] > numbers[lastIndex - 1])
+                Console.Write($"{numbers[lastIndex]}\n\n");
         }
     }
 }
