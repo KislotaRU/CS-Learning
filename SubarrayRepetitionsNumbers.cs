@@ -27,10 +27,8 @@ namespace CS_JUNIOR
 
             for (int i = 0; i < arrayNumbers.Length; i++)
             {
-                int temporaryNumber;
+                int temporaryNumber = arrayNumbers[i];
                 int temporaryRepetitionsCount = 0;
-
-                temporaryNumber = arrayNumbers[i];
 
                 for (int j = 0; j < arrayNumbers.Length; j++)
                 {
