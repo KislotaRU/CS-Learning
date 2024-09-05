@@ -59,7 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SubarrayRepetitionsNumbers.cs" />
+    <Compile Include="ShiftingArrayValues.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
