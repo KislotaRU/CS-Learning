@@ -11,7 +11,7 @@ namespace CS_JUNIOR
 
             string userInput = null;
 
-            int[] arrayNumbers = new int[0];
+            int[] numbers = new int[0];
 
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -19,7 +19,7 @@ namespace CS_JUNIOR
             {
                 Console.Write("Массив чисел:\n\n");
 
-                foreach (int temporaryNumber in arrayNumbers)
+                foreach (int temporaryNumber in numbers)
                     Console.Write($"{temporaryNumber} ");
 
                 Console.Write("\n\nПрограмма считывает введённые числа в массив и по команде выводит сумму.\n");
@@ -36,7 +36,7 @@ namespace CS_JUNIOR
                     case CommandSum:
                         int sum = 0;
 
-                        foreach (int temporaryNumber in arrayNumbers)
+                        foreach (int temporaryNumber in numbers)
                             sum += temporaryNumber;
 
                         Console.Write($"Сумма всех чисел в массиве = {sum}");
@@ -49,14 +49,14 @@ namespace CS_JUNIOR
                     default:
                         if (int.TryParse(userInput, out int number))
                         {
-                            int[] temporaryArrayNumbers = new int[arrayNumbers.Length + 1];
+                            int[] temporaryArrayNumbers = new int[numbers.Length + 1];
 
-                            for (int i = 0; i < arrayNumbers.Length; i++)
-                                temporaryArrayNumbers[i] = arrayNumbers[i];
+                            for (int i = 0; i < numbers.Length; i++)
+                                temporaryArrayNumbers[i] = numbers[i];
 
                             temporaryArrayNumbers[temporaryArrayNumbers.Length - 1] = number;
 
-                            arrayNumbers = temporaryArrayNumbers;
+                            numbers = temporaryArrayNumbers;
                         }
                         else
                         {
