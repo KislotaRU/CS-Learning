@@ -6,14 +6,12 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            const string CommandSum = "Сложить";
-            const string CommandExit = "Выйти";
+            const string CommandSum = "sum";
+            const string CommandExit = "exit";
 
             string userInput = null;
 
-            int[] numbers = new int[0];
-
-            int number;
+            int[] arrayNumbers = new int[0];
 
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -21,7 +19,7 @@ namespace CS_JUNIOR
             {
                 Console.Write("Массив чисел:\n\n");
 
-                foreach (int temporaryNumber in numbers)
+                foreach (int temporaryNumber in arrayNumbers)
                     Console.Write($"{temporaryNumber} ");
 
                 Console.Write("\n\nПрограмма считывает введённые числа в массив и по команде выводит сумму.\n");
@@ -38,7 +36,7 @@ namespace CS_JUNIOR
                     case CommandSum:
                         int sum = 0;
 
-                        foreach (int temporaryNumber in numbers)
+                        foreach (int temporaryNumber in arrayNumbers)
                             sum += temporaryNumber;
 
                         Console.Write($"Сумма всех чисел в массиве = {sum}");
@@ -49,9 +47,27 @@ namespace CS_JUNIOR
                         continue;
 
                     default:
-                        if ()
+                        if (int.TryParse(userInput, out int number))
+                        {
+                            int[] temporaryArrayNumbers = new int[arrayNumbers.Length + 1];
+
+                            for (int i = 0; i < arrayNumbers.Length; i++)
+                                temporaryArrayNumbers[i] = arrayNumbers[i];
+
+                            temporaryArrayNumbers[temporaryArrayNumbers.Length - 1] = number;
+
+                            arrayNumbers = temporaryArrayNumbers;
+                        }
+                        else
+                        {
+                            Console.Write("Требуется ввести число или команду.\n");
+                        }
+
                         break;
                 }
+
+                Console.ReadKey();
+                Console.Clear();
             }
         }
     }
