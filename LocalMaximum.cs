@@ -11,7 +11,7 @@ namespace CS_JUNIOR
             int minNumber = 10;
             int maxNumber = 100;
 
-            int elementsCount = 2;
+            int elementsCount = 30;
 
             int[] numbers = new int[elementsCount];
 
