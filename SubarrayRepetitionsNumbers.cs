@@ -12,8 +12,10 @@ namespace CS_JUNIOR
             int numbersCount = 30;
             int[] arrayNumbers = new int[numbersCount];
 
-            int repetitionsCount = 0;
+            int maxCountRepetitions = 0;
+            int repetitionsCount = 1;
             int number = 0;
+            int reset = 1;
 
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -25,27 +27,21 @@ namespace CS_JUNIOR
                 Console.Write($"{arrayNumbers[i]} ");
             }
 
-            for (int i = 0; i < arrayNumbers.Length; i++)
+            for (int i = 0; i < arrayNumbers.Length - 1; i++)
             {
-                int temporaryNumber = arrayNumbers[i];
-                int temporaryRepetitionsCount = 0;
+                if (arrayNumbers[i] == arrayNumbers[i + 1])
+                    repetitionsCount++;
+                else
+                    repetitionsCount = reset;
 
-                for (int j = i; j < arrayNumbers.Length; j++)
+                if (maxCountRepetitions < repetitionsCount)
                 {
-                    if (temporaryNumber == arrayNumbers[j])
-                        temporaryRepetitionsCount++;
-                    else
-                        break;
-                }
-
-                if (repetitionsCount < temporaryRepetitionsCount)
-                {
-                    repetitionsCount = temporaryRepetitionsCount;
-                    number = temporaryNumber;
+                    maxCountRepetitions = repetitionsCount;
+                    number = arrayNumbers[i];
                 }
             }
 
-            Console.Write($"\n\nБольше всего повтором подряд у числа {number}, повторяется кол-во раз подряд {repetitionsCount}.\n\n");
+            Console.Write($"\n\nБольше всего повтором подряд у числа {number}, повторяется кол-во раз подряд {maxCountRepetitions}.\n\n");
         }
     }
 }
