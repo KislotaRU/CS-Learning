@@ -14,7 +14,7 @@ namespace CS_JUNIOR
 
             int minCountRepetitions = 1;
             int maxCountRepetitions = minCountRepetitions;
-            int repetitionsCount = 1;
+            int repetitionsCount = minCountRepetitions;
             int number = 0;
 
             Console.ForegroundColor = ConsoleColor.White;
