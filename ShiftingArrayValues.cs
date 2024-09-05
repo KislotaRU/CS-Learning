@@ -23,6 +23,8 @@ namespace CS_JUNIOR
 
             shiftLength = Convert.ToInt32(Console.ReadLine());
 
+            shiftLength = shiftLength % numbers.Length;
+
             for (int i = 0; i < shiftLength; i++)
             {
                 int temporaryNumber;
@@ -34,7 +36,7 @@ namespace CS_JUNIOR
                     numbers[j + 1] = temporaryNumber;
                 }
             }
-
+            
             Console.Write("\n\n");
 
             foreach (int number in numbers)
