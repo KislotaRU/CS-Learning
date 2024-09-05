@@ -12,10 +12,10 @@ namespace CS_JUNIOR
             int numbersCount = 30;
             int[] arrayNumbers = new int[numbersCount];
 
-            int maxCountRepetitions = 0;
+            int minCountRepetitions = 1;
+            int maxCountRepetitions = minCountRepetitions;
             int repetitionsCount = 1;
             int number = 0;
-            int reset = 1;
 
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -32,7 +32,7 @@ namespace CS_JUNIOR
                 if (arrayNumbers[i] == arrayNumbers[i + 1])
                     repetitionsCount++;
                 else
-                    repetitionsCount = reset;
+                    repetitionsCount = minCountRepetitions;
 
                 if (maxCountRepetitions < repetitionsCount)
                 {
