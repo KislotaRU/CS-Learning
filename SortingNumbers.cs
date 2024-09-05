@@ -13,36 +13,36 @@ namespace CS_JUNIOR
 
             int numbersCount = 20;
 
-            int[] arrayNumbers = new int[numbersCount];
+            int[] numbers = new int[numbersCount];
 
             Console.ForegroundColor = ConsoleColor.White;
 
             Console.Write("Исходный массив:\n\n");
 
-            for (int i = 0; i < arrayNumbers.Length; i++)
+            for (int i = 0; i < numbers.Length; i++)
             {
-                arrayNumbers[i] = random.Next(minNumber, maxNumber);
-                Console.Write($"{arrayNumbers[i]} ");
+                numbers[i] = random.Next(minNumber, maxNumber);
+                Console.Write($"{numbers[i]} ");
             }
 
             Console.Write("\n\nМассив после сортировки:\n\n");
 
-            for (int i = 0; i < arrayNumbers.Length; i++)
+            for (int i = 0; i < numbers.Length; i++)
             {
-                for (int j = 0; j < arrayNumbers.Length - 1; j++)
+                for (int j = 0; j < numbers.Length - 1; j++)
                 {
                     int temporaryNumber;
 
-                    if (arrayNumbers[j] > arrayNumbers[j + 1])
+                    if (numbers[j] > numbers[j + 1])
                     {
-                        temporaryNumber = arrayNumbers[j + 1];
-                        arrayNumbers[j + 1] = arrayNumbers[j];
-                        arrayNumbers[j] = temporaryNumber;
+                        temporaryNumber = numbers[j + 1];
+                        numbers[j + 1] = numbers[j];
+                        numbers[j] = temporaryNumber;
                     }
                 }
             }
 
-            foreach (int number in arrayNumbers)
+            foreach (int number in numbers)
                 Console.Write($"{number} ");
 
             Console.Write("\n\n");
