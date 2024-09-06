@@ -7,6 +7,7 @@ namespace CS_JUNIOR
         static void Main()
         {
             Console.ForegroundColor = ConsoleColor.White;
+
         }
     }
 }
