@@ -1,5 +1,10 @@
 ﻿using System;
 
+/*
+ * В массиве чисел найдите самый длинный подмассив из одинаковых чисел.
+ * Дано 30 чисел. Вывести в консоль сам массив, число, которое само больше раз повторяется подряд и количество повторений.
+*/
+
 namespace CS_JUNIOR
 {
     class Program
@@ -10,7 +15,7 @@ namespace CS_JUNIOR
             int maxNumber = 10;
 
             int numbersCount = 30;
-            int[] arrayNumbers = new int[numbersCount];
+            int[] numbers = new int[numbersCount];
 
             int minCountRepetitions = 1;
             int maxCountRepetitions = minCountRepetitions;
@@ -21,15 +26,15 @@ namespace CS_JUNIOR
 
             Console.Write("Массив чисел:\n");
 
-            for (int i = 0; i < arrayNumbers.Length; i++)
+            for (int i = 0; i < numbers.Length; i++)
             {
-                arrayNumbers[i] = random.Next(maxNumber);
-                Console.Write($"{arrayNumbers[i]} ");
+                numbers[i] = random.Next(maxNumber);
+                Console.Write($"{numbers[i]} ");
             }
 
-            for (int i = 0; i < arrayNumbers.Length - 1; i++)
+            for (int i = 0; i < numbers.Length - 1; i++)
             {
-                if (arrayNumbers[i] == arrayNumbers[i + 1])
+                if (numbers[i] == numbers[i + 1])
                     repetitionsCount++;
                 else
                     repetitionsCount = minCountRepetitions;
@@ -37,7 +42,7 @@ namespace CS_JUNIOR
                 if (maxCountRepetitions < repetitionsCount)
                 {
                     maxCountRepetitions = repetitionsCount;
-                    number = arrayNumbers[i];
+                    number = numbers[i];
                 }
             }
 
