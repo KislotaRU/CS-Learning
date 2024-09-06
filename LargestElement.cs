@@ -1,5 +1,10 @@
 ﻿using System;
 
+/*
+ * Найти наибольший элемент матрицы A(10,10) и записать ноль в те ячейки,
+ * где он находятся. Вывести наибольший элемент, исходную и полученную матрицу.
+*/
+
 namespace CS_JUNIOR
 {
     class Program
@@ -16,7 +21,7 @@ namespace CS_JUNIOR
 
             int replacement = 0;
 
-            int[,] arrayNumber = new int[rowsCount, colomnsCount];
+            int[,] numbers = new int[rowsCount, colomnsCount];
 
             int largestNumberArray = int.MinValue;
 
@@ -24,15 +29,15 @@ namespace CS_JUNIOR
 
             Console.Write($"Исходная матрица A:\n\n");
 
-            for (int i = 0; i < arrayNumber.GetLength(0); i++)
+            for (int i = 0; i < numbers.GetLength(0); i++)
             {
-                for (int j = 0; j < arrayNumber.GetLength(1); j++)
+                for (int j = 0; j < numbers.GetLength(1); j++)
                 {
-                    arrayNumber[i, j] = random.Next(minNumber, maxNumber);
-                    Console.Write($"{arrayNumber[i, j]} ");
+                    numbers[i, j] = random.Next(minNumber, maxNumber);
+                    Console.Write($"{numbers[i, j]} ");
 
-                    if (largestNumberArray < arrayNumber[i, j])
-                        largestNumberArray = arrayNumber[i, j];
+                    if (largestNumberArray < numbers[i, j])
+                        largestNumberArray = numbers[i, j];
                 }
 
                 Console.WriteLine();
@@ -40,14 +45,14 @@ namespace CS_JUNIOR
 
             Console.Write($"\nИзменённая матрица A:\n\n");
 
-            for (int i = 0; i < arrayNumber.GetLength(0); i++)
+            for (int i = 0; i < numbers.GetLength(0); i++)
             {
-                for (int j = 0; j < arrayNumber.GetLength(1); j++)
+                for (int j = 0; j < numbers.GetLength(1); j++)
                 {
-                    if (largestNumberArray == arrayNumber[i, j])
-                        arrayNumber[i, j] = replacement;
+                    if (largestNumberArray == numbers[i, j])
+                        numbers[i, j] = replacement;
 
-                    Console.Write($"{arrayNumber[i, j]} ");
+                    Console.Write($"{numbers[i, j]} ");
                 }
 
                 Console.WriteLine();
