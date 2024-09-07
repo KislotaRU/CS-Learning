@@ -12,23 +12,24 @@ namespace CS_JUNIOR
 
         static void Main()
         {
-            char symbolFilling = '#';
             int maxLengthBar = 10;
 
-            int percentHealthPoint = 67;
+            int percentagesHealthPoint = 67;
             int positionYHealthPoints = 1;
 
-            int percentMagicPoint = 43;
+            int percentagesMagicPoint = 43;
             int positionYMagicPoints = 2;
 
-            DrawBar(maxLengthBar, percentHealthPoint, symbolFilling, ColorRed, positionY: positionYHealthPoints);
+            DrawBar(maxLengthBar, percentagesHealthPoint, ColorRed, positionY: positionYHealthPoints);
 
-            DrawBar(maxLengthBar, percentMagicPoint, symbolFilling, ColorBlue, positionY: positionYMagicPoints);
+            DrawBar(maxLengthBar, percentagesMagicPoint, ColorBlue, positionY: positionYMagicPoints);
         }
 
-        static void DrawBar(int maxLengthBar, int persentFilling, char symbolFilling, ConsoleColor colorFilling, int positionX = 0, int positionY = 0)
+        static void DrawBar(int maxLengthBar, int persentFilling, ConsoleColor colorFilling, int positionX = 0, int positionY = 0)
         {
+            char symbolFilling = '#';
             char symbolEmpty = '_';
+
             int lengthFilling = persentFilling / (HundredPercent / maxLengthBar);
 
             Console.SetCursorPosition(positionX, positionY);
