@@ -4,14 +4,11 @@ namespace CS_JUNIOR
 {
     class Program
     {
-        const ConsoleColor ColorDefault = ConsoleColor.Gray;
-        const ConsoleColor ColorRed = ConsoleColor.Red;
-        const ConsoleColor ColorBlue = ConsoleColor.Blue;
-
-        const int HundredPercent = 100;
-
         static void Main()
         {
+            ConsoleColor colorRed = ConsoleColor.Red;
+            ConsoleColor colorBlue = ConsoleColor.Blue;
+
             int maxLengthBar = 10;
 
             int percentagesHealthPoint = 67;
@@ -20,17 +17,20 @@ namespace CS_JUNIOR
             int percentagesMagicPoint = 43;
             int positionYMagicPoints = 2;
 
-            DrawBar(maxLengthBar, percentagesHealthPoint, ColorRed, positionY: positionYHealthPoints);
+            DrawBar(maxLengthBar, percentagesHealthPoint, colorRed, positionY: positionYHealthPoints);
 
-            DrawBar(maxLengthBar, percentagesMagicPoint, ColorBlue, positionY: positionYMagicPoints);
+            DrawBar(maxLengthBar, percentagesMagicPoint, colorBlue, positionY: positionYMagicPoints);
         }
 
         static void DrawBar(int maxLengthBar, int persentFilling, ConsoleColor colorFilling, int positionX = 0, int positionY = 0)
         {
+            ConsoleColor colorDefault = Console.ForegroundColor;
+
             char symbolFilling = '#';
             char symbolEmpty = '_';
-
-            int lengthFilling = persentFilling / (HundredPercent / maxLengthBar);
+            
+            int hundredPercent = 100;
+            int lengthFilling = persentFilling / (hundredPercent / maxLengthBar);
 
             Console.SetCursorPosition(positionX, positionY);
 
@@ -45,7 +45,7 @@ namespace CS_JUNIOR
                     Console.Write(symbolEmpty);
             }
 
-            Console.ForegroundColor = ColorDefault;
+            Console.ForegroundColor = colorDefault;
             Console.Write($"]\n");
         }
     }
