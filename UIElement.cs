@@ -6,8 +6,8 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            ConsoleColor colorRed = ConsoleColor.Red;
-            ConsoleColor colorBlue = ConsoleColor.Blue;
+            ConsoleColor colorHealthPoint = ConsoleColor.Red;
+            ConsoleColor colorMagicPoint = ConsoleColor.Blue;
 
             int maxLengthBar = 10;
 
@@ -17,9 +17,9 @@ namespace CS_JUNIOR
             int percentagesMagicPoint = 43;
             int positionYMagicPoints = 2;
 
-            DrawBar(maxLengthBar, percentagesHealthPoint, colorRed, positionY: positionYHealthPoints);
+            DrawBar(maxLengthBar, percentagesHealthPoint, colorHealthPoint, positionY: positionYHealthPoints);
 
-            DrawBar(maxLengthBar, percentagesMagicPoint, colorBlue, positionY: positionYMagicPoints);
+            DrawBar(maxLengthBar, percentagesMagicPoint, colorMagicPoint, positionY: positionYMagicPoints);
         }
 
         static void DrawBar(int maxLengthBar, int persentFilling, ConsoleColor colorFilling, int positionX = 0, int positionY = 0)
