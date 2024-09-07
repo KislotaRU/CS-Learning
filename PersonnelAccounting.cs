@@ -80,32 +80,22 @@ namespace CS_JUNIOR
         {
             Console.Clear();
 
-            string lastName;
-            string name;
-            string middleName;
-
             string fullName;
-
             string post;
 
-            Console.Write("Введите Фамилию: ");
-            lastName = Console.ReadLine();
-
-            Console.Write("Введите Имя: ");
-            name = Console.ReadLine();
-
-            Console.Write("Введите Отчество: ");
-            middleName = Console.ReadLine();
+            Console.Write("Введите ФИО: ");
+            fullName = Console.ReadLine();
 
             Console.Write("Введите Должность: ");
             post = Console.ReadLine();
 
             ExpandArray(ref persons);
-            fullName = lastName + " " + name + " " + middleName;
             persons[persons.Length - 1] = fullName;
 
             ExpandArray(ref posts);
             posts[posts.Length - 1] = post;
+
+            Console.Write("\nДосье добавлено.\n");
         }
 
         static void ShowDossier()
