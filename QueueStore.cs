@@ -9,37 +9,49 @@ namespace CS_JUNIOR
         {
             Queue<int> customers = new Queue<int>(new[] { 150, 200, 428, 19, 342, 243 });
 
-            int moneyToPay;
-
             int moneyStore = 0;
 
             while (customers.Count > 0)
             {
-                Console.Write("\tМегамаркер\n");
+                ShowStore(moneyStore, customers.Count);
 
-                Console.Write($"Выручка магазина: {moneyStore}\n");
-                Console.Write($"Кол-во клиентов в очереде {customers.Count}.\n\n");
-
-                moneyToPay = customers.Dequeue();
-                Console.Write("К вам подошёл клиент.\n" +
-                              $"Сумма чека составляет {moneyToPay}.\n");
-
-                Console.Write("Нажмите любую кнопку, чтобы обслужить клиента.\n");
-                Console.ReadKey();
-
-                Console.Write("Клиент обслужен.\n");
-
-                if (moneyToPay > 0)
-                    moneyStore += moneyToPay;
-
-                Console.Write("В кассу магазина поступили деньги.\n");
+                ServeQueue(customers, ref moneyStore);
 
                 Console.ReadKey();
                 Console.Clear();
             }
 
-            Console.Write("Все клиента обслужены.\n");
+            Console.Write("Все клиенты обслужены.\n");
             Console.ReadKey();
+        }
+
+        static void ShowStore(int moneyStore, int customersCount)
+        {
+            Console.Write("\tМегамаркер\n" +
+                         $"Выручка магазина: {moneyStore}$\n" +
+                         $"Кол-во клиентов в очереде {customersCount}.\n\n");
+        }
+
+        static void ServeQueue(Queue<int> customers, ref int moneyStore)
+        {
+            int moneyCustomer;
+
+            Console.Write("К вам подошёл клиент.\n" +
+                         $"Сумма чека составляет {customers.Peek()}$.\n");
+
+            Console.Write("Нажмите любую кнопку, чтобы обслужить клиента.\n");
+            Console.ReadKey();
+            Console.Write("Клиент обслужен.\n");
+
+            moneyCustomer = customers.Dequeue();
+
+            AddMoney(ref moneyStore, moneyCustomer);
+        }
+
+        static void AddMoney(ref int moneyStore, int moneyToPay)
+        {
+            if (moneyToPay > 0)
+                moneyStore += moneyToPay;
         }
     }
 }
