@@ -19,8 +19,10 @@ namespace CS_JUNIOR
             string path = "BraveNewWordMap";
             char[,] map;
 
-            int score = 0;
+            int[] directionPlayer = new int[2];
 
+            int score = 0;
+            
             Console.CursorVisible = false;
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -36,7 +38,9 @@ namespace CS_JUNIOR
 
                 ConsoleKey pressedKey = Console.ReadKey(true).Key;
 
-                SetPositionPlayer(pressedKey, map, symbolWall, ref positionPlayerX, ref positionPlayerY);
+                GetDirection(pressedKey, directionPlayer);
+
+                MovePlayer(map, symbolWall, ref positionPlayerX, ref positionPlayerY, directionPlayer);
 
                 if (map[positionPlayerX, positionPlayerY] == symbolItem)
                 {
@@ -52,35 +56,52 @@ namespace CS_JUNIOR
             Console.Write("Вы собрали все сокровища!\n");
         }
 
-        static void SetPositionPlayer(ConsoleKey pressedKey, char[,] map, char symbolWall, ref int positionPlayerX, ref int positionPlayerY)
+        static void MovePlayer(char[,] map, char symbolWall, ref int positionPlayerX, ref int positionPlayerY, int[] directionPlayer)
         {
             int temporeryPositionPlayerX = positionPlayerX;
             int temporeryPositionPlayerY = positionPlayerY;
 
-            switch (pressedKey)
-            {
-                case ConsoleKey.UpArrow:
-                    temporeryPositionPlayerX--;
-                    break;
-
-                case ConsoleKey.DownArrow:
-                    temporeryPositionPlayerX++;
-                    break;
-
-                case ConsoleKey.LeftArrow:
-                    temporeryPositionPlayerY--;
-                    break;
-
-                case ConsoleKey.RightArrow:
-                    temporeryPositionPlayerY++;
-                    break;
-            }
+            temporeryPositionPlayerX += directionPlayer[0];
+            temporeryPositionPlayerY += directionPlayer[1];
 
             if (map[temporeryPositionPlayerX, temporeryPositionPlayerY] != symbolWall)
             {
                 positionPlayerX = temporeryPositionPlayerX;
                 positionPlayerY = temporeryPositionPlayerY;
             }
+        }
+
+        static int[] GetDirection(ConsoleKey pressedKey, int[] directionPlayer)
+        {
+            const ConsoleKey CommandMoveUp = ConsoleKey.UpArrow;
+            const ConsoleKey CommandMoveDown = ConsoleKey.DownArrow;
+            const ConsoleKey CommandMoveLeft = ConsoleKey.LeftArrow;
+            const ConsoleKey CommandMoveRight = ConsoleKey.RightArrow;
+
+            switch (pressedKey)
+            {
+                case CommandMoveUp:
+                    directionPlayer[0] = -1;
+                    directionPlayer[1] = 0;
+                    break;
+
+                case CommandMoveDown:
+                    directionPlayer[0] = 1;
+                    directionPlayer[1] = 0;
+                    break;
+
+                case CommandMoveLeft:
+                    directionPlayer[1] = -1;
+                    directionPlayer[0] = 0;
+                    break;
+
+                case CommandMoveRight:
+                    directionPlayer[1] = 1;
+                    directionPlayer[0] = 0;
+                    break;
+            }
+
+            return directionPlayer;
         }
 
         static void DrawPlayer(char symbolPlayer, int positionX, int positionY)
