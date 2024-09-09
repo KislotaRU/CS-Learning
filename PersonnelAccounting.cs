@@ -4,22 +4,6 @@ namespace CS_JUNIOR
 {
     class Program
     {
-        static string[] persons = new string[]
-        {
-                "Макарова Татьяна Долгих",
-                "Иванов Иван Иванович",
-                "Бикеев Александр Павлович",
-                "Крюкова Ольга Петровна",
-        };
-
-        static string[] posts = new string[]
-        {
-                "Оператор",
-                "Работник",
-                "Начальник",
-                "Редактор"
-        };
-
         static void Main()
         {
             const string CommandAddDossier = "Добавить";
@@ -27,6 +11,22 @@ namespace CS_JUNIOR
             const string CommandRemoveDossier = "Удалить";
             const string CommandSearchDossier = "Поиск";
             const string CommandExit = "Выйти";
+
+            string[] persons = new string[]
+            {
+                "Макарова Татьяна Долгих",
+                "Иванов Иван Иванович",
+                "Бикеев Александр Павлович",
+                "Крюкова Ольга Петровна",
+            };
+
+            string[] posts = new string[]
+            {
+                "Оператор",
+                "Работник",
+                "Начальник",
+                "Редактор"
+            };
 
             string userInput = null;
 
@@ -44,22 +44,24 @@ namespace CS_JUNIOR
                 Console.Write("Ожидается ввод: ");
                 userInput = Console.ReadLine();
 
+                Console.Clear();
+
                 switch (userInput)
                 {
                     case CommandAddDossier:
-                        AddDossier();
+                        AddDossier(ref persons, ref posts);
                         break;
 
                     case CommandShowDossier:
-                        ShowDossier();
+                        ShowDossiers(persons, posts);
                         break;
 
                     case CommandRemoveDossier:
-                        RemoveDossier();
+                        RemoveDossier(ref persons, ref posts);
                         break;
 
                     case CommandSearchDossier:
-                        SearchDossier();
+                        SearchDossier(persons, posts);
                         break;
 
                     case CommandExit:
@@ -76,10 +78,8 @@ namespace CS_JUNIOR
             }
         }
 
-        static void AddDossier()
+        static void AddDossier(ref string[] persons, ref string[] posts)
         {
-            Console.Clear();
-
             string fullName;
             string post;
 
@@ -89,36 +89,28 @@ namespace CS_JUNIOR
             Console.Write("Введите Должность: ");
             post = Console.ReadLine();
 
-            ExpandArray(ref persons);
-            persons[persons.Length - 1] = fullName;
+            persons = ExpandArray(persons, fullName);
 
-            ExpandArray(ref posts);
-            posts[posts.Length - 1] = post;
+            posts = ExpandArray(posts, post);
 
             Console.Write("\nДосье добавлено.\n");
         }
 
-        static void ShowDossier()
+        static void ShowDossiers(string[] persons, string[] posts)
         {
             int numberDossier = 1;
-
-            Console.Clear();
 
             Console.Write("Все досье:\n");
 
             for (int i = 0; i < persons.Length; i++)
-            {
                 Console.Write($"\t{numberDossier++}. {persons[i]} - {posts[i]}\n");
-            }
         }
 
-        static void RemoveDossier()
+        static void RemoveDossier(ref string[] persons, ref string[] posts)
         {
             string userInput;
 
-            Console.Clear();
-
-            ShowDossier();
+            ShowDossiers(persons, posts);
 
             Console.Write("\nВведите номер досье: ");
             userInput = Console.ReadLine();
@@ -129,8 +121,8 @@ namespace CS_JUNIOR
                 {
                     int indexDossier = numberDossier - 1;
 
-                    ReduceArray(ref persons, indexDossier);
-                    ReduceArray(ref posts, indexDossier);
+                    persons = ReduceArray(persons, indexDossier);
+                    posts = ReduceArray(posts, indexDossier);
 
                     Console.Write("\nДосье успешно удалено.\n");
                 }
@@ -141,14 +133,13 @@ namespace CS_JUNIOR
             }
         }
 
-        static void SearchDossier()
+        static void SearchDossier(string[] persons, string[] posts)
         {
             string temporaryLastName;
             string lastName;
 
             int numberDossier = 1;
-
-            Console.Clear();
+            bool isFoundDossier = false;
 
             Console.Write("Введите фамилию: ");
             lastName = Console.ReadLine();
@@ -161,34 +152,38 @@ namespace CS_JUNIOR
 
                 if (lastName.ToLower() == temporaryLastName.ToLower())
                 {
+                    isFoundDossier = true;
                     Console.Write($"\t{numberDossier++}. {persons[i]} - {posts[i]}\n");
                 }
             }
+
+            if (isFoundDossier == false)
+                Console.Write("\tНе найдено.\n");
         }
 
-        static void ExpandArray(ref string[] array)
+        static string[] ExpandArray(string[] array, string element)
         {
             string[] temporaryArray = new string[array.Length + 1];
 
             for (int i = 0; i < array.Length; i++)
                 temporaryArray[i] = array[i];
 
-            array = temporaryArray;
+            temporaryArray[temporaryArray.Length - 1] = element;
+            
+            return temporaryArray;
         }
 
-        static void ReduceArray(ref string[] array, int index)
+        static string[] ReduceArray(string[] array, int index)
         {
             string[] temporaryArray = new string[array.Length - 1];
 
-            for (int i = 0; i < temporaryArray.Length; i++)
-            {
-                if (i < index)
-                    temporaryArray[i] = array[i];
-                else
-                    temporaryArray[i] = array[i + 1];
-            }
+            for (int i = 0; i < index; i++)
+                temporaryArray[i] = array[i];
 
-            array = temporaryArray;
+            for (int i = index; i < array.Length - 1; i++)
+                temporaryArray[i] = array[i + 1];
+
+            return temporaryArray;
         }
     }
 }
