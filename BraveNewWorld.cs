@@ -19,7 +19,7 @@ namespace CS_JUNIOR
             string path = "BraveNewWordMap";
             char[,] map;
 
-            int[] directionPlayer = new int[2];
+            int[] directionPlayer;
 
             int score = 0;
             
@@ -38,7 +38,7 @@ namespace CS_JUNIOR
 
                 ConsoleKey pressedKey = Console.ReadKey(true).Key;
 
-                GetDirection(pressedKey, directionPlayer);
+                directionPlayer = GetDirection(pressedKey);
 
                 MovePlayer(map, symbolWall, ref positionPlayerX, ref positionPlayerY, directionPlayer);
 
@@ -71,12 +71,14 @@ namespace CS_JUNIOR
             }
         }
 
-        static int[] GetDirection(ConsoleKey pressedKey, int[] directionPlayer)
+        static int[] GetDirection(ConsoleKey pressedKey)
         {
             const ConsoleKey CommandMoveUp = ConsoleKey.UpArrow;
             const ConsoleKey CommandMoveDown = ConsoleKey.DownArrow;
             const ConsoleKey CommandMoveLeft = ConsoleKey.LeftArrow;
             const ConsoleKey CommandMoveRight = ConsoleKey.RightArrow;
+
+            int[] directionPlayer = new int[2];
 
             switch (pressedKey)
             {
