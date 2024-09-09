@@ -41,9 +41,9 @@ namespace CS_JUNIOR
 
             Console.Write("Нажмите любую кнопку, чтобы обслужить клиента.\n");
             Console.ReadKey();
-            Console.Write("Клиент обслужен.\n");
 
             moneyCustomer = customers.Dequeue();
+            Console.Write("Клиент обслужен.\n");
 
             AddMoney(ref moneyStore, moneyCustomer);
         }
