@@ -16,7 +16,7 @@ namespace CS_JUNIOR
             char symbolWall = '#';
             char symbolEmpty = ' ';
 
-            string path = "BraveNewWorldMap";
+            string path = "BraveNewWordMap";
             char[,] map;
 
             int[] directionPlayer;
