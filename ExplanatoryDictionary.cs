@@ -23,10 +23,25 @@ namespace CS_JUNIOR
             Console.Write("Введите день недели и получите его значение: ");
             userInput = Console.ReadLine();
 
-            if (weekday.ContainsKey(userInput))
-                Console.Write($"День недели {userInput} имеет значение {weekday[userInput]}.\n\n");
+            if (TryGetValue(weekday, userInput, out int value))
+                Console.Write($"День недели {userInput} имеет значение {value}.\n\n");
             else
                 Console.Write("Такого дня недели не существует.\n\n");
+        }
+
+        static bool TryGetValue(Dictionary<string, int> dictionary, string userInput, out int value)
+        {
+            value = 0;
+
+            if (dictionary.ContainsKey(userInput))
+            {
+                value = dictionary[userInput];
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
