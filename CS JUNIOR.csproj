@@ -58,8 +58,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DynamicArrayAdvanced.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueueStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
