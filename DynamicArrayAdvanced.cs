@@ -12,22 +12,24 @@ namespace CS_JUNIOR
 
             List<int> numbers = new List<int>();
 
+            string[] menu = new string[]
+            {
+                CommandSum,
+                CommandExit
+            };
+
             string userInput = null;
 
             while (userInput != CommandExit)
             {
-                Console.Clear();
+                Console.Write("Программа считывает числа и по команде возвращает сумму этих чисел.\n");
 
-                Console.Write("Список чисел:\n\n");
+                ShowList(numbers);
 
-                foreach (int number in numbers)
-                    Console.Write($"{number} ");
+                Console.Write("\n\nДоступные команды:\n");
+                PrintMenu(menu);
 
-                Console.Write("\n\nДоступные команды:\n" +
-                             $"\t{CommandSum}" + "\tВозвращает сумму всех введённых чисел.\n" +
-                             $"\t{CommandExit}" + "\tЗавершает работу программы.\n\n");
-
-                Console.Write("Ожидается ввод: ");
+                Console.Write("\nОжидается ввод: ");
                 userInput = Console.ReadLine();
 
                 switch (userInput)
@@ -49,6 +51,7 @@ namespace CS_JUNIOR
                 }
 
                 Console.ReadKey();
+                Console.Clear();
             }
         }
 
@@ -60,6 +63,20 @@ namespace CS_JUNIOR
                 sum += number;
 
             Console.Write($"Сумма всех введённых чисел составляет: {sum}\n\n");
+        }
+
+        static void ShowList(List<int> numbers)
+        {
+            Console.Write("Список чисел:\n");
+
+            foreach (int number in numbers)
+                Console.Write($"{number} ");
+        }
+
+        static void PrintMenu(string[] menu)
+        {
+             for (int i = 0; i < menu.Length; i++)
+                Console.Write($"\t{i + 1}. {menu[i]}\n");
         }
     }
 }
