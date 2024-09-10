@@ -50,10 +50,7 @@ namespace CS_JUNIOR
 
         static int AddMoney(int moneyToPay)
         {
-            if (moneyToPay > 0)
-                return moneyToPay;
-            else
-                return 0;
+            return moneyToPay > 0 ? moneyToPay : 0;
         }
     }
 }
