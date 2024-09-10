@@ -15,7 +15,7 @@ namespace CS_JUNIOR
             {
                 ShowStore(moneyStore, customers.Count);
 
-                ServeQueue(customers, ref moneyStore);
+                moneyStore += ServeQueue(customers);
 
                 Console.ReadKey();
                 Console.Clear();
@@ -32,7 +32,7 @@ namespace CS_JUNIOR
                          $"Кол-во клиентов в очереде {customersCount}.\n\n");
         }
 
-        static void ServeQueue(Queue<int> customers, ref int moneyStore)
+        static int ServeQueue(Queue<int> customers)
         {
             int moneyCustomer;
 
@@ -45,13 +45,15 @@ namespace CS_JUNIOR
             moneyCustomer = customers.Dequeue();
             Console.Write("Клиент обслужен.\n");
 
-            AddMoney(ref moneyStore, moneyCustomer);
+            return AddMoney(moneyCustomer);
         }
 
-        static void AddMoney(ref int moneyStore, int moneyToPay)
+        static int AddMoney(int moneyToPay)
         {
             if (moneyToPay > 0)
-                moneyStore += moneyToPay;
+                return moneyToPay;
+            else
+                return 0;
         }
     }
 }
