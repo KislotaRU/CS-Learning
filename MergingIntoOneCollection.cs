@@ -18,8 +18,7 @@ namespace CS_JUNIOR
             Console.Write("\nМассив второй:\n");
             ShowArray(numbers2);
 
-            JoinArray(numbers, numbers1);
-            JoinArray(numbers, numbers2);
+            JoinArray(numbers, numbers1, numbers2);
 
             Console.Write("\nСписок чисел без повторений:\n");
             ShowList(numbers);
@@ -27,11 +26,12 @@ namespace CS_JUNIOR
             Console.Write("\n\n");
         }
 
-        static void JoinArray(List<int> list, params int[] array)
+        static void JoinArray(List<int> list, params int[][] array)
         {
             for (int i = 0; i < array.Length; i++)
-                if (list.Contains(array[i]) == false)
-                    list.Add(array[i]);
+                for (int j = 0; j < array[i].Length; j++)
+                    if (list.Contains(array[i][j]) == false)
+                        list.Add(array[i][j]);
         }
 
         static void ShowArray(int[] array)
