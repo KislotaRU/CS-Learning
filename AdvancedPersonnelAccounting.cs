@@ -12,8 +12,7 @@ namespace CS_JUNIOR
             const string CommandShowEmployees = "Показать всех сотрудников";
             const string CommandExit = "Завершить работу программы";
 
-            Dictionary<string, List<string>> employees = new Dictionary<string, List<string>>();
-            List<string> posts = new List<string>();
+            Dictionary<string, List<string>> posts = new Dictionary<string, List<string>>();
 
             string[] menu = new string[]
             {
@@ -35,22 +34,22 @@ namespace CS_JUNIOR
                 PrintMenu(menu);
 
                 Console.Write("\nОжидается ввод: ");
-                userInput = GetParagraphMenu(menu);
+                userInput = GetCommandMenu(menu);
 
                 Console.Clear();
 
                 switch (userInput)
                 {
                     case CommandAddEmployee:
-                        AddEmployee(employees, posts);
+                        AddEmployee(posts);
                         break;
 
                     case CommandRemoveEmployee:
-                        RemoveEmployee(employees, posts);
+                        RemoveEmployee(posts);
                         break;
 
                     case CommandShowEmployees:
-                        ShowEmployees(employees);
+                        ShowEmployees(posts);
                         break;
 
                     case CommandExit:
@@ -67,10 +66,10 @@ namespace CS_JUNIOR
             }
         }
 
-        static void AddEmployee(Dictionary<string, List<string>> employees, List<string> posts)
+        static void AddEmployee(Dictionary<string, List<string>> posts)
         {
-            List<string> postsEmployee = new List<string>();
-            
+            List<string> employees = new List<string>();
+
             string fullName;
             string post;
 
@@ -80,71 +79,78 @@ namespace CS_JUNIOR
             Console.Write("Введите должность: ");
             post = Console.ReadLine();
 
-            if (employees.ContainsKey(fullName) == false)
+            if (posts.ContainsKey(post))
             {
-                if (posts.Contains(post) == false)
-                    posts.Add(post);
-
-                postsEmployee.Add(post);
-                employees.Add(fullName, postsEmployee);
+                employees = posts[post];
+                employees.Add(fullName);
             }
             else
             {
-                Console.Write("Такой сотрудник уже имеется.\n");
+                employees.Add(fullName);
+                posts.Add(post, employees);
             }
         }
 
-        static void RemoveEmployee(Dictionary<string, List<string>> employees, List<string> posts)
+        static void RemoveEmployee(Dictionary<string, List<string>> posts)
         {
+            string post;
             string userInput;
 
-            if (employees.Count > 0)
+            if (posts.Count > 0)
             {
-                ShowEmployees(employees);
+                ShowEmployees(posts);
 
-                Console.Write("\nВведите номер сотрудника: ");
-                userInput = Console.ReadLine();
+                Console.Write("\nВведите должность сотрудника: ");
+                post = Console.ReadLine();
 
-                if (TryGetEmployee(employees, userInput, out string employee))
+                if (posts.ContainsKey(post))
                 {
-                    List<string> temporaryPosts = employees[employee];
-                    string post = temporaryPosts[0];
+                    List<string> employees = posts[post];
 
-                    employees.Remove(employee);
-                    Console.Write("Сотрудник успешно удалён.\n");
+                    Console.Clear();
+                    ShowEmployees(employees, post);
 
-                    if (TryRemovePost(employees, post))
-                        posts.Remove(post);
+                    Console.Write("\nВведите номер сотрудника: ");
+                    userInput = Console.ReadLine();
+
+                    if (TryGetEmployee(employees, userInput, out string employee))
+                    {
+                        employees.Remove(employee);
+                        Console.Write("Сотрудник успешно удалён.\n");
+
+                        if (employees.Count == 0)
+                            posts.Remove(post);
+                    }
+                    else
+                    {
+                        Console.Write("Такого сотрудника нет.\n");
+                    }
+                }
+                else
+                {
+                    Console.Write("Такой должности нет.\n");
                 }
             }
             else
             {
-                Console.Write("Нет ни одного сотрудника.\n");
+                Console.Write("Нет ни одного должности, на которой кто-нибудь бы работал.\n");
             }
         }
 
-        static bool TryGetEmployee(Dictionary<string, List<string>> employees, string userInput, out string employee)
+        static bool TryGetEmployee(List<string> employees, string userInput, out string employee)
         {
             employee = null;
 
             if (int.TryParse(userInput, out int numberEmployee))
             {
                 if (numberEmployee > 0 && numberEmployee <= employees.Count)
-                { 
-                    foreach (string temporaryEmployee in employees.Keys)
-                    {
-                        numberEmployee--;
-
-                        if (numberEmployee == 0)
-                        {
-                            employee = temporaryEmployee;
-                            return true;
-                        }
-                    }
+                {
+                    employee = employees[numberEmployee - 1];
+                    return true;
                 }
                 else
                 {
-                    Console.Write("Такого сотрудника нет.\n");
+                    Console.Write("С таким номером нет сотрудника.\n");
                 }
             }
             else
@@ -155,25 +161,25 @@ namespace CS_JUNIOR
             return false;
         }
 
-        static bool TryRemovePost(Dictionary<string, List<string>> employees, string post)
-        {
-            foreach(string employee in employees.Keys)
-            {
-                if (employees[employee][0] == post)
-                    return false;
-            }
-
-            return true;
-        }
-
-        static void ShowEmployees(Dictionary<string, List<string>> employees)
+        static void ShowEmployees(Dictionary<string, List<string>> posts)
         {
             int numberEmloyee = 1;
 
             Console.Write("Все сотрудники: \n");
 
-            foreach (string employee in employees.Keys)
-                    Console.Write($"\t{numberEmloyee++}. {employee} - {employees[employee][0]}\n");
+            foreach (string post in posts.Keys)
+                for (int i = 0; i < posts[post].Count; i++)
+                    Console.Write($"\t{numberEmloyee++}. {posts[post][i]} - {post}\n");
+        }
+
+        static void ShowEmployees(List<string> employees, string post)
+        {
+            int numberEmloyee = 1;
+
+            Console.Write($"Все сотрудники на должности: {post}\n");
+
+            foreach (string employee in employees)
+                Console.Write($"\t{numberEmloyee++}. {employee} - {post}\n");
         }
 
         static void PrintMenu(string[] menu)
@@ -182,7 +188,7 @@ namespace CS_JUNIOR
                 Console.Write($"\t{i + 1}. {menu[i]}\n");
         }
 
-        static string GetParagraphMenu(string[] menu)
+        static string GetCommandMenu(string[] menu)
         {
             string userInput = Console.ReadLine();
 
