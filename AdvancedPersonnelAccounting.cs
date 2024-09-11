@@ -50,7 +50,7 @@ namespace CS_JUNIOR
                         break;
 
                     case CommandShowEmployees:
-                        ShowEmployees(employees, posts);
+                        ShowEmployees(employees);
                         break;
 
                     case CommandExit:
@@ -100,7 +100,7 @@ namespace CS_JUNIOR
 
             if (employees.Count > 0)
             {
-                ShowEmployees(employees, posts);
+                ShowEmployees(employees);
 
                 Console.Write("\nВведите номер сотрудника: ");
                 userInput = Console.ReadLine();
@@ -166,7 +166,7 @@ namespace CS_JUNIOR
             return true;
         }
 
-        static void ShowEmployees(Dictionary<string, List<string>> employees, List<string> posts)
+        static void ShowEmployees(Dictionary<string, List<string>> employees)
         {
             int numberEmloyee = 1;
 
@@ -174,8 +174,6 @@ namespace CS_JUNIOR
 
             foreach (string employee in employees.Keys)
                     Console.Write($"\t{numberEmloyee++}. {employee} - {employees[employee][0]}\n");
-
-            Console.Write($"{posts.Count} должности\n");
         }
 
         static void PrintMenu(string[] menu)
