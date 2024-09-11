@@ -27,7 +27,7 @@ namespace CS_JUNIOR
             Console.Write("\n\n");
         }
 
-        static void JoinArray(List<int> list, int[] array)
+        static void JoinArray(List<int> list, params int[] array)
         {
             for (int i = 0; i < array.Length; i++)
                 if (list.Contains(array[i]) == false)
