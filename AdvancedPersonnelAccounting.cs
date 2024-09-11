@@ -68,8 +68,6 @@ namespace CS_JUNIOR
 
         static void AddEmployee(Dictionary<string, List<string>> posts)
         {
-            List<string> employees = new List<string>();
-
             string fullName;
             string post;
 
@@ -79,16 +77,10 @@ namespace CS_JUNIOR
             Console.Write("Введите должность: ");
             post = Console.ReadLine();
 
-            if (posts.ContainsKey(post))
-            {
-                employees = posts[post];
-                employees.Add(fullName);
-            }
-            else
-            {
-                employees.Add(fullName);
-                posts.Add(post, employees);
-            }
+            if (posts.ContainsKey(post) == false)
+                posts.Add(post, new List<string>());
+
+            posts[post].Add(fullName);
         }
 
         static void RemoveEmployee(Dictionary<string, List<string>> posts)
