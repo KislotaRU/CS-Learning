@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+/*
+ * Есть два массива строк. Надо их объединить в одну коллекцию, исключив повторения, не используя Linq.
+ * Пример: {"1", "2", "1"} + {"3", "2"} => {"1", "2", "3"}
+*/
+
 namespace CS_JUNIOR
 {
     class Program
