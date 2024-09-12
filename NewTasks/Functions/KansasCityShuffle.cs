@@ -1,5 +1,9 @@
 ﻿using System;
 
+/*
+ * Реализуйте функцию Shuffle, которая перемешивает элементы массива в случайном порядке. 
+*/
+
 namespace CS_JUNIOR
 {
     class Program
