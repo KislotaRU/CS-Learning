@@ -18,15 +18,15 @@ namespace CS_JUNIOR
 
 class Player
 {
+    private string _name;
+    private string _level;
+
     public Player(string name, int level)
     {
-        Name = name;
-        Level = level;
+        _name = name;
+        _level = level;
     }
-        
-    public string Name { get; private set; }
-    public int Level { get; private set; }
 
     public void ShowInfo() =>
-        Console.Write($"Имя: {Name} | Уровень: {Level}\n");
+        Console.Write($"Имя: {_name} | Уровень: {_level}\n");
 }
