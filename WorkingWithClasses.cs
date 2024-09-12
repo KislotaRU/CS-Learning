@@ -19,7 +19,7 @@ namespace CS_JUNIOR
 class Player
 {
     private string _name;
-    private string _level;
+    private int _level;
 
     public Player(string name, int level)
     {
