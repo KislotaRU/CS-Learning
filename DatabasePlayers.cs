@@ -137,12 +137,12 @@ class Database
 
     public void AddPlayer()
     {
-        Console.Write("\tДобавление игрока.\n");
-
         Player player;
 
         string nickname;
         string userInput;
+
+        Console.Write("\tДобавление игрока.\n");
 
         Console.Write("Введите никнейм: ");
         nickname = Console.ReadLine();
