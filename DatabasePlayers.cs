@@ -155,6 +155,8 @@ class Database
             player = new Player(nickname, level);
 
             _players.Add(player);
+
+            Console.Write("Игрок успешно добавлен.\n\n");
         }
         else
         {
