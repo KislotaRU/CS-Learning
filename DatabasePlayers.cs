@@ -53,10 +53,10 @@ class Database
         { 
             new Player("Tears", 18),
             new Player("CraftyOftel", 46),
-            new Player("Шарик", 78),
-            new Player("LOLster", 3),
+            new Player("Шарик"),
+            new Player("LOLster", 3, true),
             new Player("Jester", 25),
-            new Player("Storm"),
+            new Player("Storm", isBanned: true),
         };
     }
 
