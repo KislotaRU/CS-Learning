@@ -161,7 +161,6 @@ class Database
         else
         {
             Console.Write("Требуется ввести число.\n\n");
-            return;
         }
     }
 
