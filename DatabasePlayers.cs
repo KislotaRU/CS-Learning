@@ -122,7 +122,7 @@ class Database
         }
     }
 
-    public void Show()
+    private void Show()
     {
         Console.Write("Все игроки:\n");
 
@@ -135,7 +135,7 @@ class Database
         Console.WriteLine();
     }
 
-    public void AddPlayer()
+    private void AddPlayer()
     {
         Player player;
 
@@ -164,7 +164,7 @@ class Database
         }
     }
 
-    public void RemovePlayer()
+    private void RemovePlayer()
     {
         Show();
 
@@ -181,7 +181,7 @@ class Database
         }
     }
 
-    public void BanPlayer()
+    private void BanPlayer()
     {
         Show();
 
@@ -205,7 +205,7 @@ class Database
         }
     }
 
-    public void UnbanPlayer()
+    private void UnbanPlayer()
     {
         Show();
 
@@ -213,7 +213,7 @@ class Database
 
         if (TryGetPlayer(out Player foundPlayer))
         {
-            if (foundPlayer.IsBanned == true)
+            if (foundPlayer.IsBanned)
             {
                 foundPlayer.Unban();
                 Console.Write("Игрок успешно разбанен.\n\n");
@@ -268,21 +268,22 @@ class Player
 {
     private static int s_id = 0;
 
+    private string _nickname;
+    private int _level;
+
     public Player(string nickname, int level = 0, bool isBanned = false)
     {
         Id = ++s_id;
-        Nickname = nickname;
-        Level = level;
+        _nickname = nickname;
+        _level = level;
         IsBanned = isBanned;
     }
 
     public int Id { get; private set; }
-    public string Nickname { get; private set; }
-    public int Level { get; private set; }
     public bool IsBanned { get; private set; }
 
     public void ShowInfo() =>
-        Console.Write($"Id: {Id}".PadRight(6) + $"Ник: {Nickname}".PadRight(20) + $"Уровень: {Level}".PadRight(13) + $"Бан: {(IsBanned ? "Да" : "Нет")}\n");
+        Console.Write($"Id: {Id}".PadRight(6) + $"Ник: {_nickname}".PadRight(20) + $"Уровень: {_level}".PadRight(13) + $"Бан: {(IsBanned ? "Да" : "Нет")}\n");
 
     public void Ban() =>
         IsBanned = true;
