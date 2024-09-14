@@ -18,11 +18,11 @@ namespace CS_JUNIOR
 
 static class UserUtils
 {
-    private readonly static Random random;
+    private readonly static Random _random;
 
     static UserUtils()
     {
-        random = new Random();
+        _random = new Random();
     }
 
     public static void ShuffleList<T>(List<T> list)
@@ -34,7 +34,7 @@ static class UserUtils
         for (int i = 0; i < list.Count; i++)
         {
             firstIndex = i;
-            secondIndex = random.Next(list.Count);
+            secondIndex = _random.Next(list.Count);
 
             temporaryElement = list[firstIndex];
             list[firstIndex] = list[secondIndex];
@@ -46,12 +46,12 @@ static class UserUtils
 class Player
 {
     private readonly DeckCards _deckCards;
-
+    private readonly int _minCountCards = 0;
     private readonly int _maxCountCards = 6;
 
     public Player()
     {
-        _deckCards = new DeckCards(_maxCountCards);
+        _deckCards = new DeckCards(_minCountCards);
     }
 
     public void ShowCards()
@@ -66,13 +66,13 @@ class Player
 
     public bool TryAddCards(int cardsTakenCount)
     {
-        int temporaryCountCards = _deckCards.Count + cardsTakenCount;
+        int temporaryCountCards = _deckCards.CardsCount + cardsTakenCount;
 
         if (temporaryCountCards <= _maxCountCards)
             return true;
         else
             Console.Write("Вы пытаетсь взять больше карт, чем ваше максимальное кол-во карт.\n" +
-                         $"Ваше текущее кол-во карт {_deckCards.Count}/{_maxCountCards}.\n");
+                         $"Ваше текущее кол-во карт {_deckCards.CardsCount}/{_maxCountCards}.\n");
         
         return false;
     }
@@ -130,14 +130,14 @@ class Croupier
 
         if (int.TryParse(userInput, out cardsCount))
         {
-            if (cardsCount > 0 && cardsCount <= _deckCards.Count)
+            if (cardsCount > 0 && cardsCount <= _deckCards.CardsCount)
                 return true;
             else
-                Console.Write("Такого кол-во карт нет в колоде.\n\n");
+                Console.Write("Такого кол-во карт нет в колоде.\n");
         }
         else
         {
-            Console.Write("Требуется ввести кол-во карт.\n\n");
+            Console.Write("Требуется ввести кол-во карт.\n");
         }
 
         return false;
@@ -161,10 +161,10 @@ class DeckCards
 
     public DeckCards(int carsdCount)
     {
-        _cards = new List<Card>();
+        _cards = new List<Card>(carsdCount);
     }
 
-    public int Count {  get { return _cards.Count; } }
+    public int CardsCount {  get { return _cards.Count; } }
 
     public void Show()
     {
@@ -182,29 +182,33 @@ class DeckCards
     public void AddCard(Card card) =>
         _cards.Add(card);
 
-    public void RemoveCard(Card card) =>
-        _cards.Remove(card);
-
     public Card GetCard()
     {
-        Card temporaryCard = _cards[_cards.Count - 1];
+        int index = _cards.Count - 1;
+        Card temporaryCard = _cards[index];
 
         RemoveCard(temporaryCard);
 
         return temporaryCard;
     }
 
+    private void RemoveCard(Card card) =>
+        _cards.Remove(card);
+
     private void Create()
     {
         int suitsCount = (int)Suits.Lenght;
         int nameCardsCount = (int)NameCards.Lenght;
 
+        string suit;
+        string nameCard;
+
         for (int i = 0; i < suitsCount; i++)
         {
             for (int j = 0; j < nameCardsCount; j++)
             {
-                string suit = ((Suits)i).ToString();
-                string nameCard = ((NameCards)j).ToString();
+                suit = ((Suits)i).ToString();
+                nameCard = ((NameCards)j).ToString();
 
                 _cards.Add(new Card(suit, nameCard));
             }
@@ -227,7 +231,7 @@ class Card
     }
 
     public void Show() =>
-        Console.Write($"Название: {_name}".PadRight(16) + $"Масть: {_suit}.\n");
+        Console.Write($"Карта: {_name}".PadRight(13) + $"[{_suit}].\n");
 }
 
 enum Suits
