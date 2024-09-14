@@ -18,11 +18,11 @@ namespace CS_JUNIOR
 
 static class UserUtils
 {
-    private readonly static Random _random;
+    private readonly static Random s_random;
 
     static UserUtils()
     {
-        _random = new Random();
+        s_random = new Random();
     }
 
     public static void ShuffleList<T>(List<T> list)
@@ -34,7 +34,7 @@ static class UserUtils
         for (int i = 0; i < list.Count; i++)
         {
             firstIndex = i;
-            secondIndex = _random.Next(list.Count);
+            secondIndex = s_random.Next(list.Count);
 
             temporaryElement = list[firstIndex];
             list[firstIndex] = list[secondIndex];
