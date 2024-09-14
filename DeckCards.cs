@@ -64,7 +64,7 @@ class Player
     public void AddCard(Card card) =>
             _deckCards.AddCard(card);
 
-    public bool TryAddCards(int cardsTakenCount)
+    public bool CanAddCards(int cardsTakenCount)
     {
         int temporaryCountCards = _deckCards.CardsCount + cardsTakenCount;
 
@@ -95,7 +95,7 @@ class Croupier
 
         if (TryGetCards(out int cardsCount))
         {
-            if (_plyaer.TryAddCards(cardsCount))
+            if (_plyaer.CanAddCards(cardsCount))
             {
                 Card temporaryCard;
 
@@ -164,7 +164,7 @@ class DeckCards
         _cards = new List<Card>(carsdCount);
     }
 
-    public int CardsCount {  get { return _cards.Count; } }
+    public int CardsCount => _cards.Count;
 
     public void Show()
     {
@@ -197,22 +197,12 @@ class DeckCards
 
     private void Create()
     {
-        int suitsCount = (int)Suits.Lenght;
-        int nameCardsCount = (int)NameCards.Lenght;
+        string[] suits = Enum.GetNames(typeof(Suits));
+        string[] nameCards = Enum.GetNames(typeof(NameCards));
 
-        string suit;
-        string nameCard;
-
-        for (int i = 0; i < suitsCount; i++)
-        {
-            for (int j = 0; j < nameCardsCount; j++)
-            {
-                suit = ((Suits)i).ToString();
-                nameCard = ((NameCards)j).ToString();
-
+        foreach (string suit in suits)
+            foreach (string nameCard in nameCards)
                 _cards.Add(new Card(suit, nameCard));
-            }
-        }
     }
 
     private void Shuffle() =>
@@ -240,7 +230,6 @@ enum Suits
     Worms,
     Cross,
     Peaks,
-    Lenght
 }
 
 enum NameCards
@@ -258,5 +247,4 @@ enum NameCards
     Queen,
     King,
     Ace,
-    Lenght
 }
