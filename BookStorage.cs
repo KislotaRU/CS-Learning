@@ -34,6 +34,21 @@ static class UserUtils
 
         return userInput;
     }
+
+    public static int GetInt()
+    {
+        int number;
+
+        string userInput = Console.ReadLine();
+
+        while (int.TryParse(userInput, out number) == false)
+        {
+            Console.Write("Требуется ввести число: ");
+            userInput = Console.ReadLine();
+        }
+
+        return number;
+    }
 }
 
 class Storage
@@ -136,7 +151,7 @@ class Storage
     {
         string author;
         string name;
-        string userInput;
+        int yearOfRelease;
 
         Console.Write("Введите автора: ");
         author = Console.ReadLine();
@@ -145,23 +160,16 @@ class Storage
         name = Console.ReadLine();
 
         Console.Write("Введите год выпуска: ");
-        userInput = Console.ReadLine();
+        yearOfRelease = UserUtils.GetInt();
 
-        if (int.TryParse(userInput, out int yearOfRelease))
-        {
-            _books.Add(new Book(author, name, yearOfRelease));
-
-            Console.Write("Книга успешна добавлена.\n\n");
-        }
-        else
-        {
-            Console.Write("Требуется ввести число.\n" +
-                          "Не удалось добавить книгу.\n\n");
-        }
+        _books.Add(new Book(author, name, yearOfRelease));
+        Console.Write("Книга успешна добавлена.\n\n");
     }
 
     private void RemoveBook()
     {
+        ShowBooks(_books);
+
         if (TryGetBook(out Book book))
         {
             _books.Remove(book);
@@ -178,21 +186,17 @@ class Storage
         const string CommandSearchBookByAuthor = "Автор";
         const string CommandSearchBookByName = "Название";
         const string CommandSearchBookByYearOfRelease = "Год выпуска";
-        const string CommandSearchBookByNumber = "Номер книги";
 
         string[] menu = new string[]
         {
             CommandSearchBookByAuthor,
             CommandSearchBookByName,
             CommandSearchBookByYearOfRelease,
-            CommandSearchBookByNumber,
         };
 
         string userInput;
 
-        string author = null;
-        string name = null;
-        int yearOfRelease = 0;
+        List<Book> foundBooks = new List<Book>();
 
         Console.Write("\t\tПараметры поиска.\n\n");
 
@@ -207,88 +211,86 @@ class Storage
         switch (userInput)
         {
             case CommandSearchBookByAuthor:
-                Console.Write("Введите автора: ");
-                author = Console.ReadLine();
+                SearchByAuthor(foundBooks);
                 break;
 
             case CommandSearchBookByName:
-                Console.Write("Введите название: ");
-                name = Console.ReadLine();
+                SearchByName(foundBooks);
                 break;
 
             case CommandSearchBookByYearOfRelease:
-                Console.Write("Введите год выпуска: ");
-                userInput = Console.ReadLine();
-                yearOfRelease = ReadInt(userInput);
+                SearchByYearOfRelease(foundBooks);
                 break;
 
             default:
-                Console.Write("Требуется ввести номер параметра или сам параметр.\n\n");
+                Console.Write("Требуется ввести номер параметра или сам параметр.\n");
                 break;
         }
 
-        Console.Clear();
-
-        if (TryFindBook(author, name, yearOfRelease))
-            Console.Write("Найденные книги по запросу.\n\n");
+        if (foundBooks.Count > 0)
+        {
+            Console.Write("Найденные книги по запросу.\n");
+            ShowBooks(foundBooks);
+        }
         else
-            Console.Write("Не удалось найти ни одной книги.\n\n");
+        {
+            Console.Write("Не удалось найти ни одной книги.\n");
+        }
     }
 
-    private int ReadInt(string userInput) =>
-        int.TryParse(userInput, out int result) ? result : 0;
-
-    private bool TryFindBook(string author, string name, int yearOfRelease)
+    private void SearchByAuthor(List<Book> foundBooks)
     {
-        List<Book> foundBooks = new List<Book>();
+        string author;
 
-        if (author != null)
-        {
-            foreach (Book book in _books)
-                if (book.Author == author)
-                    foundBooks.Add(book);
-        }
-        else if (name != null)
-        {
-            foreach (Book book in _books)
-                if (book.Name == name)
-                    foundBooks.Add(book);
-        }
-        else if (yearOfRelease > 0)
-        {
-            foreach (Book book in _books)
-                if (book.YearOfRelease == yearOfRelease)
-                    foundBooks.Add(book);
-        }
-        else
-        {
-            return false;
-        }
+        Console.Write("Введите автора: ");
+        author = Console.ReadLine();
 
-        ShowBooks(foundBooks);
-        return true;
+        foreach (Book book in _books)
+            if (book.Author == author)
+                foundBooks.Add(book);
+    }
+
+    private void SearchByName(List<Book> foundBooks)
+    {
+        string name;
+
+        Console.Write("Введите название: ");
+        name = Console.ReadLine();
+
+        foreach (Book book in _books)
+            if (book.Name == name)
+                foundBooks.Add(book);
+    }
+
+    private void SearchByYearOfRelease(List<Book> foundBooks)
+    {
+        int yearOfRelease;
+
+        Console.Write("Введите год выпуска: ");
+        yearOfRelease = UserUtils.GetInt();
+
+        foreach (Book book in _books)
+            if (book.YearOfRelease == yearOfRelease)
+                foundBooks.Add(book);
     }
 
     private bool TryGetBook(out Book book)
     {
-        string userInput;
+        int numberBook;
 
         book = null;
 
         Console.Write("Введите номер книги: ");
-        userInput = Console.ReadLine();
+        numberBook = UserUtils.GetInt();
 
-        if (int.TryParse(userInput, out int numberBook))
+        if (numberBook > 0 && numberBook <= _books.Count)
         {
-            if (numberBook > 0 && numberBook <= _books.Count)
-            {
-                book = _books[numberBook - 1];
-                return true;
-            }
-            else
-            {
-                Console.Write("Под таким номером не может быть книги.\n");
-            }
+            book = _books[numberBook - 1];
+            return true;
+        }
+        else
+        {
+            Console.Write("Под таким номером нет книги.\n");
         }
 
         return false;
