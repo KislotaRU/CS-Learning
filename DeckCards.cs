@@ -41,6 +41,21 @@ static class UserUtils
             list[secondIndex] = temporaryElement;
         }
     }
+
+    public static int ReadInt()
+    {
+        int number;
+
+        string userInput = Console.ReadLine();
+
+        while (int.TryParse(userInput, out number) == false)
+        {
+            Console.Write("Требуется ввести число: ");
+            userInput = Console.ReadLine();
+        }
+
+        return number;
+    }
 }
 
 class Player
@@ -123,22 +138,13 @@ class Croupier
 
     private bool TryGetCards(out int cardsCount)
     {
-        string userInput;
-
         Console.Write("Введите кол-во: ");
-        userInput = Console.ReadLine();
+        cardsCount = UserUtils.ReadInt();
 
-        if (int.TryParse(userInput, out cardsCount))
-        {
-            if (cardsCount > 0 && cardsCount <= _deckCards.CardsCount)
-                return true;
-            else
-                Console.Write("Такого кол-во карт нет в колоде.\n");
-        }
+        if (cardsCount > 0 && cardsCount <= _deckCards.CardsCount)
+            return true;
         else
-        {
-            Console.Write("Требуется ввести кол-во карт.\n");
-        }
+            Console.Write("Такого кол-во карт нет в колоде.\n");
 
         return false;
     }
