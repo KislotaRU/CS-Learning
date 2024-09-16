@@ -18,33 +18,24 @@ namespace CS_JUNIOR
 
 static class UserUtils
 {
-    public static void PrintMenu(string[] menu)
+    public static int ReadInt()
     {
-        for (int i = 0; i < menu.Length; i++)
-            Console.Write($"\t{i + 1}. {menu[i]}\n");
-    }
+        int number;
 
-    public static string GetCommandMenu(string[] menu)
-    {
         string userInput = Console.ReadLine();
 
-        if (int.TryParse(userInput, out int number))
-            if (number > 0 && number <= menu.Length)
-                return menu[number - 1];
+        while (int.TryParse(userInput, out number) == false)
+        {
+            Console.Write("Требуется ввести число: ");
+            userInput = Console.ReadLine();
+        }
 
-        return userInput;
+        return number;
     }
 }
 
 class Database
 {
-    private const string CommandShowPlayers = "Показать игроков";
-    private const string CommandAddPlayer = "Добавить игрока";
-    private const string CommandRemovePlayer = "Удалить игрока";
-    private const string CommandBanPlayer = "Забанить игрока";
-    private const string CommandUnbanPlayer = "Разбанить игрока";
-    private const string CommandExit = "Выйти";
-
     private readonly List<Player> _players;
 
     public Database()
@@ -62,6 +53,13 @@ class Database
 
     public void Work()
     {
+        const string CommandShowPlayers = "Показать игроков";
+        const string CommandAddPlayer = "Добавить игрока";
+        const string CommandRemovePlayer = "Удалить игрока";
+        const string CommandBanPlayer = "Забанить игрока";
+        const string CommandUnbanPlayer = "Разбанить игрока";
+        const string CommandExit = "Выйти";
+
         string[] menu = new string[]
         {
                 CommandShowPlayers,
@@ -72,17 +70,18 @@ class Database
                 CommandExit
         };
 
-        string userInput = null;
+        string userInput;
+        bool isRunning = true;
 
-        while (userInput != CommandExit)
+        while (isRunning)
         {
             Console.Write("\t**** БАЗА ДАННЫХ ****\n\n");
 
             Console.Write("Доступные команды:\n");
-            UserUtils.PrintMenu(menu);
+            PrintMenu(menu);
 
             Console.Write("\nОжидается ввод: ");
-            userInput = UserUtils.GetCommandMenu(menu);
+            userInput = GetCommandMenu(menu);
 
             Console.Clear();
 
@@ -109,7 +108,7 @@ class Database
                     break;
 
                 case CommandExit:
-                    Console.Write("Вы завершили работу программы.\n\n");
+                    isRunning = Exit();
                     continue;
 
                 default:
@@ -137,10 +136,8 @@ class Database
 
     private void AddPlayer()
     {
-        Player player;
-
         string nickname;
-        string userInput;
+        int level;
 
         Console.Write("\tДобавление игрока.\n");
 
@@ -148,20 +145,10 @@ class Database
         nickname = Console.ReadLine();
 
         Console.Write("Введите уровень: ");
-        userInput = Console.ReadLine();
+        level = UserUtils.ReadInt();
 
-        if (int.TryParse(userInput, out int level))
-        {
-            player = new Player(nickname, level);
-
-            _players.Add(player);
-
-            Console.Write("Игрок успешно добавлен.\n\n");
-        }
-        else
-        {
-            Console.Write("Требуется ввести число.\n\n");
-        }
+        _players.Add(new Player(nickname, level));
+        Console.Write("Игрок успешно добавлен.\n\n");
     }
 
     private void RemovePlayer()
@@ -229,38 +216,54 @@ class Database
         }
     }
 
+    private bool Exit()
+    {
+        Console.Write("Вы завершили программу.\n\n");
+        return false;
+    }
+
     private bool TryGetPlayer(out Player foundPlayer)
     {
-        string userInput;
+        int id;
         foundPlayer = null;
 
         Console.Write("Введите Id игрока: ");
-        userInput = Console.ReadLine();
+        id = UserUtils.ReadInt();
 
-        if (int.TryParse(userInput, out int id))
+        if (id > 0 && id <= _players.Count)
         {
-            if (id > 0 && id <= _players.Count)
+            foreach (Player player in _players)
             {
-                foreach (Player player in _players)
+                if (player.Id == id)
                 {
-                    if (player.Id == id)
-                    {
-                        foundPlayer = player;
-                        return true;
-                    }
+                    foundPlayer = player;
+                    return true;
                 }
-            }
-            else
-            {
-                Console.Write("С таким Id не существует игрока.\n");
             }
         }
         else
         {
-            Console.Write("Требуется ввести Id игрока.\n");
+            Console.Write("С таким Id не существует игрока.\n");
         }
 
         return false;
+    }
+
+    private void PrintMenu(string[] menu)
+    {
+        for (int i = 0; i < menu.Length; i++)
+            Console.Write($"\t{i + 1}. {menu[i]}\n");
+    }
+
+    private string GetCommandMenu(string[] menu)
+    {
+        string userInput = Console.ReadLine();
+
+        if (int.TryParse(userInput, out int number))
+            if (number > 0 && number <= menu.Length)
+                return menu[number - 1];
+
+        return userInput;
     }
 }
 
@@ -268,8 +271,8 @@ class Player
 {
     private static int s_id = 0;
 
-    private string _nickname;
-    private int _level;
+    private readonly string _nickname;
+    private readonly int _level;
 
     public Player(string nickname, int level = 0, bool isBanned = false)
     {
