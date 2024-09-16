@@ -166,9 +166,6 @@ class Human
     public virtual void ShowInventory() =>
         _inventory.Show();
 
-    public virtual void ShowBalance() =>
-        Console.Write($"{_money}\n");
-
     public void AddItem(Item item) =>
         _inventory.AddItem(item);
 
@@ -192,11 +189,8 @@ class Customer : Human
         base.ShowInventory();
     }
 
-    public override void ShowBalance()
-    {
-        Console.Write($"Кол-во ваших денег: ");
-        base.ShowBalance();
-    }
+    public void ShowBalance() =>
+        Console.Write($"Кол-во ваших денег: {_money}\n");
 
     public bool CanToPay(int moneyToPay)
     {
