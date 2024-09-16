@@ -18,24 +18,7 @@ namespace CS_JUNIOR
 
 static class UserUtils
 {
-    public static void PrintMenu(string[] menu)
-    {
-        for (int i = 0; i < menu.Length; i++)
-            Console.Write($"\t{i + 1}. {menu[i]}\n");
-    }
-
-    public static string GetCommandMenu(string[] menu)
-    {
-        string userInput = Console.ReadLine();
-
-        if (int.TryParse(userInput, out int number))
-            if (number > 0 && number <= menu.Length)
-                return menu[number - 1];
-
-        return userInput;
-    }
-
-    public static int GetInt()
+    public static int ReadInt()
     {
         int number;
 
@@ -86,17 +69,18 @@ class Storage
             CommandExit
         };
 
-        string userInput = null;
+        string userInput;
+        bool isRunning = true;
 
-        while (userInput != CommandExit)
+        while (isRunning)
         {
             Console.Write("\t\tМеню программы \"Хранилище книг\".\n\n");
 
             Console.Write("Доступные команды:\n");
-            UserUtils.PrintMenu(menu);
+            PrintMenu(menu);
 
             Console.Write("\nОжидается ввод: ");
-            userInput = UserUtils.GetCommandMenu(menu);
+            userInput = GetCommandMenu(menu);
 
             Console.Clear();
 
@@ -119,7 +103,7 @@ class Storage
                     break;
 
                 case CommandExit:
-                    Console.Write("Вы завершили программу.\n\n");
+                    isRunning = Exit();
                     continue;
 
                 default:
@@ -160,7 +144,7 @@ class Storage
         name = Console.ReadLine();
 
         Console.Write("Введите год выпуска: ");
-        yearOfRelease = UserUtils.GetInt();
+        yearOfRelease = UserUtils.ReadInt();
 
         _books.Add(new Book(author, name, yearOfRelease));
         Console.Write("Книга успешна добавлена.\n\n");
@@ -201,25 +185,25 @@ class Storage
         Console.Write("\t\tПараметры поиска.\n\n");
 
         Console.Write("Доступные параметры:\n");
-        UserUtils.PrintMenu(menu);
+        PrintMenu(menu);
 
         Console.Write("\nОжидается ввод:\n");
-        userInput = UserUtils.GetCommandMenu(menu);
+        userInput = GetCommandMenu(menu);
 
         Console.Clear();
 
         switch (userInput)
         {
             case CommandSearchBookByAuthor:
-                SearchByAuthor(foundBooks);
+                foundBooks = SearchByAuthor();
                 break;
 
             case CommandSearchBookByName:
-                SearchByName(foundBooks);
+                foundBooks = SearchByName();
                 break;
 
             case CommandSearchBookByYearOfRelease:
-                SearchByYearOfRelease(foundBooks);
+                foundBooks = SearchByYearOfRelease();
                 break;
 
             default:
@@ -238,8 +222,15 @@ class Storage
         }
     }
 
-    private void SearchByAuthor(List<Book> foundBooks)
+    private bool Exit()
     {
+        Console.Write("Вы завершили программу.\n\n");
+        return false;
+    }
+
+    private List<Book> SearchByAuthor()
+    {
+        List<Book> temporaryFoundBooks = new List<Book>();
         string author;
 
         Console.Write("Введите автора: ");
@@ -247,11 +238,14 @@ class Storage
 
         foreach (Book book in _books)
             if (book.Author == author)
-                foundBooks.Add(book);
+                temporaryFoundBooks.Add(book);
+
+        return temporaryFoundBooks;
     }
 
-    private void SearchByName(List<Book> foundBooks)
+    private List<Book> SearchByName()
     {
+        List<Book> temporaryFoundBooks = new List<Book>();
         string name;
 
         Console.Write("Введите название: ");
@@ -259,19 +253,24 @@ class Storage
 
         foreach (Book book in _books)
             if (book.Name == name)
-                foundBooks.Add(book);
+                temporaryFoundBooks.Add(book);
+
+        return temporaryFoundBooks;
     }
 
-    private void SearchByYearOfRelease(List<Book> foundBooks)
+    private List<Book> SearchByYearOfRelease()
     {
+        List<Book> temporaryFoundBooks = new List<Book>();
         int yearOfRelease;
 
         Console.Write("Введите год выпуска: ");
-        yearOfRelease = UserUtils.GetInt();
+        yearOfRelease = UserUtils.ReadInt();
 
         foreach (Book book in _books)
             if (book.YearOfRelease == yearOfRelease)
-                foundBooks.Add(book);
+                temporaryFoundBooks.Add(book);
+
+        return temporaryFoundBooks;
     }
 
     private bool TryGetBook(out Book book)
@@ -281,7 +280,7 @@ class Storage
         book = null;
 
         Console.Write("Введите номер книги: ");
-        numberBook = UserUtils.GetInt();
+        numberBook = UserUtils.ReadInt();
 
         if (numberBook > 0 && numberBook <= _books.Count)
         {
@@ -294,6 +293,23 @@ class Storage
         }
 
         return false;
+    }
+
+    private void PrintMenu(string[] menu)
+    {
+        for (int i = 0; i < menu.Length; i++)
+            Console.Write($"\t{i + 1}. {menu[i]}\n");
+    }
+
+    private string GetCommandMenu(string[] menu)
+    {
+        string userInput = Console.ReadLine();
+
+        if (int.TryParse(userInput, out int number))
+            if (number > 0 && number <= menu.Length)
+                return menu[number - 1];
+
+        return userInput;
     }
 }
 
