@@ -105,20 +105,21 @@ class Store
         _trader.ShowInventory();
 
         if (_trader.TryGetItem(out Item item))
-        { 
-            if (_customer.CanToPay(item.Price))
+        {
+            int moneyToPay = item.Price;
+
+            if (_customer.CanToPay(moneyToPay))
             {
-                int moneyToPay = _customer.Pay();
                 Item purchasedItem = _trader.RemoveItem(item);
 
-                _trader.AddMoney(moneyToPay);
+                _trader.TakeMoney(moneyToPay);
                 _customer.AddItem(purchasedItem);
 
                 Console.Write("Предмет успешно оплачен и добавлен в ваш инветарь.\n");
             }
             else
             {
-                Console.Write("Не удалось оплатить предмет.\n");
+                Console.Write("Не хватает денег для оплаты.\n");
             }
         }
         else
@@ -129,7 +130,7 @@ class Store
 
     private bool Exit()
     {
-        Console.Write("Вы завершили программу.\n\n");
+        Console.Write("Вы завершили работу программы.\n\n");
         return false;
     }
 
@@ -153,33 +154,31 @@ class Store
 
 class Human
 {
-    protected readonly Inventory _inventory;
+    protected readonly Inventory Inventory;
 
-    protected int _money;
+    protected int Money;
 
     public Human(int money = 0)
     {
-        _inventory = new Inventory();
-        _money = money;
+        Inventory = new Inventory();
+        Money = money;
     }
 
     public virtual void ShowInventory() =>
-        _inventory.Show();
+        Inventory.Show();
 
     public void AddItem(Item item) =>
-        _inventory.AddItem(item);
+        Inventory.AddItem(item);
 
     public Item RemoveItem(Item item) =>
-        _inventory.RemoveItem(item);
+        Inventory.RemoveItem(item);
 }
 
 class Customer : Human 
 {
-    private int _moneyToPay;
-
     public Customer(int money = 0) : base(money)
     {
-        _money = money;
+        Money = money;
     }
 
     public override void ShowInventory()
@@ -190,35 +189,13 @@ class Customer : Human
     }
 
     public void ShowBalance() =>
-        Console.Write($"Кол-во ваших денег: {_money}\n");
+        Console.Write($"Кол-во ваших денег: {Money}\n");
 
-    public bool CanToPay(int moneyToPay)
-    {
-        _moneyToPay = 0;
+    public bool CanToPay(int moneyToPay) =>
+        Money >= moneyToPay;
 
-        if (moneyToPay > 0)
-        {
-            int temporaryMoney = _money - moneyToPay;
-
-            if (temporaryMoney >= 0)
-            {
-                _moneyToPay = moneyToPay;
-                return true;
-            }
-            else
-            {
-                Console.Write("Не хватает денег для оплаты.\n");
-            }
-        }
-
-        return false;
-    }
-
-    public int Pay()
-    {
-        _money -= _moneyToPay;
-        return _moneyToPay;
-    }
+    public void Pay(int moneyToPay) =>
+        Money -= moneyToPay > 0 ? moneyToPay : 0;
 }
 
 class Trader : Human
@@ -246,20 +223,14 @@ class Trader : Human
         base.ShowInventory();
     }
 
-    public void AddMoney(int money)
-    {
-        if (money > 0)
-            _money += money;
-    }
+    public void TakeMoney(int money) =>
+        Money += money > 0 ? money : 0;
 
     public bool TryGetItem(out Item foundItem) =>
-        _inventory.TryGetItem(out foundItem);
+        Inventory.TryGetItem(out foundItem);
 
-    private void SetInventory()
-    {
-        foreach (Item item in _items)
-            _inventory.AddItem(item);
-    }
+    private void SetInventory() =>
+        _items.ForEach(item => Inventory.AddItem(item));
 }
 
 class Inventory
@@ -287,11 +258,8 @@ class Inventory
     public void AddItem(Item item) =>
         _items.Add(item);
 
-    public Item RemoveItem(Item item)
-    {
-        _items.Remove(item);
-        return item;
-    }
+    public Item RemoveItem(Item item) =>
+        _items.Remove(item) ? item : null;
 
     public bool TryGetItem(out Item foundItem)
     {
