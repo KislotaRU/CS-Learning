@@ -109,13 +109,9 @@ class Store
         _trader.ShowInventory();
 
         if (_trader.TryGetItem(out Item item))
-        {
             SellItem(item);
-        }
         else
-        {
             Console.Write("Не удалось получить предмет.\n");
-        }
     }
 
     private void SellItem(Item item)
