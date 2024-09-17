@@ -82,7 +82,7 @@ class Store
                     break;
 
                 case CommandBayItem:
-                    BayItem();
+                    Trade();
                     break;
 
                 case CommandExit:
@@ -100,36 +100,33 @@ class Store
         }
     }
 
-    private void BayItem()
+    private void Trade()
     {
         _customer.ShowBalance();
-
         Console.WriteLine();
-
         _trader.ShowInventory();
 
         if (_trader.TryGetItem(out Item item))
-            SellItem(item);
-        else
-            Console.Write("Не удалось получить предмет.\n");
-    }
-
-    private void SellItem(Item item)
-    {
-        int moneyToPay = item.Price;
-
-        if (_customer.CanToPay(moneyToPay))
         {
-            _trader.TakeMoney(moneyToPay);
+            int moneyToPay = item.Price;
 
-            _trader.RemoveItem(item);
-            _customer.AddItem(item);
+            if (_customer.CanToPay(moneyToPay))
+            {
+                _trader.TakeMoney(moneyToPay);
 
-            Console.Write("Предмет успешно оплачен и добавлен в ваш инвентарь.\n");
+                _trader.RemoveItem(item);
+                _customer.AddItem(item);
+
+                Console.Write("Предмет успешно оплачен и добавлен в ваш инвентарь.\n");
+            }
+            else
+            {
+                Console.Write("Не хватает денег для оплаты.\n");
+            }
         }
         else
         {
-            Console.Write("Не хватает денег для оплаты.\n");
+            Console.Write("Не удалось получить предмет.\n");
         }
     }
 
