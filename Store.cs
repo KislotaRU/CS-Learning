@@ -172,14 +172,8 @@ class Human
         if (Inventory.ItemsCount > 0)
             Inventory.Show();
         else
-            Console.Write("Пусто.");
+            Console.Write("\tПусто.\n");
     }
-
-    public void AddItem(Item item) =>
-        Inventory.AddItem(item);
-
-    public Item RemoveItem(Item item) =>
-        Inventory.RemoveItem(item);
 }
 
 class Customer : Human 
@@ -198,6 +192,9 @@ class Customer : Human
 
     public void ShowBalance() =>
         Console.Write($"Кол-во ваших денег: {Money}\n");
+
+    public void AddItem(Item item) =>
+        Inventory.AddItem(item);
 
     public bool CanToPay(int moneyToPay) =>
         Money >= moneyToPay;
@@ -230,6 +227,9 @@ class Trader : Human
         Console.Write("Инвентарь торговца: \n");
         base.ShowInventory();
     }
+
+    public Item RemoveItem(Item item) =>
+        Inventory.RemoveItem(item);
 
     public void TakeMoney(int money) =>
         Money += money > 0 ? money : 0;
