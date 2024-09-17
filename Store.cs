@@ -86,7 +86,8 @@ class Store
                     break;
 
                 case CommandExit:
-                    isRunning = Exit();
+                    Console.Write("Вы завершили работу программы.\n\n");
+                    isRunning = false;
                     continue;
 
                 default:
@@ -109,21 +110,7 @@ class Store
 
         if (_trader.TryGetItem(out Item item))
         {
-            int moneyToPay = item.Price;
-
-            if (_customer.CanToPay(moneyToPay))
-            {
-                Item purchasedItem = _trader.RemoveItem(item);
-
-                _trader.TakeMoney(moneyToPay);
-                _customer.AddItem(purchasedItem);
-
-                Console.Write("Предмет успешно оплачен и добавлен в ваш инветарь.\n");
-            }
-            else
-            {
-                Console.Write("Не хватает денег для оплаты.\n");
-            }
+            SellItem(item);
         }
         else
         {
@@ -131,10 +118,23 @@ class Store
         }
     }
 
-    private bool Exit()
+    private void SellItem(Item item)
     {
-        Console.Write("Вы завершили работу программы.\n\n");
-        return false;
+        int moneyToPay = item.Price;
+
+        if (_customer.CanToPay(moneyToPay))
+        {
+            _trader.TakeMoney(moneyToPay);
+
+            _trader.RemoveItem(item);
+            _customer.AddItem(item);
+
+            Console.Write("Предмет успешно оплачен и добавлен в ваш инвентарь.\n");
+        }
+        else
+        {
+            Console.Write("Не хватает денег для оплаты.\n");
+        }
     }
 
     private void PrintMenu(string[] menu)
@@ -226,7 +226,7 @@ class Trader : Human
         base.ShowInventory();
     }
 
-    public Item RemoveItem(Item item) =>
+    public void RemoveItem(Item item) =>
         Inventory.RemoveItem(item);
 
     public void TakeMoney(int money) =>
@@ -266,8 +266,8 @@ class Inventory
     public void AddItem(Item item) =>
         _items.Add(item);
 
-    public Item RemoveItem(Item item) =>
-        _items.Remove(item) ? item : null;
+    public void RemoveItem(Item item) =>
+        _items.Remove(item);
 
     public bool TryGetItem(out Item foundItem)
     {
