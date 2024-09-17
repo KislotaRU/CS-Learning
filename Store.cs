@@ -102,6 +102,9 @@ class Store
     private void AddItem()
     {
         _customer.ShowBalance();
+
+        Console.WriteLine();
+
         _trader.ShowInventory();
 
         if (_trader.TryGetItem(out Item item))
@@ -164,8 +167,13 @@ class Human
         Money = money;
     }
 
-    public virtual void ShowInventory() =>
-        Inventory.Show();
+    public virtual void ShowInventory()
+    {
+        if (Inventory.ItemsCount > 0)
+            Inventory.Show();
+        else
+            Console.Write("Пусто.");
+    }
 
     public void AddItem(Item item) =>
         Inventory.AddItem(item);
@@ -183,8 +191,8 @@ class Customer : Human
 
     public override void ShowInventory()
     {
-        ShowBalance();
         Console.Write("Инвентарь покупателя: \n");
+        ShowBalance();
         base.ShowInventory();
     }
 
@@ -241,6 +249,8 @@ class Inventory
     {
         _items = new List<Item>();
     }
+
+    public int ItemsCount => _items.Count;
 
     public void Show()
     {
