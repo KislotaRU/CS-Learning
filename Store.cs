@@ -205,11 +205,9 @@ class Customer : Human
 
 class Trader : Human
 {
-    private readonly List<Item> _items;
-
     public Trader()
     {
-        _items = new List<Item>()
+        List<Item> _items = new List<Item>()
         {
             new Item("Молоко", 45),
             new Item("Мясо", 105),
@@ -219,7 +217,7 @@ class Trader : Human
             new Item("Гречка", 20)
         };
 
-        SetInventory();
+        SetInventory(_items);
     }
 
     public override void ShowInventory()
@@ -237,8 +235,8 @@ class Trader : Human
     public bool TryGetItem(out Item foundItem) =>
         Inventory.TryGetItem(out foundItem);
 
-    private void SetInventory() =>
-        _items.ForEach(item => Inventory.AddItem(item));
+    private void SetInventory(List<Item> items) =>
+        items.ForEach(item => Inventory.AddItem(item));
 }
 
 class Inventory
