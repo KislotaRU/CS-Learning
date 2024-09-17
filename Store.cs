@@ -82,7 +82,7 @@ class Store
                     break;
 
                 case CommandBayItem:
-                    AddItem();
+                    BayItem();
                     break;
 
                 case CommandExit:
@@ -100,7 +100,7 @@ class Store
         }
     }
 
-    private void AddItem()
+    private void BayItem()
     {
         _customer.ShowBalance();
 
