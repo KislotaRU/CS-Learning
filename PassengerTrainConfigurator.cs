@@ -30,21 +30,6 @@ static class UserUtils
 
     public static int GenerateRandomNumber(int maxNumber) =>
         s_random.Next(maxNumber);
-
-    public static int ReadInt()
-    {
-        int number;
-
-        string userInput = Console.ReadLine();
-
-        while (int.TryParse(userInput, out number) == false)
-        {
-            Console.Write("Требуется ввести число: ");
-            userInput = Console.ReadLine();
-        }
-
-        return number;
-    }
 }
 
 class Dispatcher
@@ -125,16 +110,20 @@ class Dispatcher
     private void CreateFlight()
     {
         string direction;
-        int _peoplesCount;
+        int peoplesCount;
+        Train train;
 
         direction = GetDirection();
-        Console.Write($"Получено направление: {direction}.\n");
+        Console.Write($"Получено направление: {direction}.\n\n");
 
-        _peoplesCount = SellTickets();
-        Console.Write("Билеты распроданы.\n");
+        peoplesCount = SellTickets();
+        Console.Write("Билеты распроданы.\n\n");
 
-        CreateTrain(direction, _peoplesCount);
-        Console.Write("Сформирован поезд.\n");
+        train = CreateTrain(direction, peoplesCount);
+        Console.Write("Сформирован поезд.\n\n");
+
+        Console.Write("Поезд:\n");
+        train.Show();
 
         Console.Write("Поезд готов к отправки...\n");
     }
@@ -168,8 +157,14 @@ class Dispatcher
         return UserUtils.GenerateRandomNumber(minNumberPeoples, maxNumberPeoples);
     }
 
-    private void CreateTrain(string direction, int peoplesCount) =>
-        _trains.Enqueue(new Train(direction, peoplesCount));
+    private Train CreateTrain(string direction, int peoplesCount)
+    {
+        Train train = new Train(direction, peoplesCount);
+
+        _trains.Enqueue(train);
+
+        return train;
+    }
 
     private void ShowFlightInfo()
     {
@@ -183,12 +178,17 @@ class Dispatcher
     }
 
     private void ShowFlightCount() =>
-        Console.Write($"Кол-во готовых рейсов: {_trains.Count}\n\n");
+        Console.Write($"Кол-во готовых рейсов в очереди: {_trains.Count}\n\n");
 
     private void PrintMenu(string[] menu)
     {
+        int numberCommand = 1;
+
         for (int i = 0; i < menu.Length; i++)
-            Console.Write($"\t{i + 1}. {menu[i]}\n");
+        {
+            Console.Write($"\t{numberCommand}. {menu[i]}\n");
+            numberCommand++;
+        }
     }
 
     private string GetCommandMenu(string[] menu)
@@ -216,17 +216,24 @@ class Train
         CreateWagons();
     }
 
+    public string Direction { get; private set; }
     public int PlacesCount { get; private set; }
     public int TakenPlacesCount { get; private set; }
     public int WagonsCount => _wagons.Count;
-    public string Direction { get; private set; }
 
     public void Show()
     {
+        int numberWagon = 1;
+
         Console.Write("Вагоны поезда: \n");
 
         foreach (Wagon wagon in _wagons)
+        {
+            Console.Write($"\t{numberWagon}. ".PadRight(5));
             wagon.Show();
+
+            numberWagon++;
+        }
 
         Console.WriteLine();
     }
@@ -240,7 +247,7 @@ class Train
             wagon = new Wagon();
 
             _wagons.Add(wagon);
-            PlacesCount += wagon.MaxCountPassengers;
+            PlacesCount += wagon.MaxCountPlaces;
         }
     }
 }
@@ -252,11 +259,11 @@ class Wagon
         int _minNumberPassengers = 10;
         int _maxNumberPassengers = 20;
 
-        MaxCountPassengers = UserUtils.GenerateRandomNumber(_minNumberPassengers, _maxNumberPassengers);
+        MaxCountPlaces = UserUtils.GenerateRandomNumber(_minNumberPassengers, _maxNumberPassengers);
     }
 
-    public int MaxCountPassengers { get; private set; }
+    public int MaxCountPlaces { get; private set; }
 
     public void Show() =>
-        Console.Write($"Вагон, кол-во мест: {MaxCountPassengers}\n");
+        Console.Write($"Вагон, кол-во мест: {MaxCountPlaces}\n");
 }
