@@ -103,7 +103,6 @@ class Store
     private void Trade()
     {
         _customer.ShowBalance();
-        Console.WriteLine();
         _trader.ShowInventory();
 
         if (_trader.TryGetItem(out Item item))
@@ -112,6 +111,7 @@ class Store
 
             if (_customer.CanToPay(moneyToPay))
             {
+                _customer.Pay(moneyToPay);
                 _trader.TakeMoney(moneyToPay);
 
                 _trader.RemoveItem(item);
@@ -150,22 +150,36 @@ class Store
 
 class Human
 {
-    protected readonly Inventory Inventory;
+    protected readonly List<Item> Items;
 
     protected int Money;
 
     public Human(int money = 0)
     {
-        Inventory = new Inventory();
+        Items = new List<Item>();
         Money = money;
     }
 
     public virtual void ShowInventory()
     {
-        if (Inventory.ItemsCount > 0)
-            Inventory.Show();
+        if (Items.Count > 0)
+        {
+            int numberItem = 1;
+
+            foreach (Item item in Items)
+            {
+                Console.Write($"\t{numberItem}. ".PadRight(5));
+                item.Show();
+
+                numberItem++;
+            }
+
+            Console.WriteLine();
+        }
         else
+        {
             Console.Write("\tПусто.\n");
+        }
     }
 }
 
@@ -178,16 +192,16 @@ class Customer : Human
 
     public override void ShowInventory()
     {
-        Console.Write("Инвентарь покупателя: \n");
         ShowBalance();
+        Console.Write("Инвентарь покупателя: \n");
         base.ShowInventory();
     }
 
     public void ShowBalance() =>
-        Console.Write($"Кол-во ваших денег: {Money}\n");
+        Console.Write($"Кол-во ваших денег: {Money}\n\n");
 
     public void AddItem(Item item) =>
-        Inventory.AddItem(item);
+        Items.Add(item);
 
     public bool CanToPay(int moneyToPay) =>
         Money >= moneyToPay;
@@ -200,7 +214,7 @@ class Trader : Human
 {
     public Trader()
     {
-        List<Item> _items = new List<Item>()
+        List<Item> items = new List<Item>()
         {
             new Item("Молоко", 45),
             new Item("Мясо", 105),
@@ -210,7 +224,7 @@ class Trader : Human
             new Item("Гречка", 20)
         };
 
-        SetInventory(_items);
+        SetInventory(items);
     }
 
     public override void ShowInventory()
@@ -220,47 +234,10 @@ class Trader : Human
     }
 
     public void RemoveItem(Item item) =>
-        Inventory.RemoveItem(item);
+        Items.Remove(item);
 
     public void TakeMoney(int money) =>
         Money += money > 0 ? money : 0;
-
-    public bool TryGetItem(out Item foundItem) =>
-        Inventory.TryGetItem(out foundItem);
-
-    private void SetInventory(List<Item> items) =>
-        items.ForEach(item => Inventory.AddItem(item));
-}
-
-class Inventory
-{
-    private readonly List<Item> _items;
-
-    public Inventory()
-    {
-        _items = new List<Item>();
-    }
-
-    public int ItemsCount => _items.Count;
-
-    public void Show()
-    {
-        int numberCell = 1;
-
-        foreach (Item item in _items)
-        {
-            Console.Write($"\t{numberCell++}. ".PadRight(5));
-            item.Show();
-        }
-
-        Console.WriteLine();
-    }
-
-    public void AddItem(Item item) =>
-        _items.Add(item);
-
-    public void RemoveItem(Item item) =>
-        _items.Remove(item);
 
     public bool TryGetItem(out Item foundItem)
     {
@@ -271,9 +248,9 @@ class Inventory
         Console.Write("Введите номер предмета: ");
         numberItem = UserUtils.ReadInt();
 
-        if (numberItem > 0 && numberItem <= _items.Count)
+        if (numberItem > 0 && numberItem <= Items.Count)
         {
-            foundItem = _items[numberItem - 1];
+            foundItem = Items[numberItem - 1];
             return true;
         }
         else
@@ -283,6 +260,9 @@ class Inventory
 
         return false;
     }
+
+    private void SetInventory(List<Item> items) =>
+        items.ForEach(item => Items.Add(item));
 }
 
 class Item
