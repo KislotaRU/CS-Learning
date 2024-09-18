@@ -25,11 +25,8 @@ static class UserUtils
         s_random = new Random();
     }
 
-    public static int GenerateRandomNumber(int minNumber, int maxNumber) =>
+    public static int GenerateRandomNumber(int minNumber = 0, int maxNumber = 0) =>
         s_random.Next(minNumber, maxNumber);
-
-    public static int GenerateRandomNumber(int maxNumber) =>
-        s_random.Next(maxNumber);
 }
 
 class Dispatcher
