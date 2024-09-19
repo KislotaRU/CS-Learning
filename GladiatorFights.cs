@@ -120,33 +120,16 @@ class Arena
 
         while (isFighting)
         {
-            Console.Write("\t\tБой\n");
+            ShowFight();
 
-            _firstFighter.Show();
-            _secondFighter.Show();
+            Console.Write("Ходит первый боец.");
+            isFighting = MoveFighter(_firstFighter, _secondFighter);
 
-            if (_firstFighter.HealthPoints > 0)
-            {
-                Console.Write("\nХодит первый боец:");
-                _secondFighter.TakeDamage(_firstFighter.Attack());
+            if (isFighting == false)
+                continue;
 
-                if (_secondFighter.HealthPoints > 0)
-                {
-                    Console.Write("\nХодит второй боец:");
-                    _firstFighter.TakeDamage(_secondFighter.Attack());
-                }
-                else
-                {
-                    isFighting = false;
-                }
-            }
-            else
-            {
-                isFighting = false;
-            }
-
-            Console.ReadLine();
-            Console.Clear();
+            Console.Write("Ходит второй боец.");
+            isFighting = MoveFighter(_secondFighter, _firstFighter);
         }
 
         AnnounceResults();
@@ -155,15 +138,15 @@ class Arena
     private void ChooseFighters()
     {
         Console.Write("Первый боец:\n");
-        _firstFighter = GetFighter();
+        _firstFighter = CreateFighter();
         Console.Clear();
 
         Console.Write("Второй боец:\n");
-        _secondFighter = GetFighter();
+        _secondFighter = CreateFighter();
         Console.Clear();
     }
 
-    private Fighter GetFighter()
+    private Fighter CreateFighter()
     {
         Fighter fighter;
         int numberFighter;
@@ -200,14 +183,37 @@ class Arena
         Console.WriteLine();
     }
 
+    private void ShowFight()
+    {
+        Console.Clear();
+        Console.Write("Бой бойцов:\n");
+
+        _firstFighter.Show();
+        _secondFighter.Show();
+
+        Console.WriteLine();
+    }
+
+    private bool MoveFighter(Fighter attacker, Fighter defender)
+    {
+        attacker.Attack(defender);
+
+        Console.ReadLine();
+
+        if (defender.IsAlive)
+            return true;
+        else
+            return false;
+    }
+
     private void AnnounceResults()
     {
-        if (_firstFighter.HealthPoints > 0)
+        if (_firstFighter.IsAlive)
         {
             Console.Write("Победил первый боец:\n");
             _firstFighter.Show();
         }
-        else if (_secondFighter.HealthPoints > 0)
+        else if (_secondFighter.IsAlive)
         {
             Console.Write("Победил второй боец:\n");
             _secondFighter.Show();
@@ -243,12 +249,17 @@ abstract class Fighter
     public float HealthPoints { get; protected set; }
     public int Armor { get; protected set; }
     public float Damage { get; protected set; }
+    public float TotalDamage { get; protected set; }
+    public bool IsAlive => HealthPoints > 0;
 
     public void Show() =>
-        Console.Write($"Боец: {Name}".PadRight(17) + $"Хп: {HealthPoints: 0.##}".PadRight(12) + $"Броня: {Armor}".PadRight(10) + $"Урон: {Damage}\n");
+        Console.Write($"\tБоец: {Name}".PadRight(17) + $"Хп: {HealthPoints: 0.##}".PadRight(12) + $"Броня: {Armor}".PadRight(10) + $"Урон: {Damage}\n");
 
-    public virtual float Attack() =>
-        Damage;
+    public virtual void Attack(Fighter fighterOpponent)
+    {
+        fighterOpponent.TakeDamage(TotalDamage);
+        TotalDamage = Damage;
+    }
 
     public virtual void TakeDamage(float damage)
     {
@@ -269,13 +280,13 @@ class Warrior : Fighter
 {
     private readonly string _name = "Воин";
     private readonly int _minHealthPoints = 80;
-    private readonly int _maxHealthPoints = 101;
+    private readonly int _maxHealthPoints = 1010;
     private readonly int _minArmor = 10;
     private readonly int _maxArmor = 21;
     private readonly int _minDamage = 10;
     private readonly int _maxDamage = 21;
 
-    private readonly int _chanceDoubleAttack = 40;
+    private readonly int _chanceDoubleAttack = 20;
     private readonly int _damageСoefficient = 2;
 
     public Warrior()
@@ -284,6 +295,7 @@ class Warrior : Fighter
         HealthPoints = UserUtils.GenerateRandomNumber(_minHealthPoints, _maxHealthPoints);
         Armor = UserUtils.GenerateRandomNumber(_minArmor, _maxArmor);
         Damage = UserUtils.GenerateRandomNumber(_minDamage, _maxDamage);
+        TotalDamage = Damage;
     }
 
     public Warrior(float healthPoints, int armor, float damage)
@@ -292,19 +304,17 @@ class Warrior : Fighter
         HealthPoints = healthPoints;
         Armor = armor;
         Damage = damage;
+        TotalDamage = Damage;
     }
 
-    public override float Attack()
+    public override void Attack(Fighter fighterOpponent)
     {
         int chanceDropped = UserUtils.GenerateRandomNumber(maxNumber: UserUtils.HundredPercent);
-        float damage = 0f;
-
-        damage += base.Attack();
 
         if (_chanceDoubleAttack <= chanceDropped)
-            damage *= _damageСoefficient;
+            TotalDamage *= _damageСoefficient;
 
-        return damage;
+        base.Attack(fighterOpponent);
     }
 
     public override Fighter Clone(Fighter fighter) =>
@@ -331,6 +341,7 @@ class Crossbowman : Fighter
         HealthPoints = UserUtils.GenerateRandomNumber(_minHealthPoints, _maxHealthPoints);
         Armor = UserUtils.GenerateRandomNumber(_minArmor, _maxArmor);
         Damage = UserUtils.GenerateRandomNumber(_minDamage, _maxDamage);
+        TotalDamage = Damage;
     }
 
     public Crossbowman(float healthPoints, int armor, float damage)
@@ -339,19 +350,17 @@ class Crossbowman : Fighter
         HealthPoints = healthPoints;
         Armor = armor;
         Damage = damage;
+        TotalDamage = Damage;
     }
 
-    public override float Attack()
+    public override void Attack(Fighter fighterOpponent)
     {
-        float damage = 0f;
-
-        damage += base.Attack();
         _attacksCount++;
 
         if (_attacksCount % _attackTriggerNumber == 0)
-            damage += base.Attack();
+            base.Attack(fighterOpponent);
 
-        return damage;
+        base.Attack(fighterOpponent);
     }
 
     public override Fighter Clone(Fighter fighter) =>
@@ -380,6 +389,7 @@ class Berserk : Fighter
         HealthPoints = UserUtils.GenerateRandomNumber(_minHealthPoints, _maxHealthPoints);
         Armor = UserUtils.GenerateRandomNumber(_minArmor, _maxArmor);
         Damage = UserUtils.GenerateRandomNumber(_minDamage, _maxDamage);
+        TotalDamage = Damage;
     }
 
     public Berserk(float healthPoints, int armor, float damage)
@@ -388,9 +398,10 @@ class Berserk : Fighter
         HealthPoints = healthPoints;
         Armor = armor;
         Damage = damage;
+        TotalDamage = Damage;
     }
 
-    public override float Attack()
+    public override void Attack(Fighter fighterOpponent)
     {
         if (_rageCount >= _maxNumberRage)
         {
@@ -398,7 +409,7 @@ class Berserk : Fighter
             _rageCount = 0;
         }
 
-        return base.Attack();
+        base.Attack(fighterOpponent);
     }
 
     public override void TakeDamage(float damage)
@@ -443,6 +454,7 @@ class Wizard : Fighter
         HealthPoints = UserUtils.GenerateRandomNumber(_minHealthPoints, _maxHealthPoints);
         Armor = UserUtils.GenerateRandomNumber(_minArmor, _maxArmor);
         Damage = UserUtils.GenerateRandomNumber(_minDamage, _maxDamage);
+        TotalDamage = Damage;
     }
 
     public Wizard(float healthPoints, int armor, float damage)
@@ -451,28 +463,26 @@ class Wizard : Fighter
         HealthPoints = healthPoints;
         Armor = armor;
         Damage = damage;
+        TotalDamage = Damage;
     }
 
-    public override float Attack()
+    public override void Attack(Fighter fighterOpponent)
     {
-        float damage = 0f;
-
         if (_magicPoints >= _priceSpellFireball)
-            damage += AttackSpellFireball();
+            AttackSpellFireball(fighterOpponent);
         else
-            damage += base.Attack();
-
-        return damage;
+            base.Attack(fighterOpponent);
     }
 
     public override Fighter Clone(Fighter fighter) =>
         new Wizard(fighter.HealthPoints, fighter.Armor, fighter.Damage);
 
-    private float AttackSpellFireball()
+    private void AttackSpellFireball(Fighter fighterOpponent)
     {
+        TotalDamage = _damageFireball;
         _magicPoints -= _priceSpellFireball;
 
-        return _damageFireball;
+        base.Attack(fighterOpponent);
     }
 }
 
@@ -494,6 +504,7 @@ class Assassin : Fighter
         HealthPoints = UserUtils.GenerateRandomNumber(_minHealthPoints, _maxHealthPoints);
         Armor = UserUtils.GenerateRandomNumber(_minArmor, _maxArmor);
         Damage = UserUtils.GenerateRandomNumber(_minDamage, _maxDamage);
+        TotalDamage = Damage;
     }
 
     public Assassin(float healthPoints, int armor, float damage)
@@ -502,6 +513,7 @@ class Assassin : Fighter
         HealthPoints = healthPoints;
         Armor = armor;
         Damage = damage;
+        TotalDamage = Damage;
     }
 
     public override void TakeDamage(float damage)
