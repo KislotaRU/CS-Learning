@@ -128,16 +128,12 @@ class Arena
             if (_firstFighter.HealthPoints > 0)
             {
                 Console.Write("\nХодит первый боец:");
-
                 _secondFighter.TakeDamage(_firstFighter.Attack());
 
                 if (_secondFighter.HealthPoints > 0)
                 {
                     Console.Write("\nХодит второй боец:");
-
                     _firstFighter.TakeDamage(_secondFighter.Attack());
-
-                    Console.ReadLine();
                 }
                 else
                 {
