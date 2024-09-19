@@ -30,9 +30,6 @@ static class UserUtils
     public static int GenerateRandomNumber(int minNumber = 0, int maxNumber = 0) =>
         s_random.Next(minNumber, maxNumber);
 
-    public static int GenerateRandomNumber(int maxNumber) =>
-        s_random.Next(maxNumber);
-
     public static int ReadInt()
     {
         int number;
@@ -117,37 +114,30 @@ class Arena
 
     private void Fight()
     {
-        Console.Write("Первый боец:\n");
-        _firstFighter = ChooseFighter();
-        Console.Clear();
-
-        Console.Write("Второй боец:\n");
-        _secondFighter = ChooseFighter();
-        Console.Clear();
-
         bool isFighting = true;
+
+        ChooseFighters();
 
         while (isFighting)
         {
-            float damage;
-
             Console.Write("\t\tБой\n");
 
+            _firstFighter.Show();
+            _secondFighter.Show();
 
             if (_firstFighter.HealthPoints > 0)
             {
-                Console.Write("\tХодит первый боец:\n");
-                Console.WriteLine();
+                Console.Write("\nХодит первый боец:");
 
-                damage = _firstFighter.Attack();
-
-                _secondFighter.TakeDamage(damage);
+                _secondFighter.TakeDamage(_firstFighter.Attack());
 
                 if (_secondFighter.HealthPoints > 0)
                 {
-                    Console.Write("\tХодит второй боец:\n");
+                    Console.Write("\nХодит второй боец:");
 
-                    _secondFighter.TakeDamage(_firstFighter.Attack());
+                    _firstFighter.TakeDamage(_secondFighter.Attack());
+
+                    Console.ReadLine();
                 }
                 else
                 {
@@ -166,7 +156,18 @@ class Arena
         AnnounceResults();
     }
 
-    private Fighter ChooseFighter()
+    private void ChooseFighters()
+    {
+        Console.Write("Первый боец:\n");
+        _firstFighter = GetFighter();
+        Console.Clear();
+
+        Console.Write("Второй боец:\n");
+        _secondFighter = GetFighter();
+        Console.Clear();
+    }
+
+    private Fighter GetFighter()
     {
         Fighter fighter;
         int numberFighter;
@@ -248,7 +249,7 @@ abstract class Fighter
     public float Damage { get; protected set; }
 
     public void Show() =>
-        Console.Write($"Боец: {Name}".PadRight(17) + $"Хп: {HealthPoints}".PadRight(8) + $"Броня: {Armor}".PadRight(10) + $"Урон: {Damage}\n");
+        Console.Write($"Боец: {Name}".PadRight(17) + $"Хп: {HealthPoints: 0.##}".PadRight(12) + $"Броня: {Armor}".PadRight(10) + $"Урон: {Damage}\n");
 
     public virtual float Attack() =>
         Damage;
@@ -299,10 +300,10 @@ class Warrior : Fighter
 
     public override float Attack()
     {
-        int chanceDropped = UserUtils.GenerateRandomNumber(UserUtils.HundredPercent);
+        int chanceDropped = UserUtils.GenerateRandomNumber(maxNumber: UserUtils.HundredPercent);
         float damage = 0f;
 
-        damage += Attack();
+        damage += base.Attack();
 
         if (_chanceDoubleAttack <= chanceDropped)
             damage *= _damageСoefficient;
@@ -348,11 +349,11 @@ class Crossbowman : Fighter
     {
         float damage = 0f;
 
-        damage += Attack();
+        damage += base.Attack();
         _attacksCount++;
 
         if (_attacksCount % _attackTriggerNumber == 0)
-            damage += Attack();
+            damage += base.Attack();
 
         return damage;
     }
@@ -435,10 +436,10 @@ class Wizard : Fighter
     private readonly int _minDamage = 25;
     private readonly int _maxDamage = 36;
 
-    private int _magicPoints = 80;
+    private readonly int _priceSpellFireball = 25;
+    private readonly float _damageFireball = 20f;
 
-    private int _priceSpellFireball = 25;
-    private float _damageFireball = 20f;
+    private int _magicPoints = 80;
 
     public Wizard()
     {
@@ -463,7 +464,7 @@ class Wizard : Fighter
         if (_magicPoints >= _priceSpellFireball)
             damage += AttackSpellFireball();
         else
-            damage += Attack();
+            damage += base.Attack();
 
         return damage;
     }
@@ -509,7 +510,7 @@ class Assassin : Fighter
 
     public override void TakeDamage(float damage)
     {
-        int chanceDropped = UserUtils.GenerateRandomNumber(UserUtils.HundredPercent);
+        int chanceDropped = UserUtils.GenerateRandomNumber(maxNumber: UserUtils.HundredPercent);
 
         if (chanceDropped > _chanceToDodge)
             base.TakeDamage(damage);
