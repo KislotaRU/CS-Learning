@@ -284,7 +284,7 @@ class Warrior : Fighter
 {
     private readonly string _name = "Воин";
     private readonly int _minHealthPoints = 80;
-    private readonly int _maxHealthPoints = 1010;
+    private readonly int _maxHealthPoints = 121;
     private readonly int _minArmor = 10;
     private readonly int _maxArmor = 21;
     private readonly int _minDamage = 10;
