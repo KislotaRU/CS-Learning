@@ -123,13 +123,15 @@ class Arena
             ShowFight();
 
             Console.Write("Ходит первый боец.");
-            isFighting = MoveFighter(_firstFighter, _secondFighter);
+            ExecuteFight(_firstFighter, _secondFighter);
+
+            isFighting = CanExecuteFight(_secondFighter);
 
             if (isFighting == false)
                 continue;
 
             Console.Write("Ходит второй боец.");
-            isFighting = MoveFighter(_secondFighter, _firstFighter);
+            ExecuteFight(_secondFighter, _firstFighter);
         }
 
         AnnounceResults();
@@ -194,17 +196,15 @@ class Arena
         Console.WriteLine();
     }
 
-    private bool MoveFighter(Fighter attacker, Fighter defender)
+    private void ExecuteFight(Fighter attacker, Fighter defender)
     {
         attacker.Attack(defender);
 
-        Console.ReadLine();
-
-        if (defender.IsAlive)
-            return true;
-        else
-            return false;
+        Console.ReadKey();
     }
+
+    private bool CanExecuteFight(Fighter fighter) =>
+        fighter.IsAlive;
 
     private void AnnounceResults()
     {
@@ -217,6 +217,10 @@ class Arena
         {
             Console.Write("Победил второй боец:\n");
             _secondFighter.Show();
+        }
+        else
+        {
+            Console.Write("Ничья.\n");
         }
     }
 
