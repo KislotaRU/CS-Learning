@@ -73,7 +73,7 @@ class SuperMarket
 
     public void Work()
     {
-        const string CommandUpdateData = "Обновить данные";
+        const string CommandUpdateData = "Создать клиента";
         const string CommandServeCustomer = "Обслужить клиента";
         const string CommandExit = "Выйти";
 
@@ -102,7 +102,7 @@ class SuperMarket
             switch (userInput)
             {
                 case CommandUpdateData:
-                    UpdateData();
+                    CreateCustomer();
                     break;
 
                 case CommandServeCustomer:
@@ -124,168 +124,6 @@ class SuperMarket
         }
     }
 
-    public void UpdateData()
-    {
-        CreateCustomer();
-        Console.Write("Клиент встал в очередь.\n");
-    }
-
-    public void ServeCustomer()
-    {
-        if (_customers.Count > 0)
-        {
-            const string CommandAddItemInBasket = "Добавить предмет в корзину";
-            const string CommandShowBasket = "Посмотреть корзину";
-            const string CommandExecutePayBasket = "Перейти к оплате";
-            const string CommandCancelBasket = "Выйти";
-
-            string[] menu = new string[]
-            {
-                CommandAddItemInBasket,
-                CommandShowBasket,
-                CommandExecutePayBasket,
-                CommandCancelBasket
-            };
-
-            string userInput;
-
-            bool isServiced = true;
-
-            Customer customer = _customers.Peek();
-
-            while (isServiced)
-            {
-                Console.Write("\t\tМеню покупателя СуперМаркета\n\n");
-
-                Console.Write("Доступные команды:\n");
-                PrintMenu(menu);
-
-                Console.Write("\nОжидается ввод: ");
-                userInput = GetCommandMenu(menu);
-
-                Console.Clear();
-
-                switch (userInput)
-                {
-                    case CommandAddItemInBasket:
-                        AddItemInBasket(customer);
-                        break;
-
-                    case CommandShowBasket:
-                        ShowBasket(customer);
-                        break;
-
-                    case CommandExecutePayBasket:
-                        ExecutePayBasket(customer);
-                        break;
-
-                    case CommandCancelBasket:
-                        CancelBasket(customer);
-                        isServiced = false;
-                        continue;
-
-                    default:
-                        Console.Write("Требуется ввести номер команды или саму команду.\n\n");
-                        break;
-                }
-
-                Console.ReadKey();
-                Console.Clear();
-            }
-
-            Console.Write("Клиент обслужен.\n");
-            _customers.Dequeue();
-            Console.ReadKey();
-        }
-        else
-        {
-            Console.Write("В очереди никого нет.\n" +
-                          "Попробуйте обновить данные.\n");
-        } 
-    }
-
-    private void AddItemInBasket(Customer customer)
-    {
-        int numberItem;
-        int indexItem;
-        int itemCount;
-
-        ShowStorage();
-
-        Console.Write("Выберите номер предмета: ");
-        numberItem = UserUtils.ReadInt();
-
-        indexItem = numberItem - 1;
-
-        if (TryGetItem(indexItem, out Item foundItem))
-        {
-            Console.Write("Выберите кол-во предмета: ");
-            itemCount = UserUtils.ReadInt();
-
-            customer.TakeItem(foundItem, itemCount);
-            Console.Write("Предмет успешно добавлен в корзину.\n");
-        }
-        else
-        {
-            Console.Write("Не удалось найти предмет.\n");
-        }
-    }
-
-    private void ShowBasket(Customer customer) =>
-        customer.ShowBasket();
-
-    private void ExecutePayBasket(Customer customer)
-    {
-        if (customer.CellsCountInBasket > 0)
-        {
-            int indexItem;
-            int moneyToPay;
-            bool isPaid = true;
-
-            while (isPaid)
-            {
-                moneyToPay = SumPurchases(customer);
-
-                Console.Write("Требуется оплатить предметы в корзине.\n" +
-                             $"К оплате: {moneyToPay}\n\n");
-
-                if (TryTakeMoney(customer, moneyToPay))
-                {
-                    Console.Write("Оплата прошла успешна.\n");
-                    isPaid = false;
-
-                    customer.TransferBasketInBag();
-                }
-                else
-                {
-                    indexItem = UserUtils.GenerateRandomNumber(maxNumber: customer.CellsCountInBasket);
-                    customer.TryGetItem(indexItem, out Item foundItem);
-
-                    Console.Write("Недостаточно средст для оплаты.\n");
-
-                    customer.PutItem(foundItem);
-                    Console.Write("Клиент отложил один товар.\n");
-                }
-
-                Console.ReadKey();
-                Console.Clear();
-            }
-        }
-        else
-        {
-            Console.Write("Вы ничего не взяли в корзину.\n");
-        }
-    }
-
-    private int SumPurchases(Customer customer) =>
-        customer.SumPurchases();
-
-    private void CancelBasket(Customer customer)
-    {
-        customer.ClearBasket();
-        Console.Write("Вы отложили покупки и вышли из очереди.\n\n");
-    }
-
     private void CreateCustomer()
     {
         int minNumberMoney = 100;
@@ -294,40 +132,44 @@ class SuperMarket
         int money = UserUtils.GenerateRandomNumber(minNumberMoney, maxNumberMoney);
 
         _customers.Enqueue(new Customer(money));
+        Console.Write("Клиент встал в очередь.\n");
     }
 
-    private void ShowStorage()
+    public void ServeCustomer()
     {
-        Console.Write("Ассортимент СуперМаркета.\n");
-        _storage.Show();
-    }
+        if (_customers.Count > 0)
+        {
+            Customer customer = _customers.Peek();
 
-    private bool TryGetItem(int numberItem, out Item foundItem) =>
-        _storage.TryGetItem(numberItem, out foundItem);
+            int moneyToPay = customer.Work(_storage);
+
+            TakeMoney(moneyToPay);
+            Console.Write("Клиент обслужен.\n");
+            
+            _customers.Dequeue();
+        }
+        else
+        {
+            Console.Write("В очереди никого нет.\n" +
+                          "Попробуйте обновить данные.\n");
+        } 
+    }
 
     private void TakeMoney(int money) =>
         _money += money > 0 ? money : 0;
-
-    private bool TryTakeMoney(Customer customer, int moneyToPay)
-    {
-        if (customer.CanToPay(moneyToPay))
-        {
-            customer.Pay(moneyToPay);
-            TakeMoney(moneyToPay);
-
-            return true;
-        }
-
-        return false;
-    }
 
     private void SetInventory(List<Item> items) =>
         items.ForEach(item => _storage.AddItem(item));
 
     private void PrintMenu(string[] menu)
     {
+        int numberCommand = 1;
+
         for (int i = 0; i < menu.Length; i++)
-            Console.Write($"\t{i + 1}. {menu[i]}\n");
+        {
+            Console.Write($"\t{numberCommand}. {menu[i]}\n");
+            numberCommand++;
+        }
     }
 
     private string GetCommandMenu(string[] menu)
@@ -344,60 +186,179 @@ class SuperMarket
 
 class Customer
 {
-    private readonly Inventory _bag;
-    private readonly Inventory _basket;
+    private readonly Inventory _cart;
 
     private int _money = 0;
+    private bool _isShopping = true;
 
     public Customer(int money)
     {
-        _bag = new Inventory();
-        _basket = new Inventory();
+        _cart = new Inventory();
 
         _money = money;
     }
 
-    public int CellsCountInBasket => _basket.CellCount;
+    public int CellsCountInCart => _cart.CellCount;
 
-    public void ShowBasket()
+    public int Work(Inventory storage)
+    {
+        const string CommandAddItemInCart = "Добавить предмет в корзину";
+        const string CommandRemoveItemInCart = "Убрать предмет из корзины";
+        const string CommandShowCart = "Посмотреть корзину";
+        const string CommandExecutePayCart = "Перейти к оплате";
+
+        string[] menu = new string[]
+        {
+                CommandAddItemInCart,
+                CommandRemoveItemInCart,
+                CommandShowCart,
+                CommandExecutePayCart
+        };
+
+        string userInput;
+
+        int moneyToPay = 0;
+
+        while (_isShopping)
+        {
+            Console.Write("\t\tМеню покупателя СуперМаркета\n\n");
+
+            Console.Write("Доступные команды:\n");
+            PrintMenu(menu);
+
+            Console.Write("\nОжидается ввод: ");
+            userInput = GetCommandMenu(menu);
+
+            Console.Clear();
+
+            switch (userInput)
+            {
+                case CommandAddItemInCart:
+                    AddItemInCart(storage);
+                    break;
+
+                case CommandRemoveItemInCart:
+                    RemoveItemInCart();
+                    break;
+
+                case CommandShowCart:
+                    ShowCart();
+                    break;
+
+                case CommandExecutePayCart:
+                    moneyToPay = ExecutePayCart();
+                    break;
+
+                default:
+                    Console.Write("Требуется ввести номер команды или саму команду.\n\n");
+                    break;
+            }
+
+            Console.ReadKey();
+            Console.Clear();
+        }
+
+        return moneyToPay;
+    }
+
+    private void AddItemInCart(Inventory storage)
+    {
+        int itemCount;
+
+        storage.Show();
+
+        if (storage.TryGetItem(out Item foundItem))
+        {
+            Console.Write("Выберите кол-во предмета: ");
+            itemCount = UserUtils.ReadInt();
+
+            _cart.AddItem(foundItem, itemCount);
+            Console.Write("Предмет успешно добавлен в корзину.\n");
+        }
+        else
+        {
+            Console.Write("Не удалось найти предмет.\n");
+        }
+    }
+
+    private int ExecutePayCart()
+    {
+        int moneyToPay = _cart.CalculateCostItems();
+
+        Console.Write($"К оплате: {moneyToPay}$\n\n");
+
+        Console.Write($"Кол-во ваших денег: {_money}$\n");
+
+        if (CanToPay(moneyToPay))
+        {
+            Pay(moneyToPay);
+            Console.Write("Оплата прошла успешна.\n");
+            _isShopping = false;
+        }
+        else
+        {
+            Console.Write("Недостаточно средст для оплаты.\n");
+            Console.Write("Необходимо убрать часть предметов.\n");
+        }
+
+        return moneyToPay;
+    }
+
+    private void RemoveItemInCart()
+    {
+        int itemCount;
+
+        ShowCart();
+
+        if (CellsCountInCart > 0)
+        {
+            if (_cart.TryGetItem(out Item foundItem))
+            {
+                Console.Write("Выберите кол-во предмета: ");
+                itemCount = UserUtils.ReadInt();
+
+                _cart.RemoveItem(foundItem, itemCount);
+            }
+            else
+            {
+                Console.Write("Не удалось убрать предмет.\n");
+            }
+        } 
+    }
+
+    private void ShowCart()
     {
         Console.Write("Корзина покупателя.\n");
-        _basket.Show();
+        _cart.Show();
     }
 
-    public void AddItem(Item item, int itemCount = 1) =>
-        _bag.AddItem(item, itemCount);
-
-    public void TakeItem(Item item, int itemCount = 1) =>
-        _basket.AddItem(item, itemCount);
-
-    public void PutItem(Item item, int itemCount = 1) =>
-        _basket.RemoveItem(item, itemCount);
-
-    public bool TryGetItem(int indexItem, out Item foundItem) =>
-        _basket.TryGetItem(indexItem, out foundItem);
-
-    public void ClearBasket() =>
-        _basket.Clear();
-
-    public int SumPurchases() =>
-        _basket.CalculateCostItems();
-
-    public void TransferBasketInBag()
-    {
-        List<Cell> temporaryCells;
-
-        temporaryCells = _basket.Copy();
-
-        foreach (Cell cell in temporaryCells)
-            AddItem(cell.Item, cell.ItemCount);
-    }
-
-    public bool CanToPay(int moneyToPay) =>
+    private bool CanToPay(int moneyToPay) =>
         _money >= moneyToPay;
 
-    public void Pay(int moneyToPay) =>
+    private void Pay(int moneyToPay) =>
         _money -= moneyToPay > 0 ? moneyToPay : 0;
+
+    private void PrintMenu(string[] menu)
+    {
+        int numberCommand = 1;
+
+        for (int i = 0; i < menu.Length; i++)
+        {
+            Console.Write($"\t{numberCommand}. {menu[i]}\n");
+            numberCommand++;
+        }
+    }
+
+    private string GetCommandMenu(string[] menu)
+    {
+        string userInput = Console.ReadLine();
+
+        if (int.TryParse(userInput, out int number))
+            if (number > 0 && number <= menu.Length)
+                return menu[number - 1];
+
+        return userInput;
+    }
 }
 
 class Inventory
@@ -471,15 +432,17 @@ class Inventory
                 temporaryCell = cell;
         }
 
-        if (itemCount > 0 && itemCount <= temporaryCell?.ItemCount)
-            temporaryCell.DecreaseCount(itemCount);
+        if (temporaryCell != null)
+        {
+            if (itemCount > 0 && itemCount <= temporaryCell.ItemCount)
+                temporaryCell.DecreaseCount(itemCount);
+            else
+                Console.Write("Вы хотите убрать больше, чем это возможно.\n");
 
-        if (temporaryCell?.ItemCount <= 0)
-            _cells.Remove(temporaryCell);
+            if (temporaryCell.ItemCount <= 0)
+                _cells.Remove(temporaryCell);
+        }
     }
-
-    public void Clear() =>
-        _cells.Clear();
 
     public int CalculateCostItems()
     {
@@ -491,23 +454,18 @@ class Inventory
         return costItems;
     }
 
-    public List<Cell> Copy()
+    public bool TryGetItem(out Item foundItem)
     {
-        List<Cell> temporaryCells = new List<Cell>();
-        
-        foreach (Cell cell in _cells)
-            temporaryCells.Add(cell);
+        int numberItem;
 
-        return temporaryCells;
-    }
-
-    public bool TryGetItem(int indexItem, out Item foundItem)
-    {
         foundItem = null;
 
-        if (indexItem >= 0 && indexItem < _cells.Count)
+        Console.Write("Выберите номер предмета: ");
+        numberItem = UserUtils.ReadInt();
+
+        if (numberItem > 0 && numberItem <= _cells.Count)
         {
-            foundItem = _cells[indexItem].Item;
+            foundItem = _cells[numberItem - 1].Item;
             return true;
         }
         else
@@ -540,7 +498,7 @@ class Cell
 
     public void DecreaseCount(int itemCount)
     {
-        ItemCount -= itemCount < 0 ? itemCount : 0;
+        ItemCount -= itemCount > 0 ? itemCount : 0;
 
         if (ItemCount < 0)
             ItemCount = 0;
@@ -560,5 +518,5 @@ class Item
     public int Price { get; private set; }
 
     public void Show() =>
-            Console.Write($"Предмет: {_name}".PadRight(20) + $"Цена: {Price}\n");
+            Console.Write($"Предмет: {_name}".PadRight(20) + $"Цена: {Price}$\n");
 }
