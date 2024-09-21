@@ -18,8 +18,6 @@ namespace CS_JUNIOR
 
 static class UserUtils
 {
-    public const int HundredPercent = 100;
-
     private readonly static Random s_random;
 
     static UserUtils()
