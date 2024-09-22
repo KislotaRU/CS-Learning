@@ -363,11 +363,6 @@ class Inventory
 {
     private readonly List<Cell> _cells;
 
-    public Inventory(List<Cell> cells)
-    {
-        _cells = cells;
-    }
-
     public Inventory()
     {
         _cells = new List<Cell>();
