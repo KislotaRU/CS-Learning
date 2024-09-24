@@ -223,7 +223,7 @@ class SoldierFactory
             new Rifleman(),
             new Sniper(),
             new Grenadier(),
-            new Gunner(),
+            new Gunner()
         };
     }
 
