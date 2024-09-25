@@ -18,9 +18,6 @@ namespace CS_JUNIOR
 
 static class UserUtils
 {
-    public const int FullValue = 100;
-    public const int HalfValue = 50;
-
     private static readonly Random s_random;
 
     static UserUtils()
@@ -220,7 +217,7 @@ class Enclosure
             int numberAnimal = 1;
 
             Console.Write($"Вольер, где содержится вид животных: {_typeAnimal ?? "..."}\n" +
-                          $"Всего в данном вольере сожержится {_animals.Count}\n" +
+                          $"Кол-во особей: {_animals.Count}\n" +
                           $"Из них мужского пола {_malesCount} и женского пола {_femalesCount}\n" +
                           $"Животные данного вида в основном издают звук: {_soundAnimals}\n\n");
 
