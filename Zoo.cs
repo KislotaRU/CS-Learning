@@ -127,8 +127,14 @@ class Zoo
 
     private void CreateEnclosures()
     {
-        while (_enclosures.Count < _maxCountEnclosures)
-            _enclosures.Add(new Enclosure());
+        AnimalFactory animalFactory = new AnimalFactory();
+        List<Animal> temporaryAnimals;
+
+        for (int i = 0; i < _maxCountEnclosures; i++)
+        {
+            temporaryAnimals = animalFactory.Create(Enclosure.MaxCountAnimals);
+            _enclosures.Add(new Enclosure(temporaryAnimals));
+        }
     }
 
     private void ShowEnclosures()
@@ -194,20 +200,21 @@ class Zoo
 
 class Enclosure
 {
+    public const int MaxCountAnimals = 10;
+
     private readonly List<Animal> _animals;
-    private readonly int _maxCountAnimals = 10;
 
     private int _malesCount = 0;
     private int _femalesCount = 0;
 
-    private string _typeAnimal;
-    private string _soundAnimals;
+    private string _typeAnimal = "...";
+    private string _soundAnimal = "...";
 
-    public Enclosure()
+    public Enclosure(List<Animal> animals)
     {
-        _animals = new List<Animal>();
+        _animals = animals;
 
-        CreateAnimal();
+        ReadAnimals(animals);
     }
 
     public void ShowAnimals()
@@ -219,7 +226,7 @@ class Enclosure
             Console.Write($"Вольер, где содержится вид животных: {_typeAnimal ?? "..."}\n" +
                           $"Кол-во особей: {_animals.Count}\n" +
                           $"Из них мужского пола {_malesCount} и женского пола {_femalesCount}\n" +
-                          $"Животные данного вида в основном издают звук: {_soundAnimals}\n\n");
+                          $"Животные данного вида в основном издают звук: {_soundAnimal}\n\n");
 
             foreach (Animal animal in _animals)
             {
@@ -240,31 +247,20 @@ class Enclosure
     public void ShowInfo() =>
         Console.Write($"Вольер, где содержится вид животных: {_typeAnimal ?? "..."}\n");
 
-    private void CreateAnimal()
+    private void ReadAnimals(List<Animal> animals)
     {
-        AnimalFactory animalFactory = new AnimalFactory();
-        List<Animal> animals = animalFactory.GetAnimals();
-
-        int animalsCount = UserUtils.GenerateRandomNumber(maxNumber: _maxCountAnimals);
-        int index = UserUtils.GenerateRandomNumber(maxNumber: animals.Count);
-
-        Animal temporaryAnimal = animals[index];
-
-        if (animalsCount > 0)
+        if (animals.Count > 0)
         {
-            _typeAnimal = temporaryAnimal.Name;
-            _soundAnimals = temporaryAnimal.Sound;
-
-            while (_animals.Count < animalsCount)
-                _animals.Add(temporaryAnimal.Clone());
-
-            foreach (Animal animal in _animals)
+            foreach (Animal animal in animals)
             {
                 if (animal.Gender == Animal.GenderMale)
                     _malesCount++;
                 else
                     _femalesCount++;
             }
+
+            _typeAnimal = animals[0].Name;
+            _soundAnimal = animals[0].Sound;
         }
     }
 }
@@ -284,12 +280,16 @@ class AnimalFactory
         };
     }
 
-    public List<Animal> GetAnimals()
+    public List<Animal> Create(int animalsCount = 1)
     {
         List<Animal> temporaryAnimals = new List<Animal>();
+        int index;
 
-        foreach (Animal animal in _animals)
-            temporaryAnimals.Add(animal.Clone());
+        for (int i = 0; i < animalsCount; i++)
+        {
+            index = UserUtils.GenerateRandomNumber(maxNumber: _animals.Count);
+            temporaryAnimals.Add(_animals[index].Clone());
+        }
 
         return temporaryAnimals;
     }
