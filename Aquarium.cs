@@ -47,7 +47,7 @@ static class UserUtils
 class Aquarist
 {
     private readonly Aquarium _aquarium;
-    private readonly List<Fish> _fishesOfShop;
+    private List<Fish> _fishesOfShop;
 
     public Aquarist()
     {
@@ -132,15 +132,10 @@ class Aquarist
 
     private void UpdateShop()
     {
-        int fishesCount = 2;
-
         FishFactory fishFactory = new FishFactory();
-        List<Fish> temporaryFishes = fishFactory.Create(fishesCount);
+        int fishesCount = 5;
 
-        _fishesOfShop.Clear();
-
-        foreach (Fish fish in temporaryFishes)
-            _fishesOfShop.Add(fish);
+        _fishesOfShop = fishFactory.Create(fishesCount);
     }
 
     private void AddFish()
@@ -151,7 +146,7 @@ class Aquarist
 
         if (_fishesOfShop.Count > 0)
         {
-            Console.Write("Выберите рыбу, которую хотите добавить: ");
+            Console.Write("Выберите рыбу, которую хотите добавить к себе в аквариум: ");
 
             if (TryGetFish(out Fish foundFish))
             {
@@ -177,19 +172,19 @@ class Aquarist
     {
         ShowFishes(_aquarium);
 
-        Console.Write("Выберите рыбу, которую хотите убрать: ");
-
-        if (TryGetFish(_aquarium, out Fish foundFish))
+        if (_aquarium.CanRemoveFish)
         {
-            if (_aquarium.CanRemoveFish)
+            Console.Write("Выберите рыбу, которую хотите убрать: ");
+
+            if (TryGetFish(_aquarium, out Fish foundFish))
             {
                 _aquarium.RemoveFish(foundFish);
                 Console.Write("Вы успешно убрали рыбу из аквариума.\n");
             }
-            else
-            {
-                Console.Write("Не удалось убрать рыбу из аквариума.\n");
-            }
+        }
+        else
+        {
+            Console.Write("Ваш аквариум пуст.\n");
         }
     }
 
