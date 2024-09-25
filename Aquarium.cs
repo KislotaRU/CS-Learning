@@ -355,7 +355,7 @@ class FishFactory
         List<Fish> temporaryFishes = new List<Fish>();
         int index;
 
-        while (temporaryFishes.Count < countFish)
+        for (int i = 0; i < countFish; i++)
         {
             index = UserUtils.GenerateRandomNumber(maxNumber: _fishes.Count);
 
