@@ -358,7 +358,6 @@ class FishFactory
         for (int i = 0; i < countFish; i++)
         {
             index = UserUtils.GenerateRandomNumber(maxNumber: _fishes.Count);
-
             temporaryFishes.Add(_fishes[index].Clone());
         }
 
