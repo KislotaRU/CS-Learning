@@ -47,26 +47,26 @@ static class UserUtils
 class Aquarist
 {
     private readonly Aquarium _aquarium;
-    private Aquarium _aquariumShop;
+    private readonly List<Fish> _fishesOfShop;
 
     public Aquarist()
     {
-        int _maxCountFishes = 20;
+        _aquarium = new Aquarium();
+        _fishesOfShop = new List<Fish>();
 
-        _aquarium = new Aquarium(_maxCountFishes);
-        _aquariumShop = new Aquarium();
+        UpdateShop();
     }
 
     public void Work()
     {
-        const string CommandUpdateShop = "Обновить магазин";
+        const string CommandCelebrateNewYear = "Новый год";
         const string CommandAddFish = "Добавить рыбу";
         const string CommandRemoveFish = "Убрать рыбу";
         const string CommandExit = "Завершить работу аквариума";
 
         string[] menu = new string[]
         {
-            CommandUpdateShop,
+            CommandCelebrateNewYear,
             CommandAddFish,
             CommandRemoveFish,
             CommandExit
@@ -83,7 +83,7 @@ class Aquarist
             Console.Write($"Кол-во лет работы вашего аквариума: {_aquarium.SimulateTime}\n" +
                           $"Кол-во уникальных рыб за это время: {_aquarium.UniqueFishesCount}\n\n");
 
-            Show(_aquarium);
+            ShowFishes(_aquarium);
 
             Console.Write("Доступные команды:\n");
             PrintMenu(menu);
@@ -95,8 +95,8 @@ class Aquarist
 
             switch (userInput)
             {
-                case CommandUpdateShop:
-                    UpdateShop();
+                case CommandCelebrateNewYear:
+                    CelebrateNewYear();
                     break;
 
                 case CommandAddFish:
@@ -122,47 +122,66 @@ class Aquarist
         }
     }
 
-    private void UpdateShop()
+    private void CelebrateNewYear()
     {
-        _aquariumShop = new Aquarium();
+        UpdateShop();
 
         _aquarium.GrowUpFishes();
+        Console.Write("Наступил новый год.\n");
     }
 
-    private bool AddFish()
+    private void UpdateShop()
     {
-        Console.Write("\t\tМагазин рыб\n\n");
+        int fishesCount = 2;
 
-        Show(_aquariumShop);
+        FishFactory fishFactory = new FishFactory();
+        List<Fish> temporaryFishes = fishFactory.Create(fishesCount);
 
-        Console.Write("Выберите рыбу, которую хотите добавить: ");
+        _fishesOfShop.Clear();
 
-        if (TryGetFish(_aquariumShop, out Fish foundFish))
+        foreach (Fish fish in temporaryFishes)
+            _fishesOfShop.Add(fish);
+    }
+
+    private void AddFish()
+    {
+        Console.Write("\t\tРыбы из магазина\n\n");
+
+        ShowFishes();
+
+        if (_fishesOfShop.Count > 0)
         {
-            if (_aquarium.CanAddFish())
+            Console.Write("Выберите рыбу, которую хотите добавить: ");
+
+            if (TryGetFish(out Fish foundFish))
             {
-                _aquarium.AddFish(foundFish);
-                _aquariumShop.RemoveFish(foundFish);
-                Console.Write("Вы успешно добавили рыбу в аквариум.\n");
-            }
-            else
-            {
-                Console.Write("Не удалось добавить рыбу.\n");
+                if (_aquarium.CanAddFish)
+                {
+                    _aquarium.AddFish(foundFish);
+                    _fishesOfShop.Remove(foundFish);
+                    Console.Write("Вы успешно добавили рыбу в аквариум.\n");
+                }
+                else
+                {
+                    Console.Write("Не удалось добавить рыбу.\n");
+                }
             }
         }
-
-        return false;
+        else
+        {
+            Console.Write("Рыбы из магазина закончились.\n");
+        }
     }
 
     private void RemoveFish()
     {
-        Show(_aquarium);
+        ShowFishes(_aquarium);
 
         Console.Write("Выберите рыбу, которую хотите убрать: ");
 
         if (TryGetFish(_aquarium, out Fish foundFish))
         {
-            if (_aquarium.CanRemoveFish())
+            if (_aquarium.CanRemoveFish)
             {
                 _aquarium.RemoveFish(foundFish);
                 Console.Write("Вы успешно убрали рыбу из аквариума.\n");
@@ -174,11 +193,54 @@ class Aquarist
         }
     }
 
-    private void Show(Aquarium aquarium) =>
+    private void ShowFishes(Aquarium aquarium) =>
         aquarium.Show();
+
+    private void ShowFishes()
+    {
+        Console.Write("Рыбы в аквариуме:\n");
+
+        if (_fishesOfShop.Count > 0)
+        {
+            int numberFish = 1;
+
+            foreach (Fish fish in _fishesOfShop)
+            {
+                Console.Write($"\t{numberFish}. ".PadRight(5));
+                fish.Show();
+
+                numberFish++;
+            }
+
+            Console.WriteLine();
+        }
+        else
+        {
+            Console.Write("\tАквариум пуст.\n\n");
+        }
+    }
 
     private bool TryGetFish(Aquarium aquarium, out Fish foundFish) =>
         aquarium.TryGetFish(out foundFish);
+
+    private bool TryGetFish(out Fish foundFish)
+    {
+        int numberFish = UserUtils.ReadInt();
+
+        foundFish = null;
+
+        if (numberFish > 0 && numberFish <= _fishesOfShop.Count)
+        {
+            foundFish = _fishesOfShop[numberFish - 1];
+            return true;
+        }
+        else
+        {
+            Console.Write("Под таким номером нет рыбы.\n");
+        }
+
+        return false;
+    }
 
     private void PrintMenu(string[] menu)
     {
@@ -208,22 +270,17 @@ class Aquarist
 class Aquarium
 {
     private readonly List<Fish> _fishes;
-    private readonly int _maxCountFishes = 10;
-
-    public Aquarium(int fishCount)
-    {
-        _maxCountFishes = fishCount;
-        _fishes = new List<Fish>();
-    }
+    private readonly int _maxCountFishes = 20;
 
     public Aquarium()
     {
         _fishes = new List<Fish>();
-        CreateFishes();
     }
 
     public int SimulateTime { get; private set; }
     public int UniqueFishesCount { get; private set; }
+    public bool CanAddFish => _fishes.Count < _maxCountFishes;
+    public bool CanRemoveFish => _fishes.Count > 0;
 
     public void GrowUpFishes()
     {
@@ -238,12 +295,6 @@ class Aquarium
 
     public void RemoveFish(Fish fish) =>
         _fishes.Remove(fish);
-
-    public bool CanAddFish() =>
-        _fishes.Count < _maxCountFishes;
-
-    public bool CanRemoveFish() =>
-        _fishes.Count > 0;
 
     public void Show()
     {
@@ -287,18 +338,6 @@ class Aquarium
 
         return false;
     }
-
-    private void CreateFishes()
-    {
-        FishFactory fishFactory = new FishFactory();
-
-        while (_fishes.Count < _maxCountFishes)
-        {
-            Fish fish = fishFactory.CreateFish();
-
-            _fishes.Add(fish);
-        }
-    }
 }
 
 class FishFactory
@@ -316,11 +355,19 @@ class FishFactory
         };
     }
 
-    public Fish CreateFish()
+    public List<Fish> Create(int countFish = 1)
     {
-        int index = UserUtils.GenerateRandomNumber(maxNumber: _fishes.Count);
+        List<Fish> temporaryFishes = new List<Fish>();
+        int index;
 
-        return _fishes[index].Clone();
+        while (temporaryFishes.Count < countFish)
+        {
+            index = UserUtils.GenerateRandomNumber(maxNumber: _fishes.Count);
+
+            temporaryFishes.Add(_fishes[index].Clone());
+        }
+
+        return temporaryFishes;
     }
 }
 
