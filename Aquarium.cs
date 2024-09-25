@@ -47,15 +47,14 @@ static class UserUtils
 class Aquarist
 {
     private readonly Aquarium _aquarium;
-    private readonly Aquarium _aquariumShop;
+    private Aquarium _aquariumShop;
 
     public Aquarist()
     {
-        int _maxCountFishesAquarium = 20;
-        int _maxCountFishesShop = 10;
+        int _maxCountFishes = 20;
 
-        _aquarium = new Aquarium(_maxCountFishesAquarium);
-        _aquariumShop = new Aquarium(_maxCountFishesShop);
+        _aquarium = new Aquarium(_maxCountFishes);
+        _aquariumShop = new Aquarium();
     }
 
     public void Work()
@@ -125,8 +124,7 @@ class Aquarist
 
     private void UpdateShop()
     {
-        _aquariumShop.Clear();
-        _aquariumShop.CreateFishes();
+        _aquariumShop = new Aquarium();
 
         _aquarium.GrowUpFishes();
     }
@@ -210,12 +208,18 @@ class Aquarist
 class Aquarium
 {
     private readonly List<Fish> _fishes;
-    private readonly int _maxCountFishes;
+    private readonly int _maxCountFishes = 10;
 
     public Aquarium(int fishCount)
     {
         _maxCountFishes = fishCount;
         _fishes = new List<Fish>();
+    }
+
+    public Aquarium()
+    {
+        _fishes = new List<Fish>();
+        CreateFishes();
     }
 
     public int SimulateTime { get; private set; }
@@ -284,10 +288,7 @@ class Aquarium
         return false;
     }
 
-    public void Clear() =>
-        _fishes.Clear();
-
-    public void CreateFishes()
+    private void CreateFishes()
     {
         FishFactory fishFactory = new FishFactory();
 
