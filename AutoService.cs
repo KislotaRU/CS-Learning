@@ -660,12 +660,6 @@ class Cell
 {
     private readonly int _maxCountPart = 10;
 
-    public Cell(Part part, int partCount = 0)
-    {
-        Part = part;
-        PartCount = partCount;
-    }
-
     public Cell(Part part)
     {
         Part = part;
