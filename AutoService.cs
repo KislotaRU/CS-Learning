@@ -224,19 +224,19 @@ class AutoService
 
     private bool CanServeCar(Car car)
     {
-        ConsoleKey CommandYes = ConsoleKey.Y;
-        ConsoleKey userInput;
+        string CommandYes = "Да";
+        string userInput;
 
         ShowCar(car);
 
         Console.Write("Отказать клиенту в обслуживани?\n");
 
         Console.Write("Доступные команды:\n");
-        Console.Write($"\t{CommandYes} - да\n" +
+        Console.Write($"\t{CommandYes} - отказать\n" +
                       $"\tЛюбая другая кнопка - нет\n\n");
         
         Console.Write("Ожидается ввод: ");
-        userInput = Console.ReadKey().Key;
+        userInput = Console.ReadLine();
 
         Console.Clear();
 
