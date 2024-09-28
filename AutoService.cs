@@ -63,20 +63,22 @@ class PartFactory
         };
     }
 
-    public List<Part> Create(bool isCar = false)
+    public List<Part> Create()
     {
         List<Part> temporaryParts = new List<Part>();
 
-        if (isCar)
-        {
-            foreach (Part part in _parts)
-                temporaryParts.Add(part.Clone(part.Name, 0));
-        }
-        else
-        {
-            foreach (Part part in _parts)
-                temporaryParts.Add(part.Clone(part.Name, part.Price));
-        }
+        foreach (Part part in _parts)
+            temporaryParts.Add(part.Clone(part.Name, part.Price));
+
+        return temporaryParts;
+    }
+
+    public List<Part> CreateCar()
+    {
+        List<Part> temporaryParts = new List<Part>();
+
+        foreach (Part part in _parts)
+            temporaryParts.Add(part.Clone(part.Name, 0));
 
         return temporaryParts;
     }
@@ -226,7 +228,7 @@ class AutoService
 
     private bool CanServeCar(Car car)
     {
-        string CommandYes = "Да";
+        string commandReject = "Отказать";
         string userInput;
 
         ShowCar(car);
@@ -234,18 +236,15 @@ class AutoService
         Console.Write("Отказать клиенту в обслуживани?\n");
 
         Console.Write("Доступные команды:\n");
-        Console.Write($"\t{CommandYes} - отказать\n" +
-                      $"\tЛюбая другая кнопка - нет\n\n");
+        Console.Write($"\t{commandReject} - отказать\n" +
+                      $"\tЛюбая другая кнопка - продолжить\n\n");
         
         Console.Write("Ожидается ввод: ");
         userInput = Console.ReadLine();
 
         Console.Clear();
 
-        if (userInput == CommandYes)
-            return false;
-        else
-            return true;
+        return userInput != commandReject;
     }
 
     private bool TryFixCar(Car car, out int timeCount)
@@ -422,8 +421,7 @@ class AutoService
 
     private void CreateCar()
     {
-        bool isCar = true;
-        Car car = new Car(_partFactory.Create(isCar));
+        Car car = new Car(_partFactory.CreateCar());
 
         _cars.Enqueue(car);
     }
