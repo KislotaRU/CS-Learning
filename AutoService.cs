@@ -44,11 +44,11 @@ static class UserUtils
     }
 }
 
-static class PartFactory
+class PartFactory
 {
-    private static readonly List<Part> _parts;
+    private readonly List<Part> _parts;
 
-    static PartFactory()
+    public PartFactory()
     {
         _parts = new List<Part>()
         {
@@ -63,19 +63,19 @@ static class PartFactory
         };
     }
 
-    public static List<Part> Create(Car car = null)
+    public List<Part> Create(bool isCar = false)
     {
         List<Part> temporaryParts = new List<Part>();
 
-        if (car == null)
+        if (isCar)
         {
             foreach (Part part in _parts)
-                temporaryParts.Add(part.Clone(part.Name, part.Price));
+                temporaryParts.Add(part.Clone(part.Name, 0));
         }
         else
         {
             foreach (Part part in _parts)
-                temporaryParts.Add(part.Clone(part.Name, 0));
+                temporaryParts.Add(part.Clone(part.Name, part.Price));
         }
 
         return temporaryParts;
@@ -84,6 +84,7 @@ static class PartFactory
 
 class AutoService
 {
+    private readonly PartFactory _partFactory;
     private readonly Inventory _storage;
     private readonly Queue<Car> _cars;
 
@@ -98,6 +99,7 @@ class AutoService
 
     public AutoService()
     {
+        _partFactory = new PartFactory();
         _storage = CreateStorage();
         _cars = new Queue<Car>();
     }
@@ -187,7 +189,7 @@ class AutoService
                       $"Кол-во денег за проведённую работу: {_sumMoneyForRepair}$\n" +
                       $"Кол-во денег за штрафы: {_sumMoneyOfFines}$\n" +
                       $"{new string('-', 20)}\n"+
-                      $"Итог: {profit}\n\n");
+                      $"Итог: {profit}$\n\n");
     }
 
     private void ShowCar(Car car)
@@ -420,13 +422,14 @@ class AutoService
 
     private void CreateCar()
     {
-        Car car = new Car(PartFactory.Create(new Car()));
+        bool isCar = true;
+        Car car = new Car(_partFactory.Create(isCar));
 
         _cars.Enqueue(car);
     }
 
     private Inventory CreateStorage() =>
-        new Inventory(PartFactory.Create());
+        new Inventory(_partFactory.Create());
 
     private void PrintMenu(string[] menu)
     {
@@ -517,7 +520,7 @@ class Car
         if (partCar.Name == partAutoService.Name && partCar.IsBroken)
         {
             _brokenParts.Remove(partCar);
-            _parts.Add(partCar.Clone(partCar.Name, partCar.Price, partAutoService.Condition));
+            _parts.Add(partAutoService);
 
             return true;
         }
