@@ -467,12 +467,6 @@ class Car
         _brokenParts = BreakParts();
     }
 
-    public Car()
-    {
-        _parts = new List<Part>();
-        _brokenParts = new List<Part>();
-    }
-
     public int BrokenPartsCount => _brokenParts.Count;
     public bool IsFixedCar => _brokenParts.Count == 0;
 
