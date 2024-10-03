@@ -19,23 +19,23 @@ namespace CS_JUNIOR
 
 public class CriminalDatabase
 {
-    private readonly List<Criminal> _criminals;
+    private List<Criminal> _criminals;
 
     public CriminalDatabase()
     {
         _criminals = new List<Criminal>()
         {
-            new Criminal("Блохин", "Юстиниан", "Петрович", true),
+            new Criminal("Блохин", "Юстиниан", "Петрович", true, "Вандализм"),
             new Criminal("Беляев", "Лев", "Станиславович", false, "Антиправительственное"),
-            new Criminal("Тимофеева", "Алёна", "Федосеевна", false),
+            new Criminal("Тимофеева", "Алёна", "Федосеевна", false, "Хулиганство"),
             new Criminal("Семёнова", "Серафима", "Иринеевна", true, "Антиправительственное"),
             new Criminal("Якушев", "Виктор", "Агафонович", true, "Антиправительственное"),
             new Criminal("Королёв", "Игорь", "Альвианович", false, "Антиправительственное"),
-            new Criminal("Яковлев", "Ипполит", "Куприянович", false),
+            new Criminal("Яковлев", "Ипполит", "Куприянович", false, "Кража"),
             new Criminal("Ефремов", "Алан", "Александрович", false, "Антиправительственное"),
-            new Criminal("Пономарёва", "Олеся", "Евгеньевна", true),
-            new Criminal("Захаров", "Юстин", "Андреевич", true),
-            new Criminal("Орехов", "Адам", "Валентинович", false),
+            new Criminal("Пономарёва", "Олеся", "Евгеньевна", true, "Антиправительственное"),
+            new Criminal("Захаров", "Юстин", "Андреевич", true, "Кража"),
+            new Criminal("Орехов", "Адам", "Валентинович", false, "Разбой"),
             new Criminal("Власова", "Даниэла", "Александровна", false, "Антиправительственное"),
             new Criminal("Киселёв", "Митрофан", "Арсеньевич", true, "Антиправительственное"),
             new Criminal("Жданова", "Елизавета", "Наумовна", true, "Антиправительственное")
@@ -122,22 +122,13 @@ public class CriminalDatabase
     {
         string typeCrime = "Антиправительственное";
 
-        Console.Write("Преступники до амнистии:\n");
+        Console.Write($"Преступники до амнистии:\n");
         Show();
 
-        ExecuteAmnesty(typeCrime);
+        _criminals = _criminals.Where(criminal => criminal.TypeCrime != typeCrime).ToList();
 
-        Console.Write("Преступники после амнистии:\n");
+        Console.Write($"Преступники после амнистии:\n");
         Show();
-    }
-
-    private void ExecuteAmnesty(string typeCrime)
-    {
-        List<Criminal> prisonersCriminals;
-        prisonersCriminals = _criminals.Where(criminal => criminal.TypeCrime == typeCrime).ToList();
-
-        foreach (Criminal criminal in prisonersCriminals)
-            criminal.Amnesty(typeCrime);
     }
 
     private void PrintMenu(string[] menu)
@@ -190,14 +181,5 @@ public class Criminal
                       $"{_middleName}".PadRight(15) +
                       $"Статус: {(IsPrisoner ? "Заключён" : "Свободен")}".PadRight(17) +
                       $"Тип преступления: {TypeCrime ?? "Отсутствует"}\n");
-    }
-
-    public void Amnesty(string typeCrime)
-    {
-        if (TypeCrime == typeCrime)
-        {
-            TypeCrime = null;
-            IsPrisoner = false;
-        }
     }
 }
