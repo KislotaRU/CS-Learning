@@ -17,24 +17,6 @@ namespace CS_JUNIOR
     }
 }
 
-public static class UserUtils
-{
-    public static int ReadInt()
-    {
-        int number;
-
-        string userInput = Console.ReadLine();
-
-        while (int.TryParse(userInput, out number) == false)
-        {
-            Console.Write("Требуется ввести число: ");
-            userInput = Console.ReadLine();
-        }
-
-        return number;
-    }
-}
-
 public class CriminalDatabase
 {
     private readonly List<Criminal> _criminals;
