@@ -92,7 +92,7 @@ public class CriminalDataBase
             switch (userInput)
             {
                 case CommandShow:
-                    Show();
+                    Show(_criminals);
                     break;
 
                 case CommandSearch:
@@ -114,11 +114,11 @@ public class CriminalDataBase
         }
     }
 
-    private void Show()
+    private void Show(List<Criminal> criminals)
     {
         int numberCriminal = 1;
 
-        foreach (Criminal criminal in _criminals)
+        foreach (Criminal criminal in criminals)
         {
             Console.Write($"{numberCriminal}. ".PadRight(5));
             criminal.Show();
@@ -131,7 +131,37 @@ public class CriminalDataBase
 
     private void Search()
     {
-        //Console.Write();
+        List<Criminal> temporaryCriminals;
+        int height;
+        int weight;
+        string nationality;
+
+        Console.Write("Поиск преступников на свободе:\n");
+
+        Console.Write("Введите рост: ");
+        height = UserUtils.ReadInt();
+
+        Console.Write("Введите вес: ");
+        weight = UserUtils.ReadInt();
+
+        Console.Write("Введите национальность: ");
+        nationality = Console.ReadLine();
+
+        temporaryCriminals = GetCriminalsBySearch(height, weight, nationality);
+
+        Show(temporaryCriminals);
+    }
+
+    private List<Criminal> GetCriminalsBySearch(int height, int weight, string nationality)
+    {
+        List<Criminal> temporaryCriminals = new List<Criminal>();
+
+        temporaryCriminals = _criminals.Where(criminal => criminal.Height == height).Select(criminal => criminal).ToList();
+        temporaryCriminals = temporaryCriminals.Where(criminal => criminal.Weight == weight).Select(criminal => criminal).ToList();
+        temporaryCriminals = temporaryCriminals.Where(criminal => criminal.Nationality == nationality).Select(criminal => criminal).ToList();
+        temporaryCriminals = temporaryCriminals.Where(criminal => criminal.IsPrisoner == false).Select(criminal => criminal).ToList();
+
+        return temporaryCriminals;
     }
 
     private void PrintMenu(string[] menu)
@@ -164,30 +194,31 @@ public class Criminal
     private readonly string _lastName;
     private readonly string _firstName;
     private readonly string _middleName;
-    private readonly int _height;
-    private readonly int _weight;
-    private readonly string _nationality;
-    private readonly bool _isPrisoner;
 
     public Criminal(string lastName, string firstName, string middleName, int height, int weight, string nationality, bool isPrisoner)
     {
         _lastName = lastName;
         _firstName = firstName;
         _middleName = middleName;
-        _height = height;
-        _weight = weight;
-        _nationality = nationality;
-        _isPrisoner = isPrisoner;
+        Height = height;
+        Weight = weight;
+        Nationality = nationality;
+        IsPrisoner = isPrisoner;
     }
+
+    public int Height { get; }
+    public int Weight { get; }
+    public string Nationality { get; }
+    public bool IsPrisoner { get; }
 
     public void Show()
     {
         Console.Write($"{_lastName}".PadRight(15) +
             $"{_firstName}".PadRight(15) +
             $"{_middleName}".PadRight(15) +
-            $"Рост: {_height}".PadRight(10) +
-            $"Вес: {_weight}".PadRight(10) +
-            $"Национальность: {_nationality}".PadRight(25) +
-            $"Статус: {(_isPrisoner ? "Заключён" : "Свободен")}\n");
+            $"Рост: {Height}".PadRight(10) +
+            $"Вес: {Weight}".PadRight(10) +
+            $"Национальность: {Nationality}".PadRight(25) +
+            $"Статус: {(IsPrisoner ? "Заключён" : "Свободен")}\n");
     }
 }
