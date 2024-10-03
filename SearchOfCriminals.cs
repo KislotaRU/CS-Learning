@@ -8,7 +8,7 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            CriminalDataBase criminalDataBase = new CriminalDataBase();
+            CriminalDatabase criminalDataBase = new CriminalDatabase();
 
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -35,11 +35,11 @@ public static class UserUtils
     }
 }
 
-public class CriminalDataBase
+public class CriminalDatabase
 {
     private readonly List<Criminal> _criminals;
 
-    public CriminalDataBase()
+    public CriminalDatabase()
     {
         _criminals = new List<Criminal>()
         {
@@ -118,12 +118,19 @@ public class CriminalDataBase
     {
         int numberCriminal = 1;
 
-        foreach (Criminal criminal in criminals)
+        if (criminals.Count > 0)
         {
-            Console.Write($"{numberCriminal}. ".PadRight(5));
-            criminal.Show();
+            foreach (Criminal criminal in criminals)
+            {
+                Console.Write($"{numberCriminal}. ".PadRight(5));
+                criminal.Show();
 
-            numberCriminal++;
+                numberCriminal++;
+            }
+        }
+        else
+        {
+            Console.Write("Нет ни одной записи.\n");
         }
 
         Console.WriteLine();
@@ -131,7 +138,7 @@ public class CriminalDataBase
 
     private void Search()
     {
-        List<Criminal> temporaryCriminals;
+        List<Criminal> foundCriminals;
         int height;
         int weight;
         string nationality;
@@ -147,21 +154,19 @@ public class CriminalDataBase
         Console.Write("Введите национальность: ");
         nationality = Console.ReadLine();
 
-        temporaryCriminals = GetCriminalsBySearch(height, weight, nationality);
+        foundCriminals = GetCriminalsBySearch(height, weight, nationality);
 
-        Show(temporaryCriminals);
+        Console.Write("\nРезультат поиска:\n");
+        Show(foundCriminals);
     }
 
-    private List<Criminal> GetCriminalsBySearch(int height, int weight, string nationality)
+    private List<Criminal> GetCriminalsBySearch(int height, int weight, string nationality, bool isPrisoner = false)
     {
-        List<Criminal> temporaryCriminals = new List<Criminal>();
-
-        temporaryCriminals = _criminals.Where(criminal => criminal.Height == height).Select(criminal => criminal).ToList();
-        temporaryCriminals = temporaryCriminals.Where(criminal => criminal.Weight == weight).Select(criminal => criminal).ToList();
-        temporaryCriminals = temporaryCriminals.Where(criminal => criminal.Nationality == nationality).Select(criminal => criminal).ToList();
-        temporaryCriminals = temporaryCriminals.Where(criminal => criminal.IsPrisoner == false).Select(criminal => criminal).ToList();
-
-        return temporaryCriminals;
+        return _criminals.Where(criminal =>
+                                criminal.Height == height &&
+                                criminal.Weight == weight &&
+                                criminal.Nationality == nationality &&
+                                criminal.IsPrisoner == isPrisoner).ToList();
     }
 
     private void PrintMenu(string[] menu)
