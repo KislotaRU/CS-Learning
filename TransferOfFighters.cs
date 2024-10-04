@@ -146,13 +146,21 @@ public class SoldierDatabase
 
     private void JoinSquadsByLetter(string letter)
     {
-        List<Soldier> temporarySoldiers = _firstSquad.Where(soldier => soldier.Name.ToLower().StartsWith(letter.ToLower())).ToList();
+        List<Soldier> temporarySoldiers;
 
-        _firstSquad = _firstSquad.Where(soldier => soldier.Name.ToLower().StartsWith(letter.ToLower()) == false).ToList();
+        Console.Write("Перевод солдат из первого отряда во второй по фильтру:\n" +
+                     $">Имя начинается с \"{letter}\"\n\n");
+
+        Console.Write("До перевода:\n");
+        Show(_firstSquad, _secondSquad);
+
+        temporarySoldiers = _firstSquad.Where(soldier => soldier.Name.ToLower().StartsWith(letter.ToLower())).ToList();
         _secondSquad = _secondSquad.Union(temporarySoldiers).ToList();
 
-        Console.Write($"В основной отряд были добавлены все солдаты из других отрядов по фильру:\n" +
-                      $">Имя начинается с \"{letter}\"");
+        _firstSquad = _firstSquad.Where(soldier => soldier.Name.ToLower().StartsWith(letter.ToLower()) == false).ToList();
+
+        Console.Write("После перевода:\n");
+        Show(_firstSquad, _secondSquad);
     }
     
     private void PrintMenu(string[] menu)
