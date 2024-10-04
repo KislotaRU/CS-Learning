@@ -261,10 +261,10 @@ public class Patient
 
     public void Show()
     {
-        Console.Write($"{LastName}".PadRight(15) +
-                      $"{_firstName}".PadRight(15) +
-                      $"{_middleName}".PadRight(15) +
-                      $"Возраст: {Age}".PadRight(12) +
-                      $"Заболевание: {Disease}\n");
+        Console.Write($"{LastName}".PadRight(12) +
+                      $"| {_firstName}".PadRight(12) +
+                      $"| {_middleName}".PadRight(16) +
+                      $"| Возраст: {Age}".PadRight(14) +
+                      $"| Заболевание: {Disease}\n");
     }
 }
