@@ -63,13 +63,17 @@ public class PatientDatabase
     public void Work()
     {
         const string CommandShow = "Показать всех";
-        const string CommandSearch = "Найти по запросу";
+        const string CommandSortByLastName = "Отсортировать по ФИО";
+        const string CommandSortByAge = "Отсортировать по возрасту";
+        const string CommandSearchByDisease = "Найти по заболеванию";
         const string CommandExit = "Завершить работу";
 
         string[] menu = new string[]
         {
             CommandShow,
-            CommandSearch,
+            CommandSortByLastName,
+            CommandSortByAge,
+            CommandSearchByDisease,
             CommandExit
         };
 
@@ -95,8 +99,16 @@ public class PatientDatabase
                     Show(_patients);
                     break;
 
-                case CommandSearch:
-                    Search();
+                case CommandSortByLastName:
+                    SortByLastName();
+                    break;
+
+                case CommandSortByAge:
+                    SortByAge();
+                    break;
+
+                case CommandSearchByDisease:
+                    SearchByDisease();
                     break;
 
                 case CommandExit:
@@ -136,84 +148,36 @@ public class PatientDatabase
         Console.WriteLine();
     }
 
-    private void Search()
+    private void SortByLastName()
     {
-        const string CommandSearchByLastName = "Фамилия";
-        const string CommandSearchByAge = "Возраст";
-        const string CommandSearchByDisease = "Заболевание";
+        List<Patient> temporaryPatients;
+        temporaryPatients = _patients.OrderBy(patient => patient.LastName).ToList();
 
-        string[] menu = new string[]
-        {
-            CommandSearchByLastName,
-            CommandSearchByAge,
-            CommandSearchByDisease,
-        };
-
-        string userInput;
-
-        List<Patient> foundPatients = new List<Patient>();
-
-        Console.Write("\t\tПараметры поиска.\n\n");
-
-        Console.Write("Доступные параметры:\n");
-        PrintMenu(menu);
-
-        Console.Write("Ожидается ввод:\n");
-        userInput = GetCommandMenu(menu);
-
-        Console.Clear();
-
-        switch (userInput)
-        {
-            case CommandSearchByLastName:
-                foundPatients = SearchByLastName();
-                break;
-
-            case CommandSearchByAge:
-                foundPatients = SearchByAge();
-                break;
-
-            case CommandSearchByDisease:
-                foundPatients = SearchByDisease();
-                break;
-
-            default:
-                Console.Write("Требуется ввести номер параметра или сам параметр.\n");
-                break;
-        }
-
-        Console.Write("Найденные пациенты по запросу:\n");
-        Show(foundPatients);
+        Console.Write("Отсортированные пациенты по ФИО:\n");
+        Show(temporaryPatients);
     }
 
-    private List<Patient> SearchByLastName()
+    private void SortByAge()
     {
-        string lastName;
+        List<Patient> temporaryPatients;
+        temporaryPatients = _patients.OrderBy(patient => patient.Age).ToList();
 
-        Console.Write("Введите фамилию: ");
-        lastName = Console.ReadLine();
-
-        return _patients.Where(patient => patient.LastName.ToLower() == lastName.ToLower()).ToList();
+        Console.Write("Отсортированные пациенты по возрасту:\n");
+        Show(temporaryPatients);
     }
 
-    private List<Patient> SearchByAge()
+    private void SearchByDisease()
     {
-        int age;
-
-        Console.Write("Введите возраст: ");
-        age = UserUtils.ReadInt();
-
-        return _patients.Where(patient => patient.Age == age).ToList();
-    }
-
-    private List<Patient> SearchByDisease()
-    {
+        List<Patient> foundPatients;
         string disease;
 
         Console.Write("Введите заболевание: ");
         disease = Console.ReadLine();
 
-        return _patients.Where(patient => patient.Disease.ToLower() == disease.ToLower()).ToList();
+        foundPatients = _patients.Where(patient => patient.Disease.ToLower() == disease.ToLower()).ToList();
+
+        Console.Write("Найденные пациенты по запросу:\n");
+        Show(foundPatients);
     }
 
     private void PrintMenu(string[] menu)
