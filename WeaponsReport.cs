@@ -8,20 +8,20 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            ConservaDatabase conservaDatabase = new ConservaDatabase();
+            SoldierDatabase soldierDatabase = new SoldierDatabase();
 
             Console.ForegroundColor = ConsoleColor.White;
 
-            conservaDatabase.Work();
+            soldierDatabase.Work();
         }
     }
 }
 
-public class ConservaDatabase
+public class SoldierDatabase
 {
     private readonly List<Soldier> _soldiers;
 
-    public ConservaDatabase()
+    public SoldierDatabase()
     {
         _soldiers = new List<Soldier>()
         {
