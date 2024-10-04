@@ -150,8 +150,7 @@ public class PatientDatabase
 
     private void SortByLastName()
     {
-        List<Patient> temporaryPatients;
-        temporaryPatients = _patients.OrderBy(patient => patient.LastName).ToList();
+        List<Patient> temporaryPatients = _patients.OrderBy(patient => patient.LastName).ToList();
 
         Console.Write("Отсортированные пациенты по ФИО:\n");
         Show(temporaryPatients);
@@ -159,8 +158,7 @@ public class PatientDatabase
 
     private void SortByAge()
     {
-        List<Patient> temporaryPatients;
-        temporaryPatients = _patients.OrderBy(patient => patient.Age).ToList();
+        List<Patient> temporaryPatients = _patients.OrderBy(patient => patient.Age).ToList();
 
         Console.Write("Отсортированные пациенты по возрасту:\n");
         Show(temporaryPatients);
