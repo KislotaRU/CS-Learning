@@ -77,7 +77,7 @@ public class ConservaDatabase
             switch (userInput)
             {
                 case CommandShow:
-                    Show(_soldiers);
+                    Show();
                     break;
 
                 case CommandShowNameAndRank:
@@ -99,13 +99,13 @@ public class ConservaDatabase
         }
     }
 
-    private void Show(List<Soldier> soldiers)
+    private void Show()
     {
         int numberSoldier = 1;
 
-        if (soldiers.Count > 0)
+        if (_soldiers.Count > 0)
         {
-            foreach (Soldier soldier in soldiers)
+            foreach (Soldier soldier in _soldiers)
             {
                 Console.Write($"\t{numberSoldier}. ".PadRight(5));
                 soldier.Show();
