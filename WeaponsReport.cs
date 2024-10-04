@@ -170,7 +170,7 @@ public class Soldier
     private readonly string _weapon;
     private readonly int _serviceLifeInMonths;
 
-    public Soldier(string name = null, string weapon = null, string rank = null, int serviceLife = 0)
+    public Soldier(string name, string weapon, string rank, int serviceLife)
     {
         Name = name;
         _weapon = weapon;
