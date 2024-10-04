@@ -26,6 +26,7 @@ public class CriminalDatabase
         _criminals = new List<Criminal>()
         {
             new Criminal("Блохин", "Юстиниан", "Петрович", true, "Вандализм"),
+            new Criminal("Блохин", "Юстиниан", "Петрович", true, "Вандализм"),
             new Criminal("Беляев", "Лев", "Станиславович", false, "Антиправительственное"),
             new Criminal("Тимофеева", "Алёна", "Федосеевна", false, "Хулиганство"),
             new Criminal("Семёнова", "Серафима", "Иринеевна", true, "Антиправительственное"),
