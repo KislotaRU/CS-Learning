@@ -58,8 +58,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DefinitionOfDelay.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TopServerPlayers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
