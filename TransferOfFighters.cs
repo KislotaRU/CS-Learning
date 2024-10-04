@@ -8,31 +8,29 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            Barrack barrack = new Barrack();
+            SoldierDatabase soldierDatabase = new SoldierDatabase();
 
             Console.ForegroundColor = ConsoleColor.White;
 
-            barrack.Work();
+            soldierDatabase.Work();
         }
     }
 }
 
-public class Barrack
+public class SoldierDatabase
 {
-    private readonly Squad _firstSquad;
-    private readonly Squad _secondSquad;
+    private List<Soldier> _firstSquad;
+    private List<Soldier> _secondSquad;
 
-    public Barrack()
+    public SoldierDatabase()
     {
-        List<Soldier> temporarySoldiers;
-
-        temporarySoldiers = new List<Soldier>()
+        _firstSquad = new List<Soldier>()
         {
-            new Soldier("Эшли", "Винтовка", "Капитан", 60),
+            new Soldier("Бэшли", "Винтовка", "Капитан", 60),
             new Soldier("Брайан", "Болтовка", "Капрал", 24),
-            new Soldier("Арнольд", "Пулемёт", "Подполковник", 84),
+            new Soldier("Барнольд", "Пулемёт", "Подполковник", 84),
             new Soldier("Кэйлеб", "Винтовка", "Капитан", 60),
-            new Soldier("Эндрю", "Винтовка", "Сержант", 36),
+            new Soldier("Бэндрю", "Винтовка", "Сержант", 36),
             new Soldier("Гарет", "Пулемёт", "Капрал", 24),
             new Soldier("Битан", "Пулемёт", "Рядовой", 13),
             new Soldier("Джейм", "Винтовка", "Подполковник", 87),
@@ -40,9 +38,7 @@ public class Barrack
             new Soldier("Бернарт", "Болтовка", "Капитан", 60),
         };
 
-        _firstSquad = new Squad(temporarySoldiers);
-
-        temporarySoldiers = new List<Soldier>()
+        _secondSquad = new List<Soldier>()
         {
             new Soldier("Эрик", "Пулемёт", "Генерал армий", 189),
             new Soldier("Адам", "Болтовка", "Подполковник", 96),
@@ -52,13 +48,11 @@ public class Barrack
             new Soldier("Грант", "Винтовка", "Рядовой", 12),
             new Soldier("Дуайт", "Винтовка", "Капитан", 59),
         };
-
-        _secondSquad = new Squad(temporarySoldiers);
     }
 
     public void Work()
     {
-        const string CommandShow = "Показать всех";
+        const string CommandShow = "Показать все отряды";
         const string CommandJoinSquads = "Объединить отряды";
         const string CommandExit = "Завершить работу";
 
@@ -75,6 +69,8 @@ public class Barrack
 
         while (isWorking)
         {
+            string letter = "Б";
+
             Console.Write("\t\tМеню базы данных солдат\n\n");
 
             Console.Write("Доступные команды:\n");
@@ -88,11 +84,11 @@ public class Barrack
             switch (userInput)
             {
                 case CommandShow:
-                    Show();
+                    Show(_firstSquad, _secondSquad);
                     break;
 
                 case CommandJoinSquads:
-                    JoinSquads();
+                    JoinSquadsByLetter(letter);
                     break;
 
                 case CommandExit:
@@ -110,33 +106,55 @@ public class Barrack
         }
     }
 
-    private void Show<T>(params T[][])
+    private void Show(params List<Soldier>[] soldiers)
     {
-        int numberSoldier = 1;
-
-        if (_soldiers.Count > 0)
+        if (soldiers.Length == 0)
         {
-            foreach (Soldier soldier in _soldiers)
+            Console.Write("Нет ни одного отряда.\n");
+            return;
+        }
+
+        int numberSquad = 1;
+
+        for (int i = 0; i < soldiers.Length ; i++)
+        {
+            int numberSoldier = 1;
+
+            Console.Write($"Отряд #{numberSquad}.\n");
+
+            numberSquad++;
+
+            if (soldiers[i].Count == 0)
+            {
+                Console.Write("Нет ни одной записи.\n\n");
+                continue;
+            }
+
+            foreach (Soldier soldier in soldiers[i])
             {
                 Console.Write($"\t{numberSoldier}. ".PadRight(5));
                 soldier.Show();
 
                 numberSoldier++;
             }
-        }
-        else
-        {
-            Console.Write("Нет ни одной записи.\n");
+
+            Console.WriteLine();
         }
 
         Console.WriteLine();
     }
 
-    private void JoinSquads()
+    private void JoinSquadsByLetter(string letter)
     {
+        List<Soldier> temporarySoldiers = _firstSquad.Where(soldier => soldier.Name.ToLower().StartsWith(letter.ToLower())).ToList();
 
+        _firstSquad = _firstSquad.Where(soldier => soldier.Name.ToLower().StartsWith(letter.ToLower()) == false).ToList();
+        _secondSquad = _secondSquad.Union(temporarySoldiers).ToList();
+
+        Console.Write($"В основной отряд были добавлены все солдаты из других отрядов по фильру:\n" +
+                      $">Имя начинается с \"{letter}\"");
     }
-
+    
     private void PrintMenu(string[] menu)
     {
         int numberCommand = 1;
@@ -162,16 +180,6 @@ public class Barrack
     }
 }
 
-public class Squad
-{
-    private readonly List<Soldier> _soldiers;
-
-    public Squad(List<Soldier> soldiers)
-    {
-        _soldiers = soldiers;
-    }
-}
-
 public class Soldier
 {
     private readonly string _weapon;
@@ -190,7 +198,7 @@ public class Soldier
 
     public void Show()
     {
-        Console.Write($"{Name}".PadRight(8) +
+        Console.Write($"{Name}".PadRight(10) +
                       $"Оружие: {_weapon}".PadRight(18) +
                       $"Звание: {Rank}".PadRight(22) +
                       $"Срок службы: {_serviceLifeInMonths} месяц\n");
