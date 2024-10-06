@@ -52,13 +52,13 @@ public class SoldierDatabase
 
     public void Work()
     {
-        const string CommandShow = "Показать все отряды";
+        const string CommandShowSoldiers = "Показать все отряды";
         const string CommandJoinSquads = "Объединить отряды";
         const string CommandExit = "Завершить работу";
 
         string[] menu = new string[]
         {
-            CommandShow,
+            CommandShowSoldiers,
             CommandJoinSquads,
             CommandExit
         };
@@ -83,8 +83,8 @@ public class SoldierDatabase
 
             switch (userInput)
             {
-                case CommandShow:
-                    Show(_firstSquad, _secondSquad);
+                case CommandShowSoldiers:
+                    ShowSoldiers();
                     break;
 
                 case CommandJoinSquads:
@@ -106,39 +106,28 @@ public class SoldierDatabase
         }
     }
 
-    private void Show(params List<Soldier>[] soldiers)
+    private void ShowSoldiers()
     {
-        if (soldiers.Length == 0)
+        Show(_firstSquad);
+        Show(_secondSquad);
+    }
+
+    private void Show(List<Soldier> soldiers)
+    {
+        int numberSoldier = 1;
+
+        if (soldiers.Count == 0)
         {
-            Console.Write("Нет ни одного отряда.\n");
+            Console.Write("Нет ни одной записи.\n\n");
             return;
         }
 
-        int numberSquad = 1;
-
-        for (int i = 0; i < soldiers.Length ; i++)
+        foreach (Soldier soldier in soldiers)
         {
-            int numberSoldier = 1;
+            Console.Write($"\t{numberSoldier}. ".PadRight(5));
+            soldier.Show();
 
-            Console.Write($"Отряд #{numberSquad}.\n");
-
-            numberSquad++;
-
-            if (soldiers[i].Count == 0)
-            {
-                Console.Write("Нет ни одной записи.\n\n");
-                continue;
-            }
-
-            foreach (Soldier soldier in soldiers[i])
-            {
-                Console.Write($"\t{numberSoldier}. ".PadRight(5));
-                soldier.Show();
-
-                numberSoldier++;
-            }
-
-            Console.WriteLine();
+            numberSoldier++;
         }
 
         Console.WriteLine();
@@ -152,15 +141,17 @@ public class SoldierDatabase
                      $">Имя начинается с \"{letter}\"\n\n");
 
         Console.Write("До перевода:\n");
-        Show(_firstSquad, _secondSquad);
+        ShowSoldiers();
 
-        temporarySoldiers = _firstSquad.Where(soldier => soldier.Name.ToLower().StartsWith(letter.ToLower())).ToList();
+        temporarySoldiers = _firstSquad.Where(soldier => soldier.Name.StartsWith(letter)).ToList();
+
+        _firstSquad = _firstSquad.Except(temporarySoldiers).ToList();
         _secondSquad = _secondSquad.Union(temporarySoldiers).ToList();
 
-        _firstSquad = _firstSquad.Where(soldier => soldier.Name.ToLower().StartsWith(letter.ToLower()) == false).ToList();
+        Console.WriteLine(new string('-', 80));
 
         Console.Write("После перевода:\n");
-        Show(_firstSquad, _secondSquad);
+        ShowSoldiers();
     }
     
     private void PrintMenu(string[] menu)
