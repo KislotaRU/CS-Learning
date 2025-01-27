@@ -31,7 +31,7 @@ namespace CS_JUNIOR
                 border += frameSign;
 
             Console.Write($"\n{border}");
-            Console.Write($"\n{frameSign}{userName}{frameSign}");
+            Console.Write($"\n{middleLine}");
             Console.Write($"\n{border}\n");
         }
     }
