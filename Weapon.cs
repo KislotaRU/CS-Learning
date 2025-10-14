@@ -14,21 +14,17 @@ namespace CS_JUNIOR
     {
         public Player(float health)
         {
-            Health = health > 0 ? health : 0;
+            Health = health > 0 ? health : throw new ArgumentOutOfRangeException(nameof(health));
         }
 
         public float Health { get; private set; }
 
         public void TakeDamage(float damage)
         {
-            float temporaryHealth;
-
             if (damage < 0)
-                return;
+                throw new ArgumentOutOfRangeException(nameof(damage));
 
-            temporaryHealth = Health - damage;
-
-            Health = temporaryHealth > 0 ? temporaryHealth : 0;
+            Health = Math.Max(Health - damage, 0);
         }
     }
 
@@ -38,12 +34,15 @@ namespace CS_JUNIOR
 
         public Bot(Weapon weapon)
         {
-            _weapon = weapon;
+            _weapon = weapon ?? throw new ArgumentNullException(nameof(weapon));
         }
 
         public void OnSeePlayer(Player player)
         {
-            _weapon?.Fire(player);
+            if (player == null)
+                throw new ArgumentNullException(nameof(player));
+
+            _weapon.Fire(player);
         }
     }
 
@@ -51,8 +50,8 @@ namespace CS_JUNIOR
     {
         public Weapon(float damage, float bullets)
         {
-            Damage = damage > 0 ? damage : 0;
-            Bullets = bullets > 0 ? bullets : 0;
+            Damage = damage > 0 ? damage : throw new ArgumentOutOfRangeException(nameof(damage));
+            Bullets = bullets > 0 ? bullets : throw new ArgumentOutOfRangeException(nameof(bullets));
         }
 
         public float Damage { get; private set; }
@@ -61,11 +60,14 @@ namespace CS_JUNIOR
         public void Fire(Player player)
         {
             if (Bullets <= 0)
-                return;
+                throw new ArgumentOutOfRangeException(nameof(Bullets));
 
-            player?.TakeDamage(Damage);
-            
-            Bullets = Bullets > 0 ? --Bullets : 0;
+            if (player == null)
+                throw new ArgumentNullException(nameof(player));
+
+            player.TakeDamage(Damage);
+
+            Bullets--;
         }
     }
 }
