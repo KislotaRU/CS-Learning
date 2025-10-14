@@ -12,48 +12,60 @@ namespace CS_JUNIOR
 
     public class Player
     {
-        public int Health { get; private set; }
-
-        public Player(int health)
+        public Player(float health)
         {
-            Health = health;
+            Health = health > 0 ? health : 0;
         }
 
-        public void TakeDamage(int damage)
+        public float Health { get; private set; }
+
+        public void TakeDamage(float damage)
         {
-            int temporaryHealth;
+            float temporaryHealth;
 
             if (damage < 0)
                 return;
 
             temporaryHealth = Health - damage;
 
-            if (temporaryHealth > 0)
-                Health = temporaryHealth;
-            else
-                Health = 0;
-        }
-    }
-
-    public class Weapon
-    {
-        public int Damage { get; private set; }
-        public int Bullets { get; private set; }
-
-        public void Fire(Player player)
-        {
-            player.TakeDamage(Damage);
-            Bullets--;
+            Health = temporaryHealth > 0 ? temporaryHealth : 0;
         }
     }
 
     public class Bot
     {
-        private Weapon _weapon;
+        private readonly Weapon _weapon;
+
+        public Bot(Weapon weapon)
+        {
+            _weapon = weapon;
+        }
 
         public void OnSeePlayer(Player player)
         {
-            _weapon.Fire(player);
+            _weapon?.Fire(player);
+        }
+    }
+
+    public class Weapon
+    {
+        public Weapon(float damage, float bullets)
+        {
+            Damage = damage > 0 ? damage : 0;
+            Bullets = bullets > 0 ? bullets : 0;
+        }
+
+        public float Damage { get; private set; }
+        public float Bullets { get; private set; }
+
+        public void Fire(Player player)
+        {
+            if (Bullets <= 0)
+                return;
+
+            player?.TakeDamage(Damage);
+            
+            Bullets = Bullets > 0 ? --Bullets : 0;
         }
     }
 }
