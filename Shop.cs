@@ -17,17 +17,17 @@ namespace CS_JUNIOR
             warehouse.Delive(iPhone12, 10);
             warehouse.Delive(iPhone11, 1);
 
-            shop.Show();
+            shop.Show(); //Вывод всех товаров на складе с их остатком
 
             Cart cart = shop.Cart();
             cart.Add(iPhone12, 4);
-            //cart.Add(iPhone11, 3); //при такой ситуации возникает ошибка так, как нет нужного количества товара на складе
+            cart.Add(iPhone11, 3); //при такой ситуации возникает ошибка так, как нет нужного количества товара на складе
 
-            cart.Show();
+            cart.Show(); //Вывод всех товаров в корзине
 
             Console.WriteLine(cart.Order().Paylink);
 
-            //cart.Add(iPhone12, 9); //Ошибка, после заказа со склада убираются заказанные товары
+            cart.Add(iPhone12, 9); //Ошибка, после заказа со склада убираются заказанные товары
         }
     }
 
@@ -89,26 +89,6 @@ namespace CS_JUNIOR
                 _cells[indexCell].Merge(newCell);
         }
 
-        public int GetCountGood(Cell cell)
-        {
-            int count = 0;
-
-            if (cell == null)
-                throw new ArgumentNullException(nameof(cell));
-
-            foreach (Cell temporaryCell in _cells)
-            {
-                if (temporaryCell.Good == cell.Good)
-                {
-                    count = temporaryCell.Count;
-
-                    break;
-                }
-            }
-
-            return count;
-        }
-
         public void ReduceCount(Cell cell)
         {
             int index;
@@ -125,6 +105,21 @@ namespace CS_JUNIOR
 
             if (_cells[index].Count == 0)
                 _cells.RemoveAt(index);
+        }
+
+        public int GetCountGood(Cell cell)
+        {
+            int index;
+
+            if (cell == null)
+                throw new ArgumentNullException(nameof(cell));
+
+            index = _cells.FindIndex(temporaryCell => temporaryCell.Good == cell.Good);
+
+            if (index < 0)
+                throw new IndexOutOfRangeException(nameof(index));
+
+            return _cells[index].Count;
         }
     }
 
