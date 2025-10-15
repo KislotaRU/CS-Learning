@@ -2,14 +2,6 @@
 
 namespace CS_JUNIOR
 {
-    public class Program
-    {
-        static void Main()
-        {
-
-        }
-    }
-
     public class Player
     {
         public Player(float health)
