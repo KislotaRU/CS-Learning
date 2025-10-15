@@ -21,7 +21,7 @@ namespace CS_JUNIOR
 
             Cart cart = shop.Cart();
             cart.Add(iPhone12, 4);
-            //cart.Add(iPhone11, 3); //при такой ситуации возникает ошибка так, как нет нужного количества товара на складе
+            cart.Add(iPhone11, 3); //при такой ситуации возникает ошибка так, как нет нужного количества товара на складе
 
             cart.Show(); //Вывод всех товаров в корзине
 
@@ -31,7 +31,7 @@ namespace CS_JUNIOR
         }
     }
 
-    public interface IWarehouse
+    public interface IWarehouseInCart
     {
         void ReduceCount(Cell cell);
         int GetCountGood(Good good);
@@ -56,7 +56,7 @@ namespace CS_JUNIOR
         }
     }
 
-    public class Warehouse : IWarehouse
+    public class Warehouse : IWarehouseInCart
     {
         private readonly List<Cell> _cells;
 
@@ -80,19 +80,22 @@ namespace CS_JUNIOR
 
         public void Delive(Good good, int count)
         {
+            Cell newCell;
+            int index;
+
             if (good == null)
                 throw new ArgumentNullException(nameof(good));
 
             if (count <= 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
-            Cell newCell = new Cell(good, count);
-            int indexCell = _cells.FindIndex(cell => cell.Good == good);
+            newCell = new Cell(good, count);
+            index = _cells.FindIndex(cell => cell.Good == good);
 
-            if (indexCell < 0)
+            if (index < 0)
                 _cells.Add(newCell);
             else
-                _cells[indexCell].Merge(newCell);
+                _cells[index].Merge(newCell);
         }
 
         public void ReduceCount(Cell cell)
@@ -131,10 +134,10 @@ namespace CS_JUNIOR
 
     public class Cart
     {
-        private readonly IWarehouse _warehouse;
+        private readonly IWarehouseInCart _warehouse;
         private readonly List<Cell> _cells;
 
-        public Cart(IWarehouse warehouse)
+        public Cart(IWarehouseInCart warehouse)
         {
             _warehouse = warehouse ?? throw new ArgumentNullException(nameof(warehouse));
             _cells = new List<Cell>();
