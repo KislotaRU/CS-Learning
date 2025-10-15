@@ -21,7 +21,7 @@ namespace CS_JUNIOR
 
             Cart cart = shop.Cart();
             cart.Add(iPhone12, 4);
-            cart.Add(iPhone11, 3); //при такой ситуации возникает ошибка так, как нет нужного количества товара на складе
+            //cart.Add(iPhone11, 3); //при такой ситуации возникает ошибка так, как нет нужного количества товара на складе
 
             cart.Show(); //Вывод всех товаров в корзине
 
@@ -29,6 +29,12 @@ namespace CS_JUNIOR
 
             cart.Add(iPhone12, 9); //Ошибка, после заказа со склада убираются заказанные товары
         }
+    }
+
+    public interface IWarehouse
+    {
+        void ReduceCount(Cell cell);
+        int GetCountGood(Good good);
     }
 
     public class Shop
@@ -50,7 +56,7 @@ namespace CS_JUNIOR
         }
     }
 
-    public class Warehouse
+    public class Warehouse : IWarehouse
     {
         private readonly List<Cell> _cells;
 
@@ -107,14 +113,14 @@ namespace CS_JUNIOR
                 _cells.RemoveAt(index);
         }
 
-        public int GetCountGood(Cell cell)
+        public int GetCountGood(Good good)
         {
             int index;
 
-            if (cell == null)
-                throw new ArgumentNullException(nameof(cell));
+            if (good == null)
+                throw new ArgumentNullException(nameof(good));
 
-            index = _cells.FindIndex(temporaryCell => temporaryCell.Good == cell.Good);
+            index = _cells.FindIndex(temporaryCell => temporaryCell.Good == good);
 
             if (index < 0)
                 throw new IndexOutOfRangeException(nameof(index));
@@ -125,10 +131,10 @@ namespace CS_JUNIOR
 
     public class Cart
     {
-        private readonly Warehouse _warehouse;
+        private readonly IWarehouse _warehouse;
         private readonly List<Cell> _cells;
 
-        public Cart(Warehouse warehouse)
+        public Cart(IWarehouse warehouse)
         {
             _warehouse = warehouse ?? throw new ArgumentNullException(nameof(warehouse));
             _cells = new List<Cell>();
@@ -152,7 +158,7 @@ namespace CS_JUNIOR
             Cell newCell;
             int index;
             int availableCount;
-            int currentCount;
+            int totalCount;
 
             if (good == null)
                 throw new ArgumentNullException(nameof(good));
@@ -160,24 +166,19 @@ namespace CS_JUNIOR
             if (count <= 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
-            newCell = new Cell(good, count);
             index = _cells.FindIndex(cell => cell.Good == good);
+            availableCount = _warehouse.GetCountGood(good);
+            totalCount = index < 0 ? count : count + _cells[index].Count;
+
+            if (availableCount < totalCount)
+                throw new InvalidOperationException($"Доступно {availableCount}, запрашивается {totalCount}");
+
+            newCell = new Cell(good, count);
 
             if (index < 0)
-            {
                 _cells.Add(newCell);
-                availableCount = _warehouse.GetCountGood(newCell);
-                currentCount = newCell.Count;
-            }
             else
-            {
                 _cells[index].Merge(newCell);
-                availableCount = _warehouse.GetCountGood(_cells[index]);
-                currentCount = _cells[index].Count;
-            }
-
-            if (availableCount < currentCount)
-                throw new InvalidOperationException($"Доступно {availableCount}, запрашивается {currentCount}");
         }
 
         public Order Order()
@@ -188,11 +189,7 @@ namespace CS_JUNIOR
                 cell.Unmerge(cell);
             }
 
-            for (int i = _cells.Count - 1; i >= 0; i--)
-            {
-                if (_cells[i].Count == 0)
-                    _cells.RemoveAt(i);
-            }
+            _cells.Clear();
 
             return new Order();
         }
@@ -249,16 +246,9 @@ namespace CS_JUNIOR
     {
         public Order()
         {
-            Paylink = GeneratePaylink();
+            Paylink = "*Ссылка для оплаты*";
         }
 
         public string Paylink { get; }
-
-        public string GeneratePaylink()
-        {
-            string paylink = "*Ссылка для оплаты*";
-
-            return paylink;
-        }
     }
 }
