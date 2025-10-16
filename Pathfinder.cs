@@ -38,6 +38,9 @@ namespace CS_JUNIOR
 
         public void WriteError(string message)
         {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
             foreach (var logger in _loggers)
             {
                 logger.WriteError(message);
@@ -64,6 +67,9 @@ namespace CS_JUNIOR
     {
         public void WriteError(string message)
         {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
             File.WriteAllText("log.txt", message);
         }
     }
@@ -72,6 +78,9 @@ namespace CS_JUNIOR
     {
         public void WriteError(string message)
         {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
             Console.WriteLine(message);
         }
     }
@@ -80,6 +89,9 @@ namespace CS_JUNIOR
     {
         public void WriteError(string message)
         {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
             if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
                 File.WriteAllText("log.txt", message);
         }
@@ -89,6 +101,9 @@ namespace CS_JUNIOR
     {
         public void WriteError(string message)
         {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
             if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
                 Console.WriteLine(message);
         }
