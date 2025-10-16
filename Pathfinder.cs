@@ -8,11 +8,11 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            Pathfinder pathfinder1 = new Pathfinder(new FileLogWritter());
-            Pathfinder pathfinder2 = new Pathfinder(new ConsoleLogWritter());
-            Pathfinder pathfinder3 = new Pathfinder(new SecureFileLogWritter());
-            Pathfinder pathfinder4 = new Pathfinder(new SecureConsoleLogWritter());
-            Pathfinder pathfinder5 = new Pathfinder(new ChainLogWritter(new ConsoleLogWritter(), new SecureFileLogWritter()));
+            Pathfinder pathfinder1 = new Pathfinder(new FileLogWritter(new Logger()));
+            Pathfinder pathfinder2 = new Pathfinder(new ConsoleLogWritter(new Logger()));
+            Pathfinder pathfinder3 = new Pathfinder(new SecureLogWritter(new FileLogWritter(new Logger())));
+            Pathfinder pathfinder4 = new Pathfinder(new SecureLogWritter(new ConsoleLogWritter(new Logger())));
+            Pathfinder pathfinder5 = new Pathfinder(new ChainLogWritter(new ConsoleLogWritter(new Logger()), new SecureLogWritter(new FileLogWritter(new Logger()))));
 
             pathfinder1.Find();
             pathfinder2.Find();
@@ -25,6 +25,11 @@ namespace CS_JUNIOR
     public interface ILogger
     {
         void WriteError(string message);
+    }
+
+    public class Logger : ILogger
+    {
+        public void WriteError(string message) { }
     }
 
     public class ChainLogWritter : ILogger
@@ -51,6 +56,7 @@ namespace CS_JUNIOR
     public class Pathfinder
     {
         private readonly ILogger _logger;
+        private readonly string _message = "Запись";
 
         public Pathfinder(ILogger logger)
         {
@@ -59,53 +65,83 @@ namespace CS_JUNIOR
 
         public void Find()
         {
-            _logger.WriteError("Запись");
+            _logger.WriteError(_message);
         }
     }
 
     class FileLogWritter : ILogger
     {
+        private readonly ILogger _logger;
+        private readonly string _path = "log.txt";
+
+        public FileLogWritter(ILogger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         public void WriteError(string message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            File.WriteAllText("log.txt", message);
+            _logger.WriteError(message);
+
+            File.WriteAllText(_path, message);
         }
     }
 
     class ConsoleLogWritter : ILogger
     {
+        private readonly ILogger _logger;
+
+        public ConsoleLogWritter(ILogger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         public void WriteError(string message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
+            _logger.WriteError(message);
 
             Console.WriteLine(message);
         }
     }
 
-    class SecureFileLogWritter : ILogger
+    public abstract class LoggingPolicy : ILogger
     {
-        public void WriteError(string message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
+        private readonly ILogger _logger;
 
-            if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
-                File.WriteAllText("log.txt", message);
+        protected LoggingPolicy(ILogger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
+        public virtual void WriteError(string message)
+        {
+            if (AllowLog())
+                _logger.WriteError(message);
+        }
+
+        protected abstract bool AllowLog();
     }
 
-    class SecureConsoleLogWritter : ILogger
+    class SecureLogWritter : LoggingPolicy
     {
-        public void WriteError(string message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
+        public SecureLogWritter(ILogger logger) : base(logger) { }
 
-            if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
-                Console.WriteLine(message);
+        private bool IsFriday => DateTime.Now.DayOfWeek == DayOfWeek.Friday;
+
+        public override void WriteError(string message)
+        {
+            base.WriteError(message);
+        }
+
+        protected override bool AllowLog()
+        {
+            return IsFriday;
         }
     }
 }
