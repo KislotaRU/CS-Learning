@@ -95,8 +95,8 @@ namespace CS_JUNIOR
 
     class SecureLogWritter : ILogger
     {
-        private readonly DayOfWeek _targetDay = DayOfWeek.Friday;
         private readonly ILogger _logger;
+        private readonly DayOfWeek _targetDay = DayOfWeek.Friday;
 
         public SecureLogWritter(ILogger logger)
         {
