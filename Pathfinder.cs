@@ -8,11 +8,11 @@ namespace CS_JUNIOR
     {
         static void Main()
         {
-            Pathfinder pathfinder1 = new Pathfinder(new FileLogWritter(new Logger()));
-            Pathfinder pathfinder2 = new Pathfinder(new ConsoleLogWritter(new Logger()));
-            Pathfinder pathfinder3 = new Pathfinder(new SecureLogWritter(new FileLogWritter(new Logger())));
-            Pathfinder pathfinder4 = new Pathfinder(new SecureLogWritter(new ConsoleLogWritter(new Logger())));
-            Pathfinder pathfinder5 = new Pathfinder(new ChainLogWritter(new ConsoleLogWritter(new Logger()), new SecureLogWritter(new FileLogWritter(new Logger()))));
+            Pathfinder pathfinder1 = new Pathfinder(new FileLogWritter());
+            Pathfinder pathfinder2 = new Pathfinder(new ConsoleLogWritter());
+            Pathfinder pathfinder3 = new Pathfinder(new SecureLogWritter(new FileLogWritter()));
+            Pathfinder pathfinder4 = new Pathfinder(new SecureLogWritter(new ConsoleLogWritter()));
+            Pathfinder pathfinder5 = new Pathfinder(new ChainLogWritter(new ConsoleLogWritter(), new SecureLogWritter(new FileLogWritter())));
 
             pathfinder1.Find();
             pathfinder2.Find();
@@ -27,11 +27,6 @@ namespace CS_JUNIOR
         void WriteError(string message);
     }
 
-    public class Logger : ILogger
-    {
-        public void WriteError(string message) { }
-    }
-
     public class ChainLogWritter : ILogger
     {
         private readonly IEnumerable<ILogger> _loggers;
@@ -39,17 +34,21 @@ namespace CS_JUNIOR
         public ChainLogWritter(params ILogger[] loggers)
         {
             _loggers = loggers ?? throw new ArgumentNullException(nameof(loggers));
+
+            foreach (ILogger logger in _loggers)
+            {
+                if (logger == null)
+                    throw new ArgumentNullException(nameof(loggers));
+            }
         }
 
         public void WriteError(string message)
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
+            if (String.IsNullOrWhiteSpace(message))
+                throw new ArgumentException(nameof(message));
 
             foreach (var logger in _loggers)
-            {
                 logger.WriteError(message);
-            }
         }
     }
 
@@ -71,20 +70,12 @@ namespace CS_JUNIOR
 
     class FileLogWritter : ILogger
     {
-        private readonly ILogger _logger;
         private readonly string _path = "log.txt";
-
-        public FileLogWritter(ILogger logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
 
         public void WriteError(string message)
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            _logger.WriteError(message);
+            if (String.IsNullOrWhiteSpace(message))
+                throw new ArgumentException(nameof(message));
 
             File.WriteAllText(_path, message);
         }
@@ -92,56 +83,40 @@ namespace CS_JUNIOR
 
     class ConsoleLogWritter : ILogger
     {
-        private readonly ILogger _logger;
-
-        public ConsoleLogWritter(ILogger logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
         public void WriteError(string message)
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            _logger.WriteError(message);
+            if (String.IsNullOrWhiteSpace(message))
+                throw new ArgumentException(nameof(message));
 
             Console.WriteLine(message);
         }
     }
 
-    public abstract class LoggingPolicy : ILogger
+
+    class SecureLogWritter : ILogger
     {
+        private readonly DayOfWeek _targetDay = DayOfWeek.Friday;
         private readonly ILogger _logger;
 
-        protected LoggingPolicy(ILogger logger)
+        public SecureLogWritter(ILogger logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public virtual void WriteError(string message)
+        private bool IsAllow => DateTime.Now.DayOfWeek == _targetDay;
+
+        public void WriteError(string message)
         {
-            if (AllowLog())
+            if (String.IsNullOrWhiteSpace(message))
+                throw new ArgumentException(nameof(message));
+
+            if (IsAllow)
                 _logger.WriteError(message);
         }
 
-        protected abstract bool AllowLog();
-    }
-
-    class SecureLogWritter : LoggingPolicy
-    {
-        public SecureLogWritter(ILogger logger) : base(logger) { }
-
-        private bool IsFriday => DateTime.Now.DayOfWeek == DayOfWeek.Friday;
-
-        public override void WriteError(string message)
+        protected bool AllowLog()
         {
-            base.WriteError(message);
-        }
-
-        protected override bool AllowLog()
-        {
-            return IsFriday;
+            return IsAllow;
         }
     }
 }
