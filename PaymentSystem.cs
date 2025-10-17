@@ -1,12 +1,25 @@
 ﻿using System;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace CS_JUNIOR
 {
-    //Выведите платёжные ссылки для трёх разных систем платежа: 
-    //pay.system1.ru/order?amount=12000RUB&hash={MD5 хеш ID заказа}
-    //order.system2.ru/pay?hash={MD5 хеш ID заказа + сумма заказа}
-    //system3.com/pay?amount=12000&curency=RUB&hash={SHA-1 хеш сумма заказа + ID заказа + секретный ключ от системы}
+    public class Program
+    {
+        static void Main()
+        {
+            Order order = new Order(1, 12000);
+            string key = "key";
+
+            IPaymentSystem paySystem1 = new PaymentSystemWithPay();
+            IPaymentSystem paySystem2 = new PaymentSystemWithOrder();
+            IPaymentSystem paySystem3 = new PaymentSystemWithKey(key);
+
+            Console.WriteLine(paySystem1.GetPayingLink(order));
+            Console.WriteLine(paySystem2.GetPayingLink(order));
+            Console.WriteLine(paySystem3.GetPayingLink(order));
+        }
+    }
 
     public interface IPaymentSystem
     {
@@ -33,56 +46,112 @@ namespace CS_JUNIOR
 
     public class PaymentSystemWithPay : IPaymentSystem
     {
-        private readonly Order _order;
         private readonly string _link = "pay.system1.ru/order?amount=12000RUB&hash=";
-
-        public PaymentSystemWithPay(Order order)
-        {
-            _order = order ?? throw new ArgumentNullException(nameof(order));
-        }
 
         public string GetPayingLink(Order order)
         {
-            string data = order.Id.ToString();
+            if (order == null)
+                throw new ArgumentNullException(nameof(order));
 
-            return _link + MD5.Create(data);
+            string data = order.Id.ToString();
+            string hash = GetHash(data);
+
+            return _link + hash;
+        }
+
+        private string GetHash(string data)
+        {
+            if (String.IsNullOrWhiteSpace(data))
+                throw new ArgumentException(nameof(data));
+
+            MD5 md5 = MD5.Create();
+
+            byte[] hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(data));
+
+            string hash = "";
+
+            foreach (byte b in hashBytes)
+            {
+                hash += b.ToString();
+            }
+
+            return hash;
         }
     }
 
     public class PaymentSystemWithOrder : IPaymentSystem
     {
-        private readonly Order _order;
         private readonly string _link = "order.system2.ru/pay?hash=";
-
-        public PaymentSystemWithOrder(Order order)
-        {
-            _order = order ?? throw new ArgumentNullException(nameof(order));
-        }
 
         public string GetPayingLink(Order order)
         {
-            string data = order.Id.ToString() + order.Amount.ToString();
+            if (order == null)
+                throw new ArgumentNullException(nameof(order));
 
-            return _link + MD5.Create(data);
+            string data = order.Id.ToString() + order.Amount.ToString();
+            string hash = GetHash(data);
+
+            return _link + hash;
+        }
+
+        private string GetHash(string data)
+        {
+            if (String.IsNullOrWhiteSpace(data))
+                throw new ArgumentException(nameof(data));
+
+            MD5 md5 = MD5.Create();
+
+            byte[] hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(data));
+
+            string hash = "";
+
+            foreach (byte b in hashBytes)
+            {
+                hash += b.ToString();
+            }
+
+            return hash;
         }
     }
 
-    public class PaySystemWithKey : IPaymentSystem
+    public class PaymentSystemWithKey : IPaymentSystem
     {
-        private readonly Order _order;
         private readonly string _link = "system3.com/pay?amount=12000&curency=RUB&hash=";
-        private readonly string _key = "key";
+        private readonly string _key;
 
-        public PaySystemWithKey(Order order)
+        public PaymentSystemWithKey(string key)
         {
-            _order = order ?? throw new ArgumentNullException(nameof(order));
+            _key = String.IsNullOrWhiteSpace(key) ? throw new ArgumentException(nameof(key)) : key;
         }
 
         public string GetPayingLink(Order order)
         {
-            string data = order.Amount.ToString() + order.Id.ToString() + _key;
+            if (order == null)
+                throw new ArgumentNullException(nameof(order));
 
-            return _link + SHA1.Create(data);
+            string data = order.Amount.ToString() + order.Id.ToString() + _key;
+            string hash = GetHash(data);
+
+            return _link + hash;
+        }
+
+        private string GetHash(string data)
+        {
+            if (String.IsNullOrWhiteSpace(data))
+                throw new ArgumentException(nameof(data));
+
+            SHA1 sha1 = SHA1.Create();
+
+            byte[] hashBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(data));
+
+            string hash = "";
+
+            foreach (byte b in hashBytes)
+            {
+                hash += b.ToString();
+            }
+
+            return hash;
         }
     }
 }
