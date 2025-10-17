@@ -46,7 +46,7 @@ namespace CS_JUNIOR
 
     public class PaymentSystemWithPay : IPaymentSystem
     {
-        private readonly string _link = "pay.system1.ru/order?amount=12000RUB&hash=";
+        private string _link = "pay.system1.ru/order?amount=12000RUB&hash=";
 
         public string GetPayingLink(Order order)
         {
@@ -81,7 +81,7 @@ namespace CS_JUNIOR
 
     public class PaymentSystemWithOrder : IPaymentSystem
     {
-        private readonly string _link = "order.system2.ru/pay?hash=";
+        private string _link = "order.system2.ru/pay?hash=";
 
         public string GetPayingLink(Order order)
         {
@@ -116,8 +116,9 @@ namespace CS_JUNIOR
 
     public class PaymentSystemWithKey : IPaymentSystem
     {
-        private readonly string _link = "system3.com/pay?amount=12000&curency=RUB&hash=";
         private readonly string _key;
+
+        private string _link = "system3.com/pay?amount=12000&curency=RUB&hash=";
 
         public PaymentSystemWithKey(string key)
         {
