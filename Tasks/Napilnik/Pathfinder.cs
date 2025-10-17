@@ -92,7 +92,6 @@ namespace CS_JUNIOR
         }
     }
 
-
     class SecureLogWritter : ILogger
     {
         private readonly ILogger _logger;
