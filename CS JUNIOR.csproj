@@ -62,11 +62,14 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Weapon.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="App.config" />
     <None Include="CS JUNIOR.ruleset" />
+    <None Include="CS JUNIOR1.ruleset" />
+    <None Include="CS JUNIOR2.ruleset" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
