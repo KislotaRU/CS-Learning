@@ -8,17 +8,15 @@ namespace CS_JUNIOR
         {
         }
 
-        public static int Clamp(int value, int minValue, int maxValue)
+        public static int IndexOf(int[] array, int element)
         {
-            if (minValue > maxValue)
-                throw new InvalidOperationException();
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] == element)
+                    return i;
+            }
 
-            if (value < minValue)
-                return minValue;
-            else if (value > maxValue)
-                return maxValue;
-            else
-                return value;
+            return -1;
         }
     }
 }
