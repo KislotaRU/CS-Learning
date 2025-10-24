@@ -1,15 +1,25 @@
-﻿namespace CS_JUNIOR
+﻿using System;
+
+namespace CS_JUNIOR
 {
     internal class Weapon
     {
-        private const int MinCountBullets = 0;
+        private const int NumberBulletsPerShoot = 1;
 
         private int _bullets;
 
-        public bool CanShoot() =>
-            _bullets > MinCountBullets;
+        public Weapon(int bullets)
+        {
+            _bullets = bullets >= 0 ? bullets : throw new ArgumentOutOfRangeException(nameof(bullets));
+        }
 
-        public void Shoot() =>
-            _bullets--;
+        public bool CanShoot() =>
+            _bullets >= NumberBulletsPerShoot;
+
+        public void Shoot()
+        {
+            if (CanShoot())
+                _bullets -= NumberBulletsPerShoot;
+        }
     }
 }
