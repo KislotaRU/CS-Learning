@@ -6,6 +6,9 @@ namespace CS_JUNIOR
     {
         public static void Main()
         {
+            int armySize = 10;
+            int coinCount = 10;
+            string firstName = "Vladislav";
         }
     }
 }
