@@ -15,7 +15,7 @@ namespace CS_JUNIOR
         public string FindBy(int index)
         {
             if (index >= 0)
-                throw new ArgumentNullException(nameof(index));
+                throw new ArgumentOutOfRangeException(nameof(index));
 
             throw new NotImplementedException();
         }
