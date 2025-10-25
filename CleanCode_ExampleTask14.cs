@@ -2,11 +2,11 @@
 
 namespace CS_JUNIOR
 {
-
-    internal class BulletsThrower
+    internal class Weapon
     {
         public void Shoot()
         {
+            throw new NotImplementedException();
         }
     }
 }

@@ -61,10 +61,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BulletsThrower.cs" />
+    <Compile Include="CleanCode_ExampleTask14.cs" />
+    <Compile Include="CleanCode_ExampleTask15.cs" />
+    <Compile Include="CleanCode_ExampleTask17.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27.cs" />
+    <Compile Include="CleanCode_ExampleTask30.cs" />
+    <Compile Include="CleanCode_ExampleTask34.cs" />
+    <Compile Include="medium8-1-4.cs" />
+    <Compile Include="OCP.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Weapon.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
