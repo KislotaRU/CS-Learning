@@ -7,12 +7,16 @@ namespace CS_JUNIOR
     {
         public static void Main()
         {
-            var orderForm = new OrderForm();
+            var paymentSystemFactory = new PaymentSystemFactory();
+            var orderForm = new OrderForm(paymentSystemFactory.SystemsId);
             var paymentHandler = new PaymentHandler();
-            var systemId = orderForm.ShowForm();
+            string systemId;
+            IPaymentSystem paymentSystem;
 
-            IPaymentSystem paymentSystem = PaymentSystemFactory.Create(systemId);
+            orderForm.ShowForm();
+            systemId = orderForm.ReadForm();
 
+            paymentSystem = paymentSystemFactory.Create(systemId);
             paymentHandler.ShowPaymentResult(paymentSystem);
         }
     }
@@ -26,10 +30,29 @@ namespace CS_JUNIOR
 
     public class OrderForm
     {
-        public string ShowForm()
+        private readonly IEnumerable<string> _systemsId;
+
+        public OrderForm(IEnumerable<string> systemsId)
+        {
+            if (systemsId == null)
+                throw new ArgumentNullException(nameof(systemsId));
+
+            foreach (var systemId in systemsId)
+            {
+                if (string.IsNullOrWhiteSpace(systemId))
+                    throw new ArgumentException(nameof(systemId));
+            }
+
+            _systemsId = systemsId;
+        }
+
+        public void ShowForm()
         {
             ShowPaymentSystems();
+        }
 
+        public string ReadForm()
+        {
             // Симуляция веб интерфейса.
             Console.WriteLine("Какое системой вы хотите совершить оплату?");
             return Console.ReadLine();
@@ -37,11 +60,11 @@ namespace CS_JUNIOR
 
         private void ShowPaymentSystems()
         {
-            Console.WriteLine("Мы принимаем: ");
+            Console.WriteLine("Мы принимаем:");
 
-            foreach (var key in PaymentSystemFactory.PaymentSystems.Keys)
+            foreach (var systemId in _systemsId)
             {
-                Console.Write($"{key}, ");
+                Console.Write($" {systemId},");
             }
         }
     }
@@ -61,30 +84,26 @@ namespace CS_JUNIOR
         }
     }
 
-    public static class PaymentSystemFactory
+    public class PaymentSystemFactory
     {
-        public static readonly IReadOnlyDictionary<string, IPaymentSystem> PaymentSystems = new Dictionary<string, IPaymentSystem>()
+        private readonly IReadOnlyDictionary<string, Func<IPaymentSystem>> _paymentSystems = new Dictionary<string, Func<IPaymentSystem>>()
         {
-            { "QIWI", new PaymentSystemQIWI() },
-            { "WebMoney", new PaymentSystemWebMoney() },
-            { "Card", new PaymentSystemCard() },
+            { "QIWI", () => new PaymentSystemQIWI() },
+            { "WebMoney", () => new PaymentSystemWebMoney() },
+            { "Card", () => new PaymentSystemCard() },
         };
 
-        public static IPaymentSystem Create(string systemId)
+        public IEnumerable<string> SystemsId => _paymentSystems.Keys;
+
+        public IPaymentSystem Create(string systemId)
         {
             if (string.IsNullOrEmpty(systemId))
                 throw new ArgumentException(nameof(systemId));
 
             IPaymentSystem paymentSystem = null;
 
-            foreach (var key in PaymentSystems.Keys)
-            {
-                if (key == systemId)
-                {
-                    paymentSystem = PaymentSystems[key];
-                    break;
-                }
-            }
+            if (_paymentSystems.TryGetValue(systemId, out var creatorPaymentSystem))
+                paymentSystem = creatorPaymentSystem();
 
             if (paymentSystem == null)
                 throw new ArgumentNullException(nameof(paymentSystem));
