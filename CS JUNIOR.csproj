@@ -61,15 +61,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CleanCode_ExampleTask14.cs" />
-    <Compile Include="CleanCode_ExampleTask15.cs" />
-    <Compile Include="CleanCode_ExampleTask17.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27.cs" />
-    <Compile Include="CleanCode_ExampleTask30.cs" />
-    <Compile Include="CleanCode_ExampleTask34.cs" />
-    <Compile Include="medium8-1-4.cs" />
-    <Compile Include="OCP.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Database.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\HashCalculatorSha256.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\IHashCalculator.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\IPassportDatabase.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\IPassportService.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Model.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Passport.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\PassportDatabase.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\PassportService.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\StatusAccess.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Presenter.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Searcher.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\View.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -94,5 +98,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
