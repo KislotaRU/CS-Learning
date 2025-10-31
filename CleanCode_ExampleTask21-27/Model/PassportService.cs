@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 
 namespace CS_JUNIOR.CleanCode_ExampleTask21_27.Model
 {
@@ -19,8 +20,24 @@ namespace CS_JUNIOR.CleanCode_ExampleTask21_27.Model
                 throw new ArgumentNullException(nameof(passport));
 
             string hash = _hashCalculator.GetHash(passport.Id);
+            var dataTable = _passportDatabase.GetPassportDataTableBy(hash);
 
-            return _passportDatabase.GetStatusPassportBy(hash);
+            return GetPassportStatus(dataTable);
+        }
+
+        private StatusAccess GetPassportStatus(DataTable dataTable)
+        {
+            if (dataTable == null)
+                throw new ArgumentNullException(nameof(dataTable));
+
+            bool hasAccess;
+
+            if (dataTable.Rows.Count == 0)
+                return StatusAccess.NotFound;
+
+            hasAccess = Convert.ToBoolean(dataTable.Rows[0].ItemArray[1]);
+
+            return hasAccess ? StatusAccess.Granted : StatusAccess.Denied;
         }
     }
 }

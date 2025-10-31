@@ -13,7 +13,7 @@ namespace CS_JUNIOR.CleanCode_ExampleTask21_27.Model
             _connectionString = string.IsNullOrWhiteSpace(connectionString) ? throw new ArgumentException(nameof(connectionString)) : connectionString;
         }
 
-        public StatusAccess GetStatusPassportBy(string hash)
+        public DataTable GetPassportDataTableBy(string hash)
         {
             if (string.IsNullOrWhiteSpace(hash))
                 throw new ArgumentException(nameof(hash));
@@ -25,11 +25,11 @@ namespace CS_JUNIOR.CleanCode_ExampleTask21_27.Model
                 connection.Open();
 
                 var command = CreateCommand(hash);
-                var status = ExecuteCommand(connection, command);
+                var dataTable = ExecuteCommand(connection, command);
 
                 connection.Close();
 
-                return status;
+                return dataTable;
             }
             catch (SQLiteException ex)
             {
@@ -37,7 +37,7 @@ namespace CS_JUNIOR.CleanCode_ExampleTask21_27.Model
             }
         }
 
-        private StatusAccess ExecuteCommand(SQLiteConnection sqliteConnection, string command)
+        private DataTable ExecuteCommand(SQLiteConnection sqliteConnection, string command)
         {
             if (sqliteConnection == null)
                 throw new ArgumentNullException(nameof(sqliteConnection));
@@ -50,22 +50,7 @@ namespace CS_JUNIOR.CleanCode_ExampleTask21_27.Model
 
             sqliteDataAdapter.Fill(dataTable);
 
-            return GetPassportStatus(dataTable);
-        }
-
-        private StatusAccess GetPassportStatus(DataTable dataTable)
-        {
-            if (dataTable == null)
-                throw new ArgumentNullException(nameof(dataTable));
-
-            bool hasAccess;
-
-            if (dataTable.Rows.Count == 0)
-                return StatusAccess.NotFound;
-
-            hasAccess = Convert.ToBoolean(dataTable.Rows[0].ItemArray[1]);
-
-            return hasAccess ? StatusAccess.Granted : StatusAccess.Denied;
+            return dataTable;
         }
 
         private string CreateCommand(string hash)
