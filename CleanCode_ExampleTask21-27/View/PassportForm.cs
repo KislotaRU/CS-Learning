@@ -6,7 +6,7 @@ using CS_JUNIOR.CleanCode_ExampleTask21_27.Presentor;
 
 namespace CS_JUNIOR.CleanCode_ExampleTask21_27.View
 {
-    internal class PassportForm
+    internal class PassportForm : IPassportForm
     {
         private readonly PassportPresenter _passportPresenter;
 
@@ -16,16 +16,22 @@ namespace CS_JUNIOR.CleanCode_ExampleTask21_27.View
             var passportDatabase = new PassportDatabase(connectionString);
             IHashCalculator hashCalculator = new HashCalculatorSha256();
             var passportService = new PassportService(passportDatabase, hashCalculator);
-            _passportPresenter = new PassportPresenter(passportService);
+            _passportPresenter = new PassportPresenter(passportService, this);
         }
 
-        public string Text { get; private set; }
+        public void ShowStatusMessage(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public void ShowError(string errorMessage)
+        {
+            Console.WriteLine(errorMessage);
+        }
 
         private void HandleClick(object sender, EventArgs e)
         {
-            string result = _passportPresenter.GetStatusAccess(Text);
-
-            MessageBox.Show(result);
+            _passportPresenter.ReadStatusMessageBy();
         }
 
         private string CreateConnectionString()

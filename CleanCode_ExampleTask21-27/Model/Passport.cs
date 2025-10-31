@@ -1,11 +1,42 @@
-﻿namespace CS_JUNIOR.CleanCode_ExampleTask21_27.Model
+﻿using System;
+
+namespace CS_JUNIOR.CleanCode_ExampleTask21_27.Model
 {
     internal class Passport
     {
-        public int Id { get; set; }
+        private const int MinLength = 10;
 
-        public string Hash { get; set; }
+        public Passport(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                throw new ArgumentException(nameof(id));
 
-        public bool HasAccess { get; set; }
+            if (IsValidId(id) == false)
+                throw new ArgumentException(nameof(id));
+
+            Id = id;
+        }
+
+        public string Id { get; }
+
+        private bool IsValidId(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentException(nameof(id));
+
+            string normalizedId = Normalize(id);
+
+            return normalizedId.Length >= MinLength;
+        }
+
+        private string Normalize(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                throw new ArgumentException(nameof(data));
+
+            string whiteSpace = " ";
+
+            return data.Trim().Replace(whiteSpace, string.Empty);
+        }
     }
 }
