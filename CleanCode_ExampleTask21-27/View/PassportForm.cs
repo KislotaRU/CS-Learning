@@ -21,11 +21,17 @@ namespace CS_JUNIOR.CleanCode_ExampleTask21_27.View
 
         public void ShowStatusMessage(string message)
         {
+            if (string.IsNullOrEmpty(message))
+                throw new ArgumentException(nameof(message));
+
             Console.WriteLine(message);
         }
 
         public void ShowError(string errorMessage)
         {
+            if (string.IsNullOrEmpty(errorMessage))
+                throw new ArgumentException(nameof(errorMessage));
+
             Console.WriteLine(errorMessage);
         }
 
