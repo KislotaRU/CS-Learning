@@ -61,19 +61,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CleanCode_ExampleTask21-27\Database.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\HashCalculatorSha256.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\IHashCalculator.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\IPassportDatabase.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\IPassportService.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\Model.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\Passport.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\PassportDatabase.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\PassportService.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\StatusAccess.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\Presenter.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\Searcher.cs" />
-    <Compile Include="CleanCode_ExampleTask21-27\View.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Model\HashCalculatorSha256.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Model\IHashCalculator.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Model\Passport.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Model\PassportDatabase.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Model\PassportService.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Model\StatusAccess.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\Presentor\PassportPresenter.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\View\IPassportForm.cs" />
+    <Compile Include="CleanCode_ExampleTask21-27\View\PassportForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
